@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/forms": "^0.5.10",
+    "clsx": "^2.1.1",
     "crypto-browserify": "^3.12.1",
     "lucide-react": "^0.503.0",
     "prop-types": "^15.8.1",
