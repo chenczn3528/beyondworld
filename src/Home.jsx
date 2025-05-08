@@ -22,6 +22,11 @@ const Home = () => {
           className="h-full w-auto object-contain"
           style={{ objectFit: 'contain' }}
         />
+          <label
+              className="fixed mt-[20px] ml-[20px]"
+              style={{"font-color": "white"}}>
+              hello
+          </label>
       </div>
     );
 };
