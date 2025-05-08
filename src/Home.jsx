@@ -25,20 +25,20 @@ const Home = () => {
           }}
           tabIndex={0}
       >
-          {/*/!* 背景图片 *!/*/}
-          {/*<img*/}
-          {/*    src="images/background.jpg"*/}
-          {/*    alt="背景图"*/}
-          {/*    style={{*/}
-          {/*        position: 'absolute',*/}
-          {/*        top: '50%',*/}
-          {/*        left: '50%',*/}
-          {/*        height: '100%',*/}
-          {/*        width: 'auto',*/}
-          {/*        transform: 'translate(-50%, -50%)',*/}
-          {/*        objectFit: 'contain',*/}
-          {/*    }}*/}
-          {/*/>*/}
+          {/* 背景图片 */}
+          <img
+              src="images/background.jpg"
+              alt="背景图"
+              style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  height: '100%',
+                  width: 'auto',
+                  transform: 'translate(-50%, -50%)',
+                  objectFit: 'contain',
+              }}
+          />
 
           {/*/!* 文字在图片之上 *!/*/}
           {/*<label*/}

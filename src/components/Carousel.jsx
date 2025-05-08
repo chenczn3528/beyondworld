@@ -1,6 +1,4 @@
-import {useState, useEffect, useRef} from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react'; // 可选图标库
-import clsx from 'clsx';
+import {useState, useRef} from 'react';
 
 const Carousel = ( {cardData} ) => {
 
@@ -35,7 +33,21 @@ const Carousel = ( {cardData} ) => {
   };
 
   return (
-      <div className="w-full h-screen bg-black flex items-center justify-center relative">
+      <div
+          className="w-full h-screen bg-black flex items-center justify-center relative"
+          style={{
+            width: "60%",
+            height: "60%",
+            position: "absolute",
+            left: "50%",
+            top: "40%",
+            transform: "translate(-50%, -50%)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            overflow: "hidden"
+          }}
+      >
 
         <div
             className="absolute w-[50%] h-[50%] left-1/2 translate-x-[-50%] bottom-10 bg-transparent flex items-center justify-center overflow-hidden"
@@ -86,7 +98,8 @@ const Carousel = ( {cardData} ) => {
                     <img
                         src={card.图片信息[0]?.src}
                         alt={`slide-${index}`}
-                        className="w-full h-full object-cover rounded-lg shadow-xl"
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        className="rounded-lg shadow-xl cursor-pointer"
                     />
                     {/* 文字部分 */}
                     <div
