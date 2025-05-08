@@ -23,7 +23,7 @@ const Home = () => {
           style={{ objectFit: 'contain' }}
         />
           <label
-              className="fixed mt-[20px] ml-[20px]"
+              className="absolute mt-[20px] ml-[20px] z-10"
               style={{"font-color": "white"}}>
               hello
           </label>
