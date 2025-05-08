@@ -12,23 +12,46 @@ const Home = () => {
   // 返回数据时显示的页面
   return (
       <div
-        className="relative w-screen h-screen cursor-pointer overflow-hidden outline-none focus:outline-none"
-        style={{ overflow: 'hidden' }} // 强制禁止滚动
-        tabIndex={0}
+          style={{
+              position: 'relative',
+              width: '100vw',
+              height: '100vh',
+              overflow: 'hidden',
+          }}
+          tabIndex={0}
       >
-        <img
-          src="images/background.jpg"
-          alt="背景图"
-          className="h-full w-auto object-contain"
-          style={{ objectFit: 'contain' }}
-        />
+          {/* 背景图片 */}
+          <img
+              src="images/background.jpg"
+              alt="背景图"
+              style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  height: '100%',
+                  width: 'auto',
+                  transform: 'translate(-50%, -50%)',
+                  objectFit: 'contain',
+              }}
+          />
+
+          {/* 文字在图片之上 */}
           <label
-              className="absolute mt-[20px] ml-[20px] z-10"
-              style={{"font-color": "white"}}>
+              style={{
+                  position: 'absolute',
+                  top: '20px',
+                  left: '20px',
+                  color: 'white',
+                  fontSize: '18px',
+                  zIndex: 10,
+              }}
+          >
               hello
           </label>
       </div>
-    );
+
+
+  );
 };
 
 export default Home;
