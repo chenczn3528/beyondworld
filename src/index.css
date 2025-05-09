@@ -87,3 +87,20 @@ button:focus-visible {
 
 * {-webkit-tap-highlight-color: transparent;outline: none;}
 
+.edge-blur-mask {
+  -webkit-mask-image:
+    linear-gradient(to top, transparent 0%, black 2%, black 98%, transparent 100%),
+    linear-gradient(to left, transparent 0%, black 2%, black 98%, transparent 100%);
+  -webkit-mask-composite: intersect;
+
+  mask-image:
+    linear-gradient(to top, transparent 0%, black 2%, black 98%, transparent 100%),
+    linear-gradient(to left, transparent 0%, black 2%, black 98%, transparent 100%);
+  mask-composite: intersect;
+
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}

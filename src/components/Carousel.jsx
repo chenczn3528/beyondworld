@@ -1,13 +1,28 @@
-import React, { useState, useRef } from 'react';
-import FullScreenImage from './FullScreenImage';
+import React, { useState, useRef, useEffect } from 'react';
+import DetailedImage from './DetailedImage.jsx';
 
-const Carousel = ({ cardData }) => {
+const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage }) => {
   const [current, setCurrent] = useState(2); // 默认中间是第三张图片
   const startX = useRef(0);
   const deltaX = useRef(0);
 
   const [fullImage, setFullImage] = useState(null);
-  const [showFullImage, setShowFullImage] = useState(false);
+
+
+  const rarityMap = {
+      世界: 'images/world.png',
+      月: 'images/moon.png',
+      辰星: 'images/star1.png',
+      星: 'images/star2.png',
+    };
+
+  useEffect(() => {
+  const interval = setInterval(() => {
+    setCurrent(prev => (prev + 1) % cardData.length); // 循环播放
+  }, 4500); // 每 3 秒切换一次
+
+  return () => clearInterval(interval); // 清除定时器
+}, [cardData.length]);
 
 
   const handleTouchStart = (e) => {
@@ -36,7 +51,7 @@ const Carousel = ({ cardData }) => {
     if (Math.abs(offset) > 2) return null;
 
     const baseStyle = {
-      transition: "all 0.4s ease",
+      transition: "all 2s ease",
       position: "absolute",
       top: "50%",
       left: "50%",
@@ -72,26 +87,52 @@ const Carousel = ({ cardData }) => {
               ...baseStyle,
               transform,
               zIndex: zIndex,
-              maxWidth: '100%', // 不超过容器
+              maxWidth: '100%',
               maxHeight: '100%',
             }}
             className="cursor-pointer flex items-center justify-center"
         >
-          <img
-              src={card.图片信息[0]?.src}
-              alt={`slide-${index}`}
-              className="max-w-full max-h-full object-contain rounded-lg shadow-xl"
-              // onClick={() => handleClickImage(index)}
-              onClick={() => {
-                if (index === current) {
-                  setFullImage(card);
-                  setShowFullImage(true);
-                } else {
-                  handleClickImage(index);
-                }
-              }}
-          />
+          <div className="relative">
+            {/* 主图 */}
+            <img
+                src={card.图片信息[0]?.src}
+                alt={`slide-${index}`}
+                className="max-w-full max-h-full object-contain rounded-lg shadow-xl edge-blur-mask"
+                onClick={() => {
+                  if (index === current) {
+                    setFullImage(card);
+                    setShowDetailedImage(true);
+                  } else {
+                    handleClickImage(index);
+                  }
+                }}
+            />
+
+            {/* 稀有度角标 */}
+            <img
+                className="absolute ml-[-6vw] w-[6vw] h-auto"
+                src={rarityMap[card.稀有度]}
+                alt="Rarity Badge"
+            />
+
+            {/* 卡片标题 */}
+            <label
+                className="absolute left-1/2 -translate-x-1/2 font-normal"
+                style={{
+                  width: '28vw', // 关键：固定宽度
+                  color: 'white',
+                  fontSize: '1.5vw',
+                  fontWeight: 800,
+                  textAlign: 'right', // 文字右对齐
+                  textShadow: '0 0 2px gray, 0 0 4px gray',
+                }}
+            >
+              {card.主角} · {card.卡名}
+            </label>
+
+          </div>
         </div>
+
 
     );
   };
@@ -102,7 +143,7 @@ const Carousel = ({ cardData }) => {
   };
 
   return (
-      <div className="w-full h-screen bg-black flex items-center justify-center relative">
+      <div className="w-full h-[60%] bg-black flex items-center justify-center relative">
         {/* 将轮播图居中，使用 absolute 定位 */}
         <div
             className="absolute w-[80vw] h-[60vh] left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2
@@ -113,17 +154,17 @@ const Carousel = ({ cardData }) => {
             onMouseDown={handleTouchStart}
             onMouseMove={(e) => e.buttons === 1 && handleTouchMove(e)}
             onMouseUp={handleTouchEnd}
-      >
-        <div className="relative w-full h-full flex items-center justify-center">
-          {/* 渲染卡片 */}
-          {cardData.map((card, index) => renderImage(card, index))}
+        >
+          <div className="relative w-full h-full flex items-center justify-center">
+            {/* 渲染卡片 */}
+            {cardData.map((card, index) => renderImage(card, index))}
+          </div>
         </div>
-      </div>
 
-        {showFullImage && (
-          <FullScreenImage
+        {showDetailedImage && (
+          <DetailedImage
             card={fullImage}  // 确保传递 fullImage，而不是其他东西
-            onClose={() => setShowFullImage(false)}
+            onClose={() => setShowDetailedImage(false)}
           />
         )}
 

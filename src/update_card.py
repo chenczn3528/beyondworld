@@ -35,6 +35,12 @@ for index, row in enumerate(rows):
         '灵巧': row.get('data-param12'),
     }
 
+    # 找到包含“获取途径”的 <td>，一般是最后一个 <td>
+    tds = row.find_all('td')
+
+    if tds[-1] and "获取途径" in tds[-1].text:
+        card['获取途径'] = tds[-1].text.split("获取途径：")[-1].replace("\n", "")
+
     name_div = row.find('div', class_='cardname')
     if name_div:
         card['卡名'] = name_div.get_text(strip=True).split("·")[-1]

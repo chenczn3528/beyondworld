@@ -1,7 +1,7 @@
 import React from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 
-const FullScreenImage = ({ card, onClose }) => {
+const DetailedImage = ({ card, onClose }) => {
 
     const rarityMap = {
       世界: 'images/world.png',
@@ -12,11 +12,12 @@ const FullScreenImage = ({ card, onClose }) => {
 
   return (
       <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30"
           onClick={onClose}
           style={{
               position: 'fixed',
-              top: 0, left: 0,
+              top: 0,
+              left: 0,
               width: '100vw',
               height: '100vh',
               zIndex: 1, // 强制在最上层
@@ -27,14 +28,14 @@ const FullScreenImage = ({ card, onClose }) => {
           }}
       >
 
-          <div className="flex items-center justify-start w-full h-full ml-[15%] mb-[15%]">
+          <div className="flex items-center justify-start w-full h-full ml-[20%] mb-[15%]">
               <div className="relative w-[40vw] h-[40vh]">
                   <LazyLoadImage
                       src={card.图片信息[0].srcset}
                       placeholderSrc={card.图片信息[0].src}
                       effect="blur"
                       alt="Full View"
-                      className="w-full h-full object-contain rounded-lg shadow-2xl"
+                      className="w-full h-full object-contain rounded-lg shadow-2xl edge-blur-mask"
                       onClick={(e) => e.stopPropagation()}
                   />
                   {/* 角标图片，覆盖在右上角 */}
@@ -45,9 +46,9 @@ const FullScreenImage = ({ card, onClose }) => {
                   />
                   {/*重逢卡面*/}
                   <img
-                      src={card.图片信息[1].srcset}  // 假设第二张图片存在
+                      src={card.图片信息[1].src}  // 假设第二张图片存在
                       alt="Bottom Left Image"
-                      className="absolute top-0 left-0 w-[25vw] h-auto ml-[-125%] mt-[45%]"
+                      className="absolute top-0 left-0 w-[25vw] h-auto ml-[-125%] mt-[45%] edge-blur-mask"
                   />
 
                   <img
@@ -94,4 +95,4 @@ const FullScreenImage = ({ card, onClose }) => {
   );
 };
 
-export default FullScreenImage;
+export default DetailedImage;
