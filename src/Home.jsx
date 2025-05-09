@@ -16,11 +16,11 @@ const Home = () => {
   // ========================================================
   // 返回数据时显示的页面
   return (
+
       <div
           className="relative w-screen h-screen cursor-pointer overflow-hidden outline-none focus:outline-none"
           tabIndex={0}
       >
-
           {/* 视频层（最底层） */}
           <video
               preload="auto"
@@ -30,12 +30,10 @@ const Home = () => {
               muted
               controls={false}
               // onEnded={() => {
-              //     const validDrawId = drawSessionIdRef.current;
-              //     if (!validDrawId) return;
-              //     setisAnimatingDrawCards(false);
-              //
-              //     drawSessionIdRef.current = 0; // 重置流程 ID，防止后续重复触发
-              //
+              //   const validDrawId = drawSessionIdRef.current;
+              //   if (!validDrawId) return;
+              //   setisAnimatingDrawCards(false);
+              //   drawSessionIdRef.current = 0; // 重置流程 ID，防止后续重复触发
               // }}
               className="fixed top-0 left-0 w-full h-full object-cover z-0">
               <source src="videos/background.mp4" type="video/mp4"/>
@@ -55,25 +53,47 @@ const Home = () => {
           {/*    hello*/}
           {/*</label>*/}
 
+
           <div
               style={{
-                  position: 'absolute',  // 使用绝对定位，将轮播图定位在视频上方
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
+                  width: '100vw',
+                  height: '80vh',
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  zIndex: 1,  // 确保轮播图内容在视频上方
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  zIndex: 2,
+                  // border: "3px dashed red",
               }}
           >
               <Carousel cardData={filtered_cardData}/>
           </div>
 
-          <div>
+          <div
+              style={{
+                  width: '100vw',
+                  height: '40vh',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  zIndex: 1,
+              }}
+          >
+              <button>
+                  一抽
+              </button>
 
+              <button>
+                  十抽
+              </button>
           </div>
+
+
       </div>
 
 

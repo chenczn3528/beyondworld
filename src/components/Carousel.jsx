@@ -1,9 +1,14 @@
 import React, { useState, useRef } from 'react';
+import FullScreenImage from './FullScreenImage';
 
 const Carousel = ({ cardData }) => {
   const [current, setCurrent] = useState(2); // 默认中间是第三张图片
   const startX = useRef(0);
   const deltaX = useRef(0);
+
+  const [fullImage, setFullImage] = useState(null);
+  const [showFullImage, setShowFullImage] = useState(false);
+
 
   const handleTouchStart = (e) => {
     startX.current = e.touches ? e.touches[0].clientX : e.clientX;
@@ -43,42 +48,51 @@ const Carousel = ({ cardData }) => {
     let zIndex = 5;
 
     if (offset === -2) {
-      transform = "translateX(-120%) scale(0.8)"; // 最左边的图
+      transform = "translate(-100%, -50%) scale(0.8)";
       zIndex = 2;
     } else if (offset === -1) {
-      transform = "translateX(-80%) scale(0.9)"; // 左侧的图
+      transform = "translate(-80%, -50%) scale(0.9)";
       zIndex = 3;
     } else if (offset === 0) {
-      transform = "translateX(-40%) scale(1)"; // 中间的图
+      transform = "translate(-50%, -50%) scale(1)";
       zIndex = 5;
     } else if (offset === 1) {
-      transform = "translateX(0%) scale(0.9)"; // 右侧的图
+      transform = "translate(-20%, -50%) scale(0.9)";
       zIndex = 3;
     } else if (offset === 2) {
-      transform = "translateX(40%) scale(0.8)"; // 最右边的图
+      transform = "translate(0%, -50%) scale(0.8)";
       zIndex = 2;
     }
 
+
     return (
-      <div
-        key={index}
-        style={{
-          ...baseStyle,
-          transform,
-          zIndex: zIndex,
-          width: '50vw',
-          height: 'auto',
-          objectFit: 'contain',
-        }}
-        className="cursor-pointer"
-      >
-        <img
-          src={card.图片信息[0]?.src}
-          alt={`slide-${index}`}
-          className="w-full h-auto object-contain rounded-lg shadow-xl"
-          onClick={() => handleClickImage(index)} // 点击小图切换
-        />
-      </div>
+        <div
+            key={index}
+            style={{
+              ...baseStyle,
+              transform,
+              zIndex: zIndex,
+              maxWidth: '100%', // 不超过容器
+              maxHeight: '100%',
+            }}
+            className="cursor-pointer flex items-center justify-center"
+        >
+          <img
+              src={card.图片信息[0]?.src}
+              alt={`slide-${index}`}
+              className="max-w-full max-h-full object-contain rounded-lg shadow-xl"
+              // onClick={() => handleClickImage(index)}
+              onClick={() => {
+                if (index === current) {
+                  setFullImage(card);
+                  setShowFullImage(true);
+                } else {
+                  handleClickImage(index);
+                }
+              }}
+          />
+        </div>
+
     );
   };
 
@@ -88,22 +102,32 @@ const Carousel = ({ cardData }) => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-black flex items-center justify-center">
-      {/* 轮播图的容器不再使用 absolute 定位，而是使用 flex 布局来居中 */}
-      <div
-        className="w-[80vw] h-[60vh] bg-transparent flex items-center justify-center overflow-hidden"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onMouseDown={handleTouchStart}
-        onMouseMove={(e) => e.buttons === 1 && handleTouchMove(e)}
-        onMouseUp={handleTouchEnd}
+      <div className="w-full h-screen bg-black flex items-center justify-center relative">
+        {/* 将轮播图居中，使用 absolute 定位 */}
+        <div
+            className="absolute w-[80vw] h-[60vh] left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2
+             bg-transparent flex items-center justify-center overflow-hidden"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onMouseDown={handleTouchStart}
+            onMouseMove={(e) => e.buttons === 1 && handleTouchMove(e)}
+            onMouseUp={handleTouchEnd}
       >
         <div className="relative w-full h-full flex items-center justify-center">
           {/* 渲染卡片 */}
           {cardData.map((card, index) => renderImage(card, index))}
         </div>
       </div>
+
+        {showFullImage && (
+          <FullScreenImage
+            card={fullImage}  // 确保传递 fullImage，而不是其他东西
+            onClose={() => setShowFullImage(false)}
+          />
+        )}
+
+
     </div>
   );
 };

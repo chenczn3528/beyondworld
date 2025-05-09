@@ -1,8 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 html, body {
   overflow: hidden;
   height: 100%;
   background-color: black;
 }
+
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -29,11 +34,17 @@ a:hover {
 }
 
 body {
+  /*margin: 0;*/
+  /*display: flex;*/
+  /*place-items: center;*/
+  /*min-width: 320px;*/
+  /*min-height: 100vh;*/
   margin: 0;
   display: flex;
   place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
 }
 
 h1 {
@@ -72,3 +83,7 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+
+* {-webkit-tap-highlight-color: transparent;outline: none;}
+
