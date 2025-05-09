@@ -17,28 +17,29 @@ const Home = () => {
   // 返回数据时显示的页面
   return (
       <div
-          style={{
-              position: 'relative',
-              width: '100vw',
-              height: '100vh',
-              overflow: 'hidden',
-          }}
+          className="relative w-screen h-screen cursor-pointer overflow-hidden outline-none focus:outline-none"
           tabIndex={0}
       >
-          {/* 背景图片 */}
-          <img
-              src="images/background.jpg"
-              alt="背景图"
-              style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  height: '100%',
-                  width: 'auto',
-                  transform: 'translate(-50%, -50%)',
-                  objectFit: 'contain',
-              }}
-          />
+
+          {/* 视频层（最底层） */}
+          <video
+              preload="auto"
+              autoPlay
+              loop
+              playsInline
+              muted
+              controls={false}
+              // onEnded={() => {
+              //     const validDrawId = drawSessionIdRef.current;
+              //     if (!validDrawId) return;
+              //     setisAnimatingDrawCards(false);
+              //
+              //     drawSessionIdRef.current = 0; // 重置流程 ID，防止后续重复触发
+              //
+              // }}
+              className="fixed top-0 left-0 w-full h-full object-cover z-0">
+              <source src="videos/background.mp4" type="video/mp4"/>
+          </video>
 
           {/*/!* 文字在图片之上 *!/*/}
           {/*<label*/}
@@ -54,9 +55,25 @@ const Home = () => {
           {/*    hello*/}
           {/*</label>*/}
 
-          <Carousel
-            cardData={filtered_cardData}
-          />
+          <div
+              style={{
+                  position: 'absolute',  // 使用绝对定位，将轮播图定位在视频上方
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  zIndex: 1,  // 确保轮播图内容在视频上方
+              }}
+          >
+              <Carousel cardData={filtered_cardData}/>
+          </div>
+
+          <div>
+
+          </div>
       </div>
 
 
