@@ -4,13 +4,12 @@ import 'react-lazy-load-image-component/src/effects/blur.css';
 import useLocalStorageState from "./hooks/useLocalStorageState.js";
 import SettingsLayer from "./components/SettingsLayer.jsx";
 import DrawAnimationCards from "./components/DrawAnimationCards.jsx";
+import CardOverlay from "./components/CardOverlay.jsx";
 
 const Home = () => {
 
 
-    // ========================================================
-    // 数据存储与恢复
-
+    // ======================================================== 数据存储与恢复
     // 总抽卡数
     const [totalDrawCount, setTotalDrawCount] = useLocalStorageState('totalDrawCount', 0);
     // 选择的角色
@@ -50,8 +49,7 @@ const Home = () => {
     };
 
 
-    // ========================================================
-    // 其余变量
+    // ======================================================== 其余变量
     const [currentCardIndex, setCurrentCardIndex] = useState(0); // 当前的卡片索引
     const [cards, setCards] = useState([]); // 存储抽卡后的卡片信息
     const [drawnCards, setDrawnCards] = useState([]); // 存储已抽到的卡片的数组
@@ -69,7 +67,6 @@ const Home = () => {
     const currentFourStarRef = useRef(0); // 四星保底计数器的值
 
     const [showHistory, setShowHistory] = useState(false); // 是否显示抽卡历史
-    const [showAnimationDrawCards, setShowAnimationDrawCards] = useState(false); // 是否显示抽卡动画
     const [isAnimatingDrawCards, setisAnimatingDrawCards] = useState(false); // 是否正在进行抽卡动画
 
     const [isFiveStar, setIsFiveStar] = useState(false); // 判断当前卡片是否五星卡片
@@ -90,6 +87,43 @@ const Home = () => {
     const [showProbability, setShowProbability] = useState(false); // 是否展示概率测试界面
 
     const [galleryHistory, setGalleryHistory] = useState([]);  // 图鉴历史
+
+
+
+
+    // ========================================================  用于抽卡动画相关
+    const [showAnimationDrawCards, setShowAnimationDrawCards] = useState(false);
+
+    // 每次抽卡开始时触发动画组件加载
+    const handleStartDraw = () => {
+        setShowAnimationDrawCards(true);
+    };
+
+    // 抽卡动画播放完成后的处理逻辑
+    const handleDrawCardsAnimationEnd = () => {
+        const finalResults = drawResultsRef.current;
+        const finalPity = currentPityRef.current;
+
+        setPityCount(finalPity);
+        setCards(finalResults.map(r => r.card));
+
+        setHistory(prev => {
+            const updated = [
+                ...prev,
+                ...finalResults.map(r => ({
+                    ...r.card,
+                    timestamp: new Date().toISOString(),
+                })),
+            ];
+            return updated.slice(-10000);
+        });
+        setShowAnimationDrawCards(false);
+        setisAnimatingDrawCards(false);
+    };
+
+
+
+
 
 
 
@@ -408,28 +442,7 @@ const getRandomCard = (
 
 
 
-// ========================================================
-  // 动画结束后处理卡片的展示和历史记录的更新
-  const handleDrawCardsAnimationEnd = () => {
-    const finalResults = drawResultsRef.current;
-    const finalPity = currentPityRef.current;
-    setPityCount(finalPity);
-    setCards(finalResults.map(r => r.card));
 
-    setHistory(prev => {
-    const updated = [
-      ...prev, // 保留旧的记录
-      ...finalResults.map(r => ({
-        ...r.card,
-        timestamp: new Date().toISOString(),
-      })), // 追加新的记录
-    ];
-    return updated.slice(-10000); // 保留最新的10000条
-  });
-
-    setShowAnimationDrawCards(false);
-    setisAnimatingDrawCards(false);
-  };
 
 
 
@@ -445,8 +458,6 @@ const getRandomCard = (
             className="relative w-screen h-screen cursor-pointer overflow-hidden outline-none focus:outline-none"
             tabIndex={0}
         >
-
-
             {/* 视频层（最底层） */}
             <video
                 preload="auto"
@@ -455,15 +466,36 @@ const getRandomCard = (
                 playsInline
                 muted
                 controls={false}
-                // onEnded={() => {
-                //   const validDrawId = drawSessionIdRef.current;
-                //   if (!validDrawId) return;
-                //   setisAnimatingDrawCards(false);
-                //   drawSessionIdRef.current = 0; // 重置流程 ID，防止后续重复触发
-                // }}
-                className="fixed top-0 left-0 w-full h-full object-cover z-0">
+                onEnded={() => {
+                  const validDrawId = drawSessionIdRef.current;
+                  if (!validDrawId) return;
+                  setisAnimatingDrawCards(false);
+                  drawSessionIdRef.current = 0; // 重置流程 ID，防止后续重复触发
+                }}
+                className="fixed top-0 left-0 w-full h-full object-cover">
                 <source src="videos/background.mp4" type="video/mp4"/>
             </video>
+
+
+            {/* 抽卡动画层 */}
+            {showAnimationDrawCards && (
+              <DrawAnimationCards
+                isFiveStar={hasFiveStarAnimation}
+                onAnimationEnd={handleDrawCardsAnimationEnd}
+              />
+            )}
+
+
+            <CardOverlay
+                showCardOverlay={showCardOverlay}
+                currentCardIndex={currentCardIndex}
+                drawResultsRef={drawResultsRef}
+                videoPlayed={videoPlayed}
+                setVideoPlayed={setVideoPlayed}
+                handleNextCard={handleNextCard}
+                isSkipped={isSkipped}
+                setIsSkipped={setIsSkipped}
+            />
 
 
 
@@ -498,42 +530,10 @@ const getRandomCard = (
                 showProbability={showProbability}
                 setShowProbability={setShowProbability}
                 setIsSkipped={setIsSkipped}
+                handleStartDraw={handleStartDraw} // 抽卡动画处理
             />
 
-
-
-
-            {/*/!* 抽卡动画层 *!/*/}
-            {/*{showAnimationDrawCards && (*/}
-            {/*    <DrawAnimationCards*/}
-            {/*        isFiveStar={hasFiveStarAnimation}*/}
-            {/*        onAnimationEnd={handleDrawCardsAnimationEnd}*/}
-            {/*        cards={drawResultsRef.current.map((r) => r.card)}*/}
-            {/*        className="fixed inset-0 z-20"*/}
-            {/*    />*/}
-            {/*)}*/}
-
-
-            {/* 抽卡动画层 */}
-            {showAnimationDrawCards && (
-                <DrawAnimationCards
-                    isFiveStar={hasFiveStarAnimation}
-                    onAnimationEnd={handleDrawCardsAnimationEnd}
-                    cards={drawResultsRef.current.map((r) => r.card)}
-                    onSkip={(isSkipped) => setIsSkipped(isSkipped)}
-                    isSingleDraw={isSingleDraw}
-                    className="fixed inset-0 z-50"
-                    style={{border: "3px dashed red",}}
-                />
-            )}
-
-
-
-
-
         </div>
-
-
     );
 };
 

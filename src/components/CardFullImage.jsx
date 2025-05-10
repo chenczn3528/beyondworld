@@ -1,7 +1,9 @@
 import React from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 
-const CardFullImage = ({ card, onClick, setIsSkipped }) => {
+const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false, }) => {
+
+    console.log("full image:",card);
 
     const rarityMap = {
       世界: 'images/world.png',
@@ -26,8 +28,8 @@ const CardFullImage = ({ card, onClick, setIsSkipped }) => {
             }}
         >
             <LazyLoadImage
-                src={card.图片信息[0].srcset2}
-                placeholderSrc={card.图片信息[0].src}
+                src={isSecondImage ? card.图片信息[1].srcset2 : card.图片信息[0].srcset2}
+                placeholderSrc={isSecondImage ? card.图片信息[1].src : card.图片信息[0].src}
                 effect="blur"
                 alt="Full View"
                 className="h-screen object-contain rounded-lg shadow-2xl"
@@ -46,7 +48,6 @@ const CardFullImage = ({ card, onClick, setIsSkipped }) => {
                 }}
             />
 
-
             <label
                 className="absolute"
                 style={{
@@ -55,6 +56,7 @@ const CardFullImage = ({ card, onClick, setIsSkipped }) => {
                     fontWeight: 800,
                     left: '10vw',
                     bottom: '23vh',
+                    textShadow: '0 0 2px gray, 0 0 4px gray',
                 }}
             >
                 {card.主角}
@@ -73,6 +75,7 @@ const CardFullImage = ({ card, onClick, setIsSkipped }) => {
                         fontSize: '3vw',
                         fontWeight: 800,
                         marginRight: '0.5vw', // 文字和图片之间留点间距
+                        textShadow: '0 0 2px gray, 0 0 4px gray',
                     }}
                 >
                     {card.卡名}

@@ -30,6 +30,7 @@ const SettingsLayer = ({
     showProbability,
     setShowProbability,
     setIsSkipped,
+    handleStartDraw,
 }) => {
 
     const filtered_cardData = cardData.filter(card => card.稀有度 === '世界');
@@ -41,7 +42,8 @@ const SettingsLayer = ({
 
 
     return (
-        <div className="relative w-screen h-screen cursor-pointer overflow-hidden outline-none focus:outline-none">
+        <div
+            className="relative w-screen h-screen cursor-pointer overflow-visible outline-none focus:outline-none z-10">
 
             {/*主页显示卡片轮播图*/}
             <div style={{
@@ -67,23 +69,24 @@ const SettingsLayer = ({
                     position: 'absolute',
                     bottom: 0,
                     left: 0,
-                    zIndex: showDetailedImage ? 2 : 4,
+                    zIndex: showDetailedImage ? 2 : 4, // 确保按钮在动画下方
                 }}
             >
                 <button
                     className="mr-[1vw] items-center justify-center" style={{
-                        width: '10vw',
-                        height: '4vw',
-                        fontSize: '1.2vw',
-                        backgroundColor: 'rgba(122,138,166,0.8)', // 或者用 Tailwind 的 bg-yellow-400
-                        boxShadow: '0 0 10px #111214, 0 0 20px #111214',
-                        color: 'white',
-                        textShadow: '0 0 5px gray'
-                    }}
+                    width: '10vw',
+                    height: '4vw',
+                    fontSize: '1.2vw',
+                    backgroundColor: 'rgba(122,138,166,0.8)', // 或者用 Tailwind 的 bg-yellow-400
+                    boxShadow: '0 0 10px #111214, 0 0 20px #111214',
+                    color: 'white',
+                    textShadow: '0 0 5px gray'
+                }}
                     onClick={() => {
                         setHasShownSummary(false);
                         setShowSummary(false);
                         handleDraw(1);
+                        handleStartDraw();
                     }}
                 >
                     感召一次
@@ -104,6 +107,7 @@ const SettingsLayer = ({
                         setHasShownSummary(false);
                         setShowSummary(false);
                         handleDraw(10);
+                        handleStartDraw();
                         e.stopPropagation(); // 阻止冒泡
                     }}
                 >
@@ -113,7 +117,12 @@ const SettingsLayer = ({
 
             <button
                 className="absolute ml-[8vw] mt-[3vw] items-center justify-center"
-                style={{fontSize: '1.2vw', backgroundColor:'rgba(255,255,255,0.2)', color: 'white', zIndex: showDetailedImage ? 2 : 4}}
+                style={{
+                    fontSize: '1.2vw',
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    color: 'white',
+                    zIndex: showDetailedImage ? 2 : 4
+                }}
             >
                 图鉴
             </button>

@@ -1,12 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const DrawAnimationCards = ({ isFiveStar, onAnimationEnd, cards, onSkip,isSingleDraw }) => {
+const DrawAnimationCards = ({ isFiveStar, onAnimationEnd }) => {
   const videoRef = useRef(null);
   const audioRef = useRef(null);
   const [videoDuration, setVideoDuration] = useState(0);
-
-  console.log("抽卡动画")
-  console.log(cards)
 
   const handleVideoLoaded = () => {
     if (videoRef.current) {
@@ -36,7 +33,7 @@ const DrawAnimationCards = ({ isFiveStar, onAnimationEnd, cards, onSkip,isSingle
   }, [videoDuration, onAnimationEnd]);
 
   return (
-    <div className="fixed inset-0 z-100 w-screen h-screen flex items-center justify-center animate-fade-in" >
+    <div className="fixed inset-0 z-50 w-screen h-screen flex items-center justify-center animate-fade-in">
       <div className="relative w-full h-full">
         <video
             preload="auto"
@@ -50,7 +47,7 @@ const DrawAnimationCards = ({ isFiveStar, onAnimationEnd, cards, onSkip,isSingle
             controls={false}
         >
           <source
-              src={isFiveStar ? 'videos/出金.mp4' : 'videos/不出金.mp4'}
+              src={isFiveStar ? 'videos/gold.mp4' : 'videos/no_gold.mp4'}
               type="video/mp4"
           />
           Your browser does not support the video tag.
@@ -64,7 +61,7 @@ const DrawAnimationCards = ({ isFiveStar, onAnimationEnd, cards, onSkip,isSingle
             muted={false}
         >
           <source
-              src={isFiveStar ? 'audios/出金音频.mp3' : 'audios/不出金音频.mp3'}
+              src='audios/抽卡音频.mp3'
               type="audio/mp3"
           />
           Your browser does not support the audio element.
