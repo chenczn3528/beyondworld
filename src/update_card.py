@@ -100,7 +100,7 @@ for index, row in enumerate(rows):
     cards.append(card)
 
 # 保存到文件
-with open('assets/cards.json', 'w', encoding='utf-8') as f:
+with open('src/assets/cards.json', 'w', encoding='utf-8') as f:
     json.dump(cards, f, ensure_ascii=False, indent=2)
 
 print(f"共抓取 {len(cards)} 张卡片信息并保存完成。")
