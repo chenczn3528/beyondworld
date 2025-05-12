@@ -5,6 +5,7 @@ import useLocalStorageState from "./hooks/useLocalStorageState.js";
 import SettingsLayer from "./components/SettingsLayer.jsx";
 import DrawAnimationCards from "./components/DrawAnimationCards.jsx";
 import CardOverlay from "./components/CardOverlay.jsx";
+import HistoryModal from "./components/HistoryModal.jsx";
 
 const Home = () => {
 
@@ -148,7 +149,7 @@ const Home = () => {
         }
     }, [history, galleryHistory.length]);
 
-    console.log("galleryHistory:", galleryHistory)
+    // console.log("galleryHistory:", galleryHistory)
 
     // 合并新的抽卡记录
     useEffect(() => {
@@ -262,6 +263,7 @@ const Home = () => {
       }
     }
   };
+
 
 
 
@@ -488,13 +490,20 @@ const getRandomCard = (
 
             <CardOverlay
                 showCardOverlay={showCardOverlay}
+                setShowCardOverlay={setShowCardOverlay}
                 currentCardIndex={currentCardIndex}
                 drawResultsRef={drawResultsRef}
-                videoPlayed={videoPlayed}
-                setVideoPlayed={setVideoPlayed}
                 handleNextCard={handleNextCard}
                 isSkipped={isSkipped}
                 setIsSkipped={setIsSkipped}
+                currentIndex={currentCardIndex}
+                setCurrentIndex={setCurrentCardIndex}
+            />
+
+            <HistoryModal
+                showHistory={showHistory}
+                setShowHistory={setShowHistory}
+                history={history}
             />
 
 

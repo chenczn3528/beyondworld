@@ -1,9 +1,7 @@
 import React from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 
-const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false, }) => {
-
-    console.log("full image:",card);
+const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false }) => {
 
     const rarityMap = {
       世界: 'images/world.png',
@@ -11,6 +9,8 @@ const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false, }) 
       辰星: 'images/star1.png',
       星: 'images/star2.png',
     };
+
+    const isFiveStar = card.稀有度 === '世界';
 
     return (
         <div
@@ -91,23 +91,24 @@ const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false, }) 
             </div>
 
 
-            <button
-                className="absolute"
-                style={{
-                    backgroundColor: 'rgba(255,255,255,0.3)',
-                    right: '10vw',
-                    top: '6vh',
-                    color: 'white',
-                    fontSize: '1vw',
-                    height: '3vw',
-                }}
-                onClick={()=>{
-                    setIsSkipped(true);
-                    console.log("跳过")
-                }}
-            >
-                跳过
-            </button>
+            {!isFiveStar && (
+                <button
+                    className="absolute"
+                    style={{
+                        backgroundColor: 'rgba(255,255,255,0.3)',
+                        right: '10vw',
+                        top: '6vh',
+                        color: 'white',
+                        fontSize: '1vw',
+                        height: '3vw',
+                    }}
+                    onClick={() => {
+                        setIsSkipped(true);
+                    }}
+                >
+                    跳过
+                </button>
+            )}
 
 
         </div>

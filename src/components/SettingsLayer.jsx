@@ -116,7 +116,7 @@ const SettingsLayer = ({
             </div>
 
             <button
-                className="absolute ml-[8vw] mt-[3vw] items-center justify-center"
+                className="absolute ml-[8vw] items-center justify-center"
                 style={{
                     fontSize: '1.2vw',
                     backgroundColor: 'rgba(255,255,255,0.2)',
@@ -125,6 +125,19 @@ const SettingsLayer = ({
                 }}
             >
                 图鉴
+            </button>
+
+            <button
+                className="absolute ml-[15vw] items-center justify-center"
+                style={{
+                    fontSize: '1.2vw',
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    color: 'white',
+                    zIndex: showDetailedImage ? 2 : 4
+                }}
+                onClick={()=>{setShowHistory(true);}}
+            >
+                历史
             </button>
 
 
