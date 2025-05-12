@@ -12,36 +12,36 @@ const Home = () => {
 
     // ======================================================== 数据存储与恢复
     // 总抽卡数
-    const [totalDrawCount, setTotalDrawCount] = useLocalStorageState('totalDrawCount', 0);
+    const [totalDrawCount, setTotalDrawCount] = useLocalStorageState('bw_totalDrawCount', 0);
     // 选择的角色
-    const [selectedRole, setSelectedRole] = useLocalStorageState('selectedRole', '随机');
+    const [selectedRole, setSelectedRole] = useLocalStorageState('bw_selectedRole', '随机');
     // 总出金数
-    const [totalFiveStarCount, setTotalFiveStarCount] = useLocalStorageState('totalFiveStarCount', 0);
+    const [totalFiveStarCount, setTotalFiveStarCount] = useLocalStorageState('bw_totalFiveStarCount', 0);
     // 下次出金还需要多少
-    const [pityCount, setPityCount] = useLocalStorageState('pityCount', 0);
+    const [pityCount, setPityCount] = useLocalStorageState('bw_pityCount', 0);
     // 是否开启大小保底机制
-    const [useSoftGuarantee, setUseSoftGuarantee] = useLocalStorageState('useSoftGuarantee', true);
+    const [useSoftGuarantee, setUseSoftGuarantee] = useLocalStorageState('bw_useSoftGuarantee', true);
     // 目前是小保底还是大保底
-    const [softPityFailed, setSoftPityFailed] = useLocalStorageState('softPityFailed', false);
+    const [softPityFailed, setSoftPityFailed] = useLocalStorageState('bw_softPityFailed', false);
     // 是否包括三星
-    const [includeThreeStar, setIncludeThreeStar] = useLocalStorageState('includeThreeStar', true);
+    const [includeThreeStar, setIncludeThreeStar] = useLocalStorageState('bw_includeThreeStar', true);
     // 是否只抽当前角色的卡
-    const [onlySelectedRoleCard, setOnlySelectedRoleCard] = useLocalStorageState('onlySelectedRoleCard', false);
+    const [onlySelectedRoleCard, setOnlySelectedRoleCard] = useLocalStorageState('bw_onlySelectedRoleCard', false);
     // 历史记录
-    const [history, setHistory] = useLocalStorageState('history', []);
+    const [history, setHistory] = useLocalStorageState('bw_history', []);
 
 
     // 清除缓存数据
     const keysToClear = [
-        'totalDrawCount',
-        'totalFiveStarCount',
-        'pityCount',
-        'useSoftGuarantee',
-        'softPityFailed',
-        'selectedRole',
-        'includeThreeStar',
-        'onlySelectedRoleCard',
-        'history'
+        'bw_totalDrawCount',
+        'bw_totalFiveStarCount',
+        'bw_pityCount',
+        'bw_useSoftGuarantee',
+        'bw_softPityFailed',
+        'bw_selectedRole',
+        'bw_includeThreeStar',
+        'bw_onlySelectedRoleCard',
+        'bw_history'
     ];
 
     const clearLocalData = () => {
