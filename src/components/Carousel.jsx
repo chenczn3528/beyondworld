@@ -17,32 +17,71 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage }) => {
       星: 'images/star2.png',
     };
 
-  useEffect(() => {
-  const interval = setInterval(() => {
-    setCurrent(prev => (prev + 1) % cardData.length); // 循环播放
-  }, 4500); // 每 3 秒切换一次
+    const timerRef = useRef(null);
+    const resumeTimerRef = useRef(null);
 
-  return () => clearInterval(interval); // 清除定时器
-}, [cardData.length]);
+    const startAutoPlay = () => {
+      clearInterval(timerRef.current);
+      timerRef.current = setInterval(() => {
+        setCurrent((prev) => (prev + 1) % cardData.length);
+      }, 2000);
+    };
+
+    const pauseAutoPlay = () => {
+      clearInterval(timerRef.current);
+      clearTimeout(resumeTimerRef.current);
+
+      // 3 秒后恢复自动播放
+      resumeTimerRef.current = setTimeout(() => {
+        startAutoPlay();
+      }, 3000);
+    };
+
+    useEffect(() => {
+      startAutoPlay(); // 初始化时启动自动播放
+
+      return () => {
+        clearInterval(timerRef.current);
+        clearTimeout(resumeTimerRef.current);
+      };
+    }, [cardData.length]);
 
 
-  const handleTouchStart = (e) => {
-    startX.current = e.touches ? e.touches[0].clientX : e.clientX;
-  };
 
-  const handleTouchMove = (e) => {
-    const x = e.touches ? e.touches[0].clientX : e.clientX;
-    deltaX.current = x - startX.current;
-  };
 
-  const handleTouchEnd = () => {
-    if (deltaX.current > 50) {
-      setCurrent((prev) => Math.max(0, prev - 1)); // 向右滑动，切换到左边的图
-    } else if (deltaX.current < -50) {
-      setCurrent((prev) => Math.min(cardData.length - 1, prev + 1)); // 向左滑动，切换到右边的图
-    }
-    deltaX.current = 0;
-  };
+    const getTouchCoord = (e) => {
+      const point = e.touches ? e.touches[0] : e;
+
+      // 判断强制横屏：如果宽 < 高，我们视觉上是横屏但设备是竖的
+      const isForcedLandscape = window.innerWidth < window.innerHeight;
+
+      // 如果是强制横屏，手势滑动应该基于 clientY
+      return isForcedLandscape ? point.clientY : point.clientX;
+    };
+
+    const handleTouchStart = (e) => {
+        pauseAutoPlay();
+      startX.current = getTouchCoord(e);
+    };
+
+    const handleTouchMove = (e) => {
+        pauseAutoPlay();
+      const current = getTouchCoord(e);
+      deltaX.current = current - startX.current;
+    };
+
+    const handleTouchEnd = () => {
+      if (deltaX.current > 50) {
+        setCurrent((prev) => Math.max(0, prev - 1));
+      } else if (deltaX.current < -50) {
+        setCurrent((prev) => Math.min(cardData.length - 1, prev + 1));
+      }
+      deltaX.current = 0;
+    };
+
+
+
+
 
   // 控制图片变换
   const renderImage = (card, index) => {

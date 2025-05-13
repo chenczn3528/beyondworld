@@ -117,7 +117,7 @@ const SettingsLayer = ({
                 <div className="flex items-start justify-start gap-[1vmin] ml-[10vmin]">
                     <button
                         style={{
-                            fontSize: '2vmin',
+                            fontSize: '3vmin',
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -128,7 +128,7 @@ const SettingsLayer = ({
 
                     <button
                         style={{
-                            fontSize: '2vmin',
+                            fontSize: '3vmin',
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -143,7 +143,7 @@ const SettingsLayer = ({
                     <button
                         style={{
                             marginLeft: '10vmin',
-                            fontSize: '2vmin',
+                            fontSize: '3vmin',
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -160,7 +160,7 @@ const SettingsLayer = ({
                     <div
                         className="flex items-center justify-end text-white font-extrabold"
                         style={{
-                            fontSize: '2.5vmin',
+                            fontSize: '3vmin',
                             color: 'white',
                             textShadow: `
                                 0 0 10px gold,
@@ -171,9 +171,9 @@ const SettingsLayer = ({
                             `
                         }}
                     >
-                        <label className="text-shadow" style={{fontSize: '4vmin'}}> {70 - pityCount} </label>
+                        <label className="text-shadow" style={{fontSize: '4.5vmin'}}> {70 - pityCount} </label>
                         <label className="text-shadow"> 次感召必出 </label>
-                        <img src="images/world.png" className="w-[7vmin] h-auto"/>
+                        <img src="images/world.png" className="w-[8vmin] h-auto"/>
                         <label className="text-shadow"> 侧影 </label>
                     </div>
 
@@ -181,7 +181,7 @@ const SettingsLayer = ({
                     <div
                         className="flex items-center justify-end font-extrabold gap-[1.5vmin]"
                         style={{
-                            fontSize: '2vmin',
+                            fontSize: '2.5vmin',
                             color: 'white',
                             textShadow: '0 0 10px gold'
                         }}

@@ -1,12 +1,7 @@
 import React, {useEffect} from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
-import {forceLandscape} from "single-screen-utils";
 
 const DetailedImage = ({ card, onClose }) => {
-
-    useEffect(()=>{
-        forceLandscape();
-    },[])
 
     const rarityMap = {
       世界: 'images/world.png',
@@ -46,10 +41,18 @@ const DetailedImage = ({ card, onClose }) => {
                     {/*重逢卡面*/}
                     <div className="absolute left-[30%] bottom-[-30%] w-[60%] h-[60%]" style={{transform: 'translateX(-100%)'}}>
                         <div className="relative w-full h-full">
-                            <img
-                                src={card.图片信息[1].src}
-                                alt="重逢卡面"
-                                className="w-full h-full object-contain edge-blur-mask"
+                            {/*<img*/}
+                            {/*    src={card.图片信息[1].src}*/}
+                            {/*    alt="重逢卡面"*/}
+                            {/*    className="w-full h-full object-contain edge-blur-mask"*/}
+                            {/*/>*/}
+                            <LazyLoadImage
+                                src={card.图片信息[1].srcset}
+                                placeholderSrc={card.图片信息[1].src}
+                                effect="blur"
+                                alt="Full View"
+                                className="h-[24vmin] w-auto object-contain rounded-lg shadow-2xl edge-blur-mask"
+                                onClick={(e) => e.stopPropagation()}
                             />
 
                             {/* 重逢图标：贴在卡面右上角 */}
