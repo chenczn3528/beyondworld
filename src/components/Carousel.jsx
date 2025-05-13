@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import DetailedImage from './DetailedImage.jsx';
 
 const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage }) => {
+
   const [current, setCurrent] = useState(2); // 默认中间是第三张图片
   const startX = useRef(0);
   const deltaX = useRef(0);

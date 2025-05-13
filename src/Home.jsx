@@ -6,8 +6,26 @@ import SettingsLayer from "./components/SettingsLayer.jsx";
 import DrawAnimationCards from "./components/DrawAnimationCards.jsx";
 import CardOverlay from "./components/CardOverlay.jsx";
 import HistoryModal from "./components/HistoryModal.jsx";
+import forceLandscape from "./hooks/forceLandscape.js";
+import flexible from "./hooks/flexible.js";
 
 const Home = () => {
+
+    useEffect(() => {
+        // 强制横屏
+        forceLandscape();
+
+        // rem 适配配置
+        flexible({
+            pageWidth: 844,
+            pageHeight: 390,
+            pageFontSize: 100,
+            mode: 'landscape',
+        });
+    }, []);
+
+
+
 
     window.addEventListener('load', () => {
       setTimeout(() => {
@@ -463,6 +481,7 @@ const getRandomCard = (
     // 返回数据时显示的页面
     return (
         <div
+            id="app"
             className="relative w-screen h-screen cursor-pointer overflow-hidden outline-none focus:outline-none"
             tabIndex={0}
         >

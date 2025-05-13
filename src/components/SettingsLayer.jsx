@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Carousel from "./Carousel";
 import cardData from "../assets/cards.json";
 
@@ -36,20 +36,36 @@ const SettingsLayer = ({
     const filtered_cardData = cardData.filter(card => card.稀有度 === '世界');
 
     const [showDetailedImage, setShowDetailedImage] = useState(false);
-    const [showFullImage, setShowFullImage] = useState(false);
 
 
 
 
     return (
         <div
-            className="relative w-screen h-screen cursor-pointer overflow-visible outline-none focus:outline-none z-10">
+            style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                outline: 'none',
+                overflow: 'visible',
+                // cursor: 'pointer'
+            }}
+            // className="cursor-pointer overflow-visible outline-none focus:outline-none"
+        >
 
             {/*主页显示卡片轮播图*/}
-            <div style={{
-                width: '100vw', height: '90vh', display: 'flex', justifyContent: 'center',
-                alignItems: 'center', position: 'absolute', top: 0, left: 0, zIndex: 3,
-            }}>
+            <div
+                // className="flex justify-center items-center"
+                style={{
+                    // width: '80%'
+                    // marginTop: '50px',
+                    // marginLeft: '3.2rem'
+                // width: '8rem', height: '4rem', display: 'flex', justifyContent: 'center',
+                // alignItems: 'center', position: 'absolute', top: 0, left: 0, zIndex: 3,
+                }}
+            >
                 <Carousel
                     cardData={filtered_cardData}
                     showDetailedImage={showDetailedImage}
@@ -60,7 +76,7 @@ const SettingsLayer = ({
 
             {/*抽卡按钮*/}
             <div
-                className="absolute flex  justify-center bottom-[16vmin] w-screen"
+                className="absolute flex  justify-center bottom-[10vmin] w-screen"
                 style={{
                     zIndex: showDetailedImage ? 2 : 4, // 确保按钮在动画下方
                 }}
@@ -105,10 +121,9 @@ const SettingsLayer = ({
             </div>
 
 
-
             {/*最上层按钮和文字*/}
-            <div className="flex flex-row justify-between ml-[12vmin] mr-[12vmin] mt-[3vmin]">
-                <div className="flex items-start justify-start gap-[1vmin]">
+            <div className="absolute flex flex-row w-full justify-between top-[5vmin]">
+                <div className="flex items-start justify-start gap-[1vmin] ml-[10vmin]">
                     <button
                         style={{
                             fontSize: '2vmin',
@@ -149,7 +164,7 @@ const SettingsLayer = ({
 
 
                 {/* 保底显示 */}
-                <div className="flex flex-col">
+                <div className="flex flex-col mr-[10vmin]">
                     <div
                         className="flex items-center justify-end text-white font-extrabold"
                         style={{
