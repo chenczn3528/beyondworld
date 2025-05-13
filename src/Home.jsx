@@ -6,32 +6,16 @@ import SettingsLayer from "./components/SettingsLayer.jsx";
 import DrawAnimationCards from "./components/DrawAnimationCards.jsx";
 import CardOverlay from "./components/CardOverlay.jsx";
 import HistoryModal from "./components/HistoryModal.jsx";
-import forceLandscape from "./hooks/forceLandscape.js";
-import flexible from "./hooks/flexible.js";
+import { forceLandscape, useDynamicRem } from 'single-screen-utils';
+
 
 const Home = () => {
 
-    useEffect(() => {
-        // 强制横屏
+    useEffect(()=>{
         forceLandscape();
-
-        // rem 适配配置
-        flexible({
-            pageWidth: 1688,
-            pageHeight: 780,
-            pageFontSize: 100,
-            mode: 'landscape',
-        });
-    }, []);
+    },[])
 
 
-
-
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        window.scrollTo(0, 1);  // 滚动页面，触发地址栏隐藏
-      }, 100);
-    });
 
 
 

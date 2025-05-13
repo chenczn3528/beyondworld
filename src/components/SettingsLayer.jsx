@@ -50,14 +50,12 @@ const SettingsLayer = ({
                 alignItems: 'center',
                 outline: 'none',
                 overflow: 'visible',
-                // cursor: 'pointer'
             }}
-            // className="cursor-pointer overflow-visible outline-none focus:outline-none"
         >
 
             {/*主页显示卡片轮播图*/}
             <div
-                className="mt-[20vmin]"
+                className="mt-[12vmin]"
             >
                 <Carousel
                     cardData={filtered_cardData}

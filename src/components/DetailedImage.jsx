@@ -1,7 +1,12 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
+import {forceLandscape} from "single-screen-utils";
 
 const DetailedImage = ({ card, onClose }) => {
+
+    useEffect(()=>{
+        forceLandscape();
+    },[])
 
     const rarityMap = {
       世界: 'images/world.png',
@@ -12,6 +17,7 @@ const DetailedImage = ({ card, onClose }) => {
 
     return (
         <div
+            id="app"
             className="fixed inset-0 z-50 w-full h-full top-[0] left-[0] flex justify-center items-center"
             onClick={onClose}
             style={{backgroundColor: 'rgba(0, 0, 0, 0.8)',}}
@@ -25,7 +31,7 @@ const DetailedImage = ({ card, onClose }) => {
                             placeholderSrc={card.图片信息[0].src}
                             effect="blur"
                             alt="Full View"
-                            className="max-w-[40vw] max-h-[40vh] w-auto h-auto object-contain rounded-lg shadow-2xl edge-blur-mask"
+                            className="h-[40vmin] w-auto object-contain rounded-lg shadow-2xl edge-blur-mask"
                             onClick={(e) => e.stopPropagation()}
                         />
 
@@ -38,7 +44,7 @@ const DetailedImage = ({ card, onClose }) => {
                     </div>
 
                     {/*重逢卡面*/}
-                    <div className="absolute left-[30%] bottom-[-40%] w-[60%] h-[60%]" style={{transform: 'translateX(-100%)'}}>
+                    <div className="absolute left-[30%] bottom-[-30%] w-[60%] h-[60%]" style={{transform: 'translateX(-100%)'}}>
                         <div className="relative w-full h-full">
                             <img
                                 src={card.图片信息[1].src}

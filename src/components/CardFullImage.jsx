@@ -1,20 +1,33 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { forceLandscape, useDynamicRem } from 'single-screen-utils';
 
 const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false }) => {
 
+    useEffect(()=>{
+        forceLandscape();
+    },[])
+
+    useDynamicRem({
+        pageWidth: 750,
+        pageHeight: 1334,
+        mode: 'landscape'
+    });
+
     const rarityMap = {
-      世界: 'images/world.png',
-      月: 'images/moon.png',
-      辰星: 'images/star1.png',
-      星: 'images/star2.png',
+        世界: 'images/world.png',
+        月: 'images/moon.png',
+        辰星: 'images/star1.png',
+        星: 'images/star2.png',
     };
 
     const isFiveStar = card.稀有度 === '世界';
 
+
     return (
         <div
-            style={{backgroundColor: 'black'}}
+            id="app"
+            style={{ backgroundColor: 'black' }}
             className="fixed z-10 w-full h-full flex justify-center items-center"
         >
             <LazyLoadImage
@@ -22,7 +35,7 @@ const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false }) =
                 placeholderSrc={isSecondImage ? card.图片信息[1].src : card.图片信息[0].src}
                 effect="blur"
                 alt="Full View"
-                className="h-full w-auto object-contain rounded-lg shadow-2xl"
+                className="h-[100vmin] w-auto object-contain rounded-lg shadow-2xl"
                 onClick={onClick}
             />
 
@@ -63,7 +76,7 @@ const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false }) =
                         color: 'white',
                         fontSize: '5vmin',
                         fontWeight: 800,
-                        marginRight: '1vmin', // 文字和图片之间留点间距
+                        marginRight: '1vmin',
                         textShadow: '0 0 2px gray, 0 0 4px gray',
                     }}
                 >
@@ -78,7 +91,6 @@ const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false }) =
                     }}
                 />
             </div>
-
 
             {!isFiveStar && (
                 <button
@@ -97,10 +109,7 @@ const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false }) =
                     跳过
                 </button>
             )}
-
-
         </div>
-
     );
 };
 
