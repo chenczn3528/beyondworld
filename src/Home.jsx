@@ -455,7 +455,6 @@ const getRandomCard = (
     // ========================================================
     // 返回数据时显示的页面
     return (
-
         <div
             className="relative w-screen h-screen cursor-pointer overflow-hidden outline-none focus:outline-none"
             tabIndex={0}

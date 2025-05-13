@@ -6,16 +6,6 @@ html, body {
   overflow: hidden;
   height: 100%;
   background-color: black;
-
-  transform: rotate(90deg);
-  /*transform-origin: left top;*/
-  /*width: 100vh; !* 竖屏高度作为横屏宽度 *!*/
-  /*height: 100vw; !* 竖屏宽度作为横屏高度 *!*/
-  /*overflow-x: hidden;*/
-  /*position: absolute;*/
-  /*top: 0;*/
-  /*left: 0;*/
-
 }
 
 
