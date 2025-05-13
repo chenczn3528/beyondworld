@@ -35,7 +35,7 @@ const HistoryModal = ({ showHistory, setShowHistory, history }) => {
   return (
     showHistory && (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center w-screen h-screen"
+        className="fixed inset-0 z-50 flex items-center justify-center w-full h-full"
         onClick={() => setShowHistory(false)}
       >
         <div

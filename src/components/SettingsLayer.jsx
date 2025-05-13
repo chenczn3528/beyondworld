@@ -57,14 +57,7 @@ const SettingsLayer = ({
 
             {/*主页显示卡片轮播图*/}
             <div
-                // className="flex justify-center items-center"
-                style={{
-                    // width: '80%'
-                    // marginTop: '50px',
-                    // marginLeft: '3.2rem'
-                // width: '8rem', height: '4rem', display: 'flex', justifyContent: 'center',
-                // alignItems: 'center', position: 'absolute', top: 0, left: 0, zIndex: 3,
-                }}
+                className="mt-[20vmin]"
             >
                 <Carousel
                     cardData={filtered_cardData}
@@ -76,14 +69,14 @@ const SettingsLayer = ({
 
             {/*抽卡按钮*/}
             <div
-                className="absolute flex  justify-center bottom-[10vmin] w-screen"
+                className="absolute flex  justify-center bottom-[10vmin] w-full"
                 style={{
                     zIndex: showDetailedImage ? 2 : 4, // 确保按钮在动画下方
                 }}
             >
                 <button
                     className="mr-[1vmin] items-center justify-center" style={{
-                    fontSize: '2vmin',
+                    fontSize: '3vmin',
                     backgroundColor: 'rgba(122,138,166,0.8)', // 或者用 Tailwind 的 bg-yellow-400
                     boxShadow: '0 0 10px #111214, 0 0 20px #111214',
                     color: 'white',
@@ -102,7 +95,7 @@ const SettingsLayer = ({
                 <button
                     className="ml-[1vmin] items-center justify-center"
                     style={{
-                        fontSize: '2vmin',
+                        fontSize: '3vmin',
                         backgroundColor: 'rgba(239,218,160,0.8)', // 或者用 Tailwind 的 bg-yellow-400
                         boxShadow: '0 0 10px gold, 0 0 20px gold',
                         color: 'white',
@@ -151,6 +144,7 @@ const SettingsLayer = ({
 
                     <button
                         style={{
+                            marginLeft: '10vmin',
                             fontSize: '2vmin',
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',

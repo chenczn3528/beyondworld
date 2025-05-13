@@ -17,8 +17,8 @@ const Home = () => {
 
         // rem 适配配置
         flexible({
-            pageWidth: 844,
-            pageHeight: 390,
+            pageWidth: 1688,
+            pageHeight: 780,
             pageFontSize: 100,
             mode: 'landscape',
         });

@@ -33,7 +33,7 @@ const DrawAnimationCards = ({ isFiveStar, onAnimationEnd }) => {
   }, [videoDuration, onAnimationEnd]);
 
   return (
-    <div className="fixed inset-0 z-50 w-screen h-screen flex items-center justify-center animate-fade-in">
+    <div className="fixed inset-0 z-50 w-full h-full flex items-center justify-center animate-fade-in">
       <div className="relative w-full h-full">
         <video
             preload="auto"

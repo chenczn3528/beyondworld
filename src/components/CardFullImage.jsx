@@ -13,13 +13,16 @@ const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false }) =
     const isFiveStar = card.稀有度 === '世界';
 
     return (
-        <div className="z-10">
+        <div
+            style={{backgroundColor: 'black'}}
+            className="fixed z-10 w-full h-full flex justify-center items-center"
+        >
             <LazyLoadImage
                 src={isSecondImage ? card.图片信息[1].srcset2 : card.图片信息[0].srcset2}
                 placeholderSrc={isSecondImage ? card.图片信息[1].src : card.图片信息[0].src}
                 effect="blur"
                 alt="Full View"
-                className="w-screen h-screen object-cover rounded-lg shadow-2xl"
+                className="h-full w-auto object-contain rounded-lg shadow-2xl"
                 onClick={onClick}
             />
 
