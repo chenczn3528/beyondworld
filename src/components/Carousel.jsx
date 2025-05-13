@@ -108,27 +108,28 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage }) => {
                 }}
             />
 
-            {/* 稀有度角标 */}
-            <img
-                className="absolute ml-[-6vw] w-[6vw] h-auto"
-                src={rarityMap[card.稀有度]}
-                alt="Rarity Badge"
-            />
+              <div className="absolute flex flex-row justify-end top-[0vmin] right-[2vmin]">
+                  {/* 卡片标题 */}
+                <label
+                    className="font-normal"
+                    style={{
+                      color: 'white',
+                      fontSize: '2.5vmin',
+                      fontWeight: 800,
+                      textAlign: 'right', // 文字右对齐
+                      textShadow: '0 0 2px gray, 0 0 4px gray',
+                    }}
+                >
+                  {card.主角} · {card.卡名}
+                </label>
+                {/* 稀有度角标 */}
+                <img
+                    className="w-[8vmin] h-auto"
+                    src={rarityMap[card.稀有度]}
+                    alt="Rarity Badge"
+                />
+              </div>
 
-            {/* 卡片标题 */}
-            <label
-                className="absolute left-1/2 -translate-x-1/2 font-normal"
-                style={{
-                  width: '28vw', // 关键：固定宽度
-                  color: 'white',
-                  fontSize: '1.5vw',
-                  fontWeight: 800,
-                  textAlign: 'right', // 文字右对齐
-                  textShadow: '0 0 2px gray, 0 0 4px gray',
-                }}
-            >
-              {card.主角} · {card.卡名}
-            </label>
 
           </div>
         </div>
@@ -143,10 +144,10 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage }) => {
   };
 
   return (
-      <div className="w-full h-[60%] bg-black flex items-center justify-center relative">
+      <div className="w-full bg-black flex items-center justify-center relative">
         {/* 将轮播图居中，使用 absolute 定位 */}
         <div
-            className="absolute w-[80vw] h-[60vh] left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2
+            className="absolute w-[150vmin] h-[150vmin] left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2
              bg-transparent flex items-center justify-center overflow-hidden"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}

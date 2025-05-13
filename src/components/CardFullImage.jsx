@@ -13,38 +13,24 @@ const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false }) =
     const isFiveStar = card.稀有度 === '世界';
 
     return (
-        <div
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100vw',
-                backgroundColor: 'black',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 10,
-            }}
-        >
+        <div className="z-10">
             <LazyLoadImage
                 src={isSecondImage ? card.图片信息[1].srcset2 : card.图片信息[0].srcset2}
                 placeholderSrc={isSecondImage ? card.图片信息[1].src : card.图片信息[0].src}
                 effect="blur"
                 alt="Full View"
-                className="h-screen object-contain rounded-lg shadow-2xl"
+                className="w-screen h-screen object-cover rounded-lg shadow-2xl"
                 onClick={onClick}
             />
-
 
             <img
                 className="absolute"
                 src={rarityMap[card.稀有度]}
                 style={{
-                    height: '8vw',
+                    height: '12vmin',
                     width: 'auto',
-                    left: '10vw',
-                    top: '8vh',
+                    left: '18vmin',
+                    top: '4vmin',
                 }}
             />
 
@@ -52,10 +38,10 @@ const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false }) =
                 className="absolute"
                 style={{
                     color: 'white',
-                    fontSize: '2vw',
+                    fontSize: '3.5vmin',
                     fontWeight: 800,
-                    left: '10vw',
-                    bottom: '23vh',
+                    left: '20vmin',
+                    bottom: '20vmin',
                     textShadow: '0 0 2px gray, 0 0 4px gray',
                 }}
             >
@@ -65,16 +51,16 @@ const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false }) =
             <div
                 className="absolute flex items-center"
                 style={{
-                    left: '11vw',
-                    bottom: '15vh',
+                    left: '21vmin',
+                    bottom: '12vmin',
                 }}
             >
                 <label
                     style={{
                         color: 'white',
-                        fontSize: '3vw',
+                        fontSize: '5vmin',
                         fontWeight: 800,
-                        marginRight: '0.5vw', // 文字和图片之间留点间距
+                        marginRight: '1vmin', // 文字和图片之间留点间距
                         textShadow: '0 0 2px gray, 0 0 4px gray',
                     }}
                 >
@@ -84,7 +70,7 @@ const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false }) =
                     src={`images/60px-${card.属性}.png`}
                     alt="图标"
                     style={{
-                        height: '3vw',
+                        height: '5vmin',
                         width: 'auto',
                     }}
                 />
@@ -96,11 +82,10 @@ const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false }) =
                     className="absolute"
                     style={{
                         backgroundColor: 'rgba(255,255,255,0.3)',
-                        right: '10vw',
-                        top: '6vh',
+                        right: '14vmin',
+                        top: '3vmin',
                         color: 'white',
-                        fontSize: '1vw',
-                        height: '3vw',
+                        fontSize: '2vmin',
                     }}
                     onClick={() => {
                         setIsSkipped(true);
