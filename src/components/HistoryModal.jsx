@@ -39,7 +39,7 @@ const HistoryModal = ({ showHistory, setShowHistory, history }) => {
         onClick={() => setShowHistory(false)}
       >
         <div
-          className="relative flex flex-col w-[60vw] h-[60vh] p-4 rounded-lg overflow-hidden"
+          className="relative flex flex-col w-[90vmin] h-[90vmin] p-4 rounded-lg overflow-hidden"
           onClick={(e) => e.stopPropagation()}
           style={{backgroundColor: '#2a2d39'}}
         >
@@ -52,7 +52,7 @@ const HistoryModal = ({ showHistory, setShowHistory, history }) => {
 
             {/*表头*/}
             <div
-                className="flex flex-row text-xs mb-2 flex justify-between ml-[3vw] mr-[3vw] h-[5vh] items-center"
+                className="flex flex-row text-xs mb-2 flex justify-between ml-[3vw] mr-[3vw] h-[5vmin] items-center"
                 style={{backgroundColor: '#474964', fontSize: '1vw'}}
             >
               <div style={style_long}>侧影</div>
@@ -61,7 +61,7 @@ const HistoryModal = ({ showHistory, setShowHistory, history }) => {
               <div style={style_long}>时间</div>
             </div>
 
-            <div className="flex-1 overflow-y-auto mb-[2vh]">
+            <div className="flex-1 overflow-y-auto mb-[2vmin]">
               {history.slice().reverse().map((card, idx) => {
                 const cardHistoryColors = {
                   "星": {color: "gray"},
@@ -89,7 +89,7 @@ const HistoryModal = ({ showHistory, setShowHistory, history }) => {
                     <div
                         key={idx}
                         style={{backgroundColor, fontSize: '1vw'}}
-                        className={`flex flex-row text-xs mb-2 flex justify-between ml-[3vw] mr-[3vw] h-[4vh] items-center`}
+                        className={`flex flex-row text-xs mb-2 flex justify-between ml-[3vw] mr-[3vw] h-[4vmin] items-center`}
                     >
                       <div style={style1}>{card.主角}·{card.卡名}</div>
                       <div style={style2}>{card.稀有度}</div>
