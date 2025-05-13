@@ -9,6 +9,13 @@ import HistoryModal from "./components/HistoryModal.jsx";
 
 const Home = () => {
 
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        window.scrollTo(0, 1);  // 滚动页面，触发地址栏隐藏
+      }, 100);
+    });
+
+
 
     // ======================================================== 数据存储与恢复
     // 总抽卡数
