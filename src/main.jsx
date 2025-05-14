@@ -4,11 +4,9 @@ import { HashRouter } from 'react-router-dom';
 import './index.css';
 import App from './App.jsx';
 
-const isProduction = process.env.NODE_ENV === 'production';
-
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <HashRouter basename={isProduction ? '/beyondworld' : ''}> {/* 根据环境设置 basename */}
+    <HashRouter>
       <App />
     </HashRouter>
   </StrictMode>
