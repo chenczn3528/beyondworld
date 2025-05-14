@@ -2,19 +2,24 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Single Page Apps for GitHub Pages</title>
-    <script type="text/javascript">
-      var pathSegmentsToKeep = 1;
-      var l = window.location;
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-        l.hash
-      );
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com;
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data:;
+      connect-src 'self';
+    ">
+    <title>Redirecting...</title>
+    <script>
+      // 简化版 SPA 重定向
+      sessionStorage.redirect = location.pathname + location.search;
+      location.replace('/beyondworld/#' + location.pathname);
     </script>
   </head>
   <body>
+    <noscript>
+      <h1>Redirecting...</h1>
+      <p>Please enable JavaScript to access this single-page application.</p>
+    </noscript>
   </body>
 </html>
