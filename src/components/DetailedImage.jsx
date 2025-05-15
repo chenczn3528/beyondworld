@@ -1,5 +1,6 @@
 import React, {useEffect} from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
+import {playClickSound} from "../utils/playClickSound.js";
 
 const DetailedImage = ({ card, onClose }) => {
 
@@ -14,7 +15,7 @@ const DetailedImage = ({ card, onClose }) => {
         <div
             id="app"
             className="fixed inset-0 z-50 w-full h-full top-[0] left-[0] flex justify-center items-center"
-            onClick={onClose}
+            onClick={()=>{playClickSound(); onClose();}}
             style={{backgroundColor: 'rgba(0, 0, 0, 0.8)',}}
         >
 
@@ -27,7 +28,6 @@ const DetailedImage = ({ card, onClose }) => {
                             effect="blur"
                             alt="Full View"
                             className="h-[40vmin] w-auto object-contain rounded-lg shadow-2xl edge-blur-mask"
-                            onClick={(e) => e.stopPropagation()}
                         />
 
                         {/* 角标图标：定位在主图右上角 */}
@@ -41,18 +41,12 @@ const DetailedImage = ({ card, onClose }) => {
                     {/*重逢卡面*/}
                     <div className="absolute left-[30%] bottom-[-30%] w-[60%] h-[60%]" style={{transform: 'translateX(-100%)'}}>
                         <div className="relative w-full h-full">
-                            {/*<img*/}
-                            {/*    src={card.图片信息[1].src}*/}
-                            {/*    alt="重逢卡面"*/}
-                            {/*    className="w-full h-full object-contain edge-blur-mask"*/}
-                            {/*/>*/}
                             <LazyLoadImage
                                 src={card.图片信息[1].srcset}
                                 placeholderSrc={card.图片信息[1].src}
                                 effect="blur"
                                 alt="Full View"
                                 className="h-[24vmin] w-auto object-contain rounded-lg shadow-2xl edge-blur-mask"
-                                onClick={(e) => e.stopPropagation()}
                             />
 
                             {/* 重逢图标：贴在卡面右上角 */}

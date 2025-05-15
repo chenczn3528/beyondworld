@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import Carousel from "./Carousel";
 import cardData from "../assets/cards.json";
+import {playClickSound} from "../utils/playClickSound.js";
 
 const SettingsLayer = ({
     totalDrawCount,
@@ -29,9 +30,30 @@ const SettingsLayer = ({
     setShowGallery,
     showProbability,
     setShowProbability,
-    setIsSkipped,
     handleStartDraw,
+    setShowCardPoolFilter,
 }) => {
+
+    // const excludedAttributes = ['图片信息', '相会事件', '体魄','思维','魅力','灵巧','感知','详情页', '卡名'];
+    // const countByAttributesDynamic = cardData.reduce((acc, item) => {
+    //   Object.keys(item).forEach((key) => {
+    //     // 如果当前属性在排除列表中，跳过
+    //     if (excludedAttributes.includes(key)) return;
+    //     if (item.稀有度 !== '世界') return;
+    //     // 否则统计这个属性
+    //     if (!acc[key]) {
+    //       acc[key] = {};
+    //     }
+    //     acc[key][item[key]] = (acc[key][item[key]] || 0) + 1;
+    //   });
+    //   return acc;
+    // }, {});
+    // console.log("countByAttributesDynamic", countByAttributesDynamic);
+
+
+
+
+
 
     const filtered_cardData = cardData.filter(card => card.稀有度 === '世界');
 
@@ -122,6 +144,9 @@ const SettingsLayer = ({
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
                         }}
+                        onClick={() => {
+                            playClickSound();
+                        }}
                     >
                         图鉴
                     </button>
@@ -134,10 +159,30 @@ const SettingsLayer = ({
                             zIndex: showDetailedImage ? 2 : 4
                         }}
                         onClick={() => {
+                            playClickSound();
                             setShowHistory(true);
                         }}
                     >
                         历史
+                    </button>
+
+                    {/*筛选卡池*/}
+                    <button
+                        style={{
+                            marginLeft: '3vmin',
+                            fontSize: '3vmin',
+                            backgroundColor: 'rgba(255,255,255,0.2)',
+                            color: 'white',
+                            zIndex: showDetailedImage ? 2 : 4
+                        }}
+                        onClick={()=>{
+                            playClickSound();
+                            setShowCardPoolFilter(true);
+                            // 放哪些世界卡进池子（活动，主角）；放不放星卡、辰星卡
+                            // 世界卡组成：常驻+活动/ 是否单独几个主角
+                        }}
+                    >
+                        筛选卡池
                     </button>
 
                     <button
@@ -194,7 +239,10 @@ const SettingsLayer = ({
                     </div>
                 </div>
 
+
             </div>
+
+
 
 
         </div>

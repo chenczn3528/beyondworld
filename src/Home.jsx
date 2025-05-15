@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState, useRef, useMemo} from 'react';
 import cardData from './assets/cards.json';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import useLocalStorageState from "./hooks/useLocalStorageState.js";
@@ -7,6 +7,9 @@ import DrawAnimationCards from "./components/DrawAnimationCards.jsx";
 import CardOverlay from "./components/CardOverlay.jsx";
 import HistoryModal from "./components/HistoryModal.jsx";
 import { forceLandscape, useDynamicRem } from 'single-screen-utils';
+import CardSummary from "./components/CardSummary.jsx";
+import CardPoolFilter from "./components/CardPoolFilter.jsx";
+import {getAvailablePools, getDynamicAttributeCounts} from "./utils/cardDataUtils.js";
 
 
 const Home = () => {
@@ -16,14 +19,18 @@ const Home = () => {
     },[])
 
 
-
+    const { valuesList } = useMemo(() => {
+        return getDynamicAttributeCounts(cardData);
+    }, [cardData]);
 
 
     // ======================================================== 数据存储与恢复
     // 总抽卡数
     const [totalDrawCount, setTotalDrawCount] = useLocalStorageState('bw_totalDrawCount', 0);
     // 选择的角色
-    const [selectedRole, setSelectedRole] = useLocalStorageState('bw_selectedRole', '随机');
+    const [selectedRole, setSelectedRole] = useLocalStorageState('bw_selectedRole', ['随机']);
+    // 选择的池子
+    const [selectedPools, setSelectedPools] = useLocalStorageState("bw_selectedPools", ["全部"])
     // 总出金数
     const [totalFiveStarCount, setTotalFiveStarCount] = useLocalStorageState('bw_totalFiveStarCount', 0);
     // 下次出金还需要多少
@@ -32,12 +39,16 @@ const Home = () => {
     const [useSoftGuarantee, setUseSoftGuarantee] = useLocalStorageState('bw_useSoftGuarantee', true);
     // 目前是小保底还是大保底
     const [softPityFailed, setSoftPityFailed] = useLocalStorageState('bw_softPityFailed', false);
-    // 是否包括三星
+    // 是否包括星卡
     const [includeThreeStar, setIncludeThreeStar] = useLocalStorageState('bw_includeThreeStar', true);
+    // 是否包括辰星卡
+    const [includeThreeStarM, setIncludeThreeStarM] = useLocalStorageState('bw_includeThreeStar', true);
+
     // 是否只抽当前角色的卡
     const [onlySelectedRoleCard, setOnlySelectedRoleCard] = useLocalStorageState('bw_onlySelectedRoleCard', false);
     // 历史记录
     const [history, setHistory] = useLocalStorageState('bw_history', []);
+
 
 
     // 清除缓存数据
@@ -49,8 +60,10 @@ const Home = () => {
         'bw_softPityFailed',
         'bw_selectedRole',
         'bw_includeThreeStar',
+        'bw_includeThreeStarM',
         'bw_onlySelectedRoleCard',
-        'bw_history'
+        'bw_history',
+        'bw_selectedPools',
     ];
 
     const clearLocalData = () => {
@@ -97,6 +110,8 @@ const Home = () => {
     const [showProbability, setShowProbability] = useState(false); // 是否展示概率测试界面
 
     const [galleryHistory, setGalleryHistory] = useState([]);  // 图鉴历史
+
+    const [showCardPoolFilter, setShowCardPoolFilter] = useState(false);
 
 
 
@@ -302,7 +317,7 @@ const handleDraw = async (count) => {
   for (let i = 0; i < count; i++) {
     let result;
 
-    if (onlySelectedRoleCard && selectedRole !== '随机') {
+    if (onlySelectedRoleCard && selectedRole.length === 1 && selectedRole[0] !== '随机') {
       // 只抽当前角色卡，关闭大小保底
       do {
         result = getRandomCard(
@@ -324,7 +339,7 @@ const handleDraw = async (count) => {
       }
     } else {
       // 启用或关闭大小保底逻辑
-      const mustBeTarget = useSoftGuarantee && selectedRole !== '随机' && localSoftPityFailed;
+      const mustBeTarget = useSoftGuarantee && selectedRole.length === 1 && selectedRole[0] !== '随机' && localSoftPityFailed;
 
       do {
         result = getRandomCard(
@@ -341,7 +356,7 @@ const handleDraw = async (count) => {
         currentPity = 0;
         currentFourStarCounter = 0;
 
-        if (useSoftGuarantee && selectedRole !== '随机') {
+        if (useSoftGuarantee && selectedRole.length === 1 && selectedRole[0] !== '随机') {
           if (result.card?.character === selectedRole) {
             localSoftPityFailed = false; // 命中选定角色
           } else {
@@ -382,7 +397,7 @@ const getRandomCard = (
   pity,
   fourStarCounter,
   mustBeTargetFiveStar = false,
-  selectedRole = '随机',
+  selectedRole = ['随机'],
   onlySelectedRoleCard = false,
   includeThreeStar = true
 ) => {
@@ -423,15 +438,15 @@ const getRandomCard = (
 
   // ⭐⭐⭐⭐ 筛选卡池 ⭐⭐⭐⭐
   if (targetStar === '世界') {
-    if (onlySelectedRoleCard && selectedRole !== '随机') {
+    if (onlySelectedRoleCard && selectedRole.length === 1 && selectedRole[0] !== '随机') {
       pool = cardData.filter(card => card.主角 === selectedRole && card.稀有度 === '世界');
-    } else if (mustBeTargetFiveStar && selectedRole !== '随机') {
+    } else if (mustBeTargetFiveStar && selectedRole.length === 1 && selectedRole[0] !== '随机') {
       pool = cardData.filter(card => card.主角 === selectedRole && card.稀有度 === '世界');
     } else {
       pool = cardData.filter(card => card.稀有度 === '世界');
     }
   } else {
-    if (onlySelectedRoleCard && selectedRole !== '随机') {
+    if (onlySelectedRoleCard && selectedRole.length === 1 && selectedRole[0] !== '随机') {
       pool = cardData.filter(card =>
         card.主角 === selectedRole &&
         card.稀有度 === targetStar &&
@@ -496,6 +511,18 @@ const getRandomCard = (
               />
             )}
 
+            {/*十抽后结算层*/}
+            {showSummary && drawResultsRef.current.length > 1 && (
+                <CardSummary
+                    drawResults={drawResultsRef.current}  // 传递卡片数据
+                    onClose={() => setShowSummary(false)}  // 关闭总结页面的回调
+                    setHasShownSummary={setHasShownSummary}
+                    setShowSummary={setShowSummary}
+                    handleDraw={handleDraw}
+                    handleStartDraw={handleStartDraw}
+                />
+            )}
+
 
             <CardOverlay
                 showCardOverlay={showCardOverlay}
@@ -513,6 +540,24 @@ const getRandomCard = (
                 showHistory={showHistory}
                 setShowHistory={setShowHistory}
                 history={history}
+            />
+
+            <CardPoolFilter
+                selectedRole={selectedRole}
+                setSelectedRole={setSelectedRole}
+                useSoftGuarantee={useSoftGuarantee}
+                setUseSoftGuarantee={setUseSoftGuarantee}
+                includeThreeStar={includeThreeStar}
+                setIncludeThreeStar={setIncludeThreeStar}
+                includeThreeStarM={includeThreeStarM}
+                setIncludeThreeStarM={setIncludeThreeStarM}
+                onlySelectedRoleCard={onlySelectedRoleCard}
+                setOnlySelectedRoleCard={setOnlySelectedRoleCard}
+                showCardPoolFilter={showCardPoolFilter}
+                setShowCardPoolFilter={setShowCardPoolFilter}
+                valuesList={valuesList}
+                selectedPools={selectedPools}
+                setSelectedPools={setSelectedPools}
             />
 
 
@@ -547,8 +592,8 @@ const getRandomCard = (
                 setShowGallery={setShowGallery}
                 showProbability={showProbability}
                 setShowProbability={setShowProbability}
-                setIsSkipped={setIsSkipped}
                 handleStartDraw={handleStartDraw} // 抽卡动画处理
+                setShowCardPoolFilter={setShowCardPoolFilter}
             />
 
         </div>

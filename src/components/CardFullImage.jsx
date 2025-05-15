@@ -2,7 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { forceLandscape, useDynamicRem } from 'single-screen-utils';
 
-const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false }) => {
+const CardFullImage = (
+    {
+        card,
+        onClick,
+        setIsSkipped,
+        isSecondImage = false,
+        isShowCardResult = false,
+    }) => {
 
     useEffect(()=>{
         forceLandscape();
@@ -28,7 +35,7 @@ const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false }) =
         <div
             id="app"
             style={{ backgroundColor: 'black' }}
-            className="fixed z-10 w-full h-full flex justify-center items-center"
+            className="fixed z-70 w-full h-full flex justify-center items-center"
         >
             <LazyLoadImage
                 src={isSecondImage ? card.图片信息[1].srcset2 : card.图片信息[0].srcset2}
@@ -92,7 +99,7 @@ const CardFullImage = ({ card, onClick, setIsSkipped, isSecondImage = false }) =
                 />
             </div>
 
-            {!isFiveStar && (
+            {!(isShowCardResult || isFiveStar) && (
                 <button
                     className="absolute"
                     style={{

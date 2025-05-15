@@ -1,5 +1,6 @@
 // HistoryModal.jsx
 import React from 'react';
+import {playClickSound} from "../utils/playClickSound.js";
 
 // 用于格式化日期的函数
 // 记录时间的格式化
@@ -36,11 +37,11 @@ const HistoryModal = ({ showHistory, setShowHistory, history }) => {
     showHistory && (
       <div
         className="fixed inset-0 z-50 flex items-center justify-center w-full h-full"
-        onClick={() => setShowHistory(false)}
+        onClick={() => {playClickSound(); setShowHistory(false)}}
       >
         <div
           className="relative flex flex-col w-[90vmin] h-[90vmin] p-4 rounded-lg overflow-hidden"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {playClickSound(); e.stopPropagation()}}
           style={{backgroundColor: '#2a2d39'}}
         >
           <div className="relative z-10 flex flex-col h-full" style={{color: 'white'}}>

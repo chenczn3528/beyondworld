@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import DetailedImage from './DetailedImage.jsx';
+import {playClickSound} from "../utils/playClickSound.js";
 
 const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage }) => {
 
@@ -7,7 +8,7 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage }) => {
   const startX = useRef(0);
   const deltaX = useRef(0);
 
-  const [fullImage, setFullImage] = useState(null);
+  const [detailedImage, setDetailedImage] = useState(null);
 
 
   const rarityMap = {
@@ -139,8 +140,9 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage }) => {
                 alt={`slide-${index}`}
                 className="max-w-full max-h-full object-contain rounded-lg shadow-xl edge-blur-mask"
                 onClick={() => {
+                  playClickSound();
                   if (index === current) {
-                    setFullImage(card);
+                    setDetailedImage(card);
                     setShowDetailedImage(true);
                   } else {
                     handleClickImage(index);
@@ -204,7 +206,7 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage }) => {
 
         {showDetailedImage && (
           <DetailedImage
-            card={fullImage}  // 确保传递 fullImage，而不是其他东西
+            card={detailedImage}  // 确保传递 fullImage，而不是其他东西
             onClose={() => setShowDetailedImage(false)}
           />
         )}
