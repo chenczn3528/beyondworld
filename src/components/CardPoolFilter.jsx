@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo } from "react";
 import {playClickSound} from "../utils/playClickSound.js";
-import {getAvailablePools, getFinalPools} from "../utils/cardDataUtils.js";
+import {filterCards, getAvailablePools, getDynamicAttributeCounts } from "../utils/cardDataUtils.js";
 import cardData from "../assets/cards.json";
 
 const CardPoolFilter = ({
@@ -20,6 +20,7 @@ const CardPoolFilter = ({
     selectedPools,
     setSelectedPools,
 }) => {
+
 
     const characters = valuesList["主角"] || [];
 
@@ -113,15 +114,21 @@ const CardPoolFilter = ({
 
 
 
-    const finalPools = getFinalPools(
+    console.log("effectiveSelectedPools",effectiveSelectedPools);
+    console.log("selectedPools", selectedPools)
+
+    const filteredCards = filterCards({
         selectedRole,
-        useSoftGuarantee,
-        selectedPools,
-        cardData,
-        permanentPools,
-        availablePools
-    );
-    console.log("finalPools", finalPools)
+        effectiveSelectedPools,
+        onlySelectedRoleCard,
+        includeThreeStar,
+        includeThreeStarM,
+        cardData
+    });
+    console.log("filteredCards",filteredCards);
+    const filteredPools = getDynamicAttributeCounts(filteredCards);
+    console.log("filteredPools", filteredPools.countByAttributes);
+
 
 
 

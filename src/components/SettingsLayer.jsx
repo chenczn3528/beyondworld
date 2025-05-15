@@ -34,6 +34,8 @@ const SettingsLayer = ({
     setShowCardPoolFilter,
 }) => {
 
+
+
     // const excludedAttributes = ['图片信息', '相会事件', '体魄','思维','魅力','灵巧','感知','详情页', '卡名'];
     // const countByAttributesDynamic = cardData.reduce((acc, item) => {
     //   Object.keys(item).forEach((key) => {
@@ -50,6 +52,7 @@ const SettingsLayer = ({
     // }, {});
     // console.log("countByAttributesDynamic", countByAttributesDynamic);
 
+    // console.log(cardData)
 
 
 
