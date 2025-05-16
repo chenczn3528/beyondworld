@@ -40,21 +40,21 @@ const HistoryModal = ({ showHistory, setShowHistory, history }) => {
         onClick={() => {playClickSound(); setShowHistory(false)}}
       >
         <div
-          className="relative flex flex-col w-[90vmin] h-[90vmin] p-4 rounded-lg overflow-hidden"
+          className="relative flex flex-col w-[90vmin] h-[70vmin] p-4 rounded-lg overflow-hidden"
           onClick={(e) => {playClickSound(); e.stopPropagation()}}
           style={{backgroundColor: '#2a2d39'}}
         >
           <div className="relative z-10 flex flex-col h-full" style={{color: 'white'}}>
 
             {/*历史记录*/}
-            <label className="text-center mt-[2vh] mb-[2vh]" style={{color: 'white', fontSize: '1.5vw', fontWeight: 800}}>
+            <label className="text-center mt-[5vmin] mb-[5vmin]" style={{color: 'white', fontSize: '4vmin', fontWeight: 800}}>
               历史记录
             </label>
 
             {/*表头*/}
             <div
-                className="flex flex-row text-xs mb-2 flex justify-between ml-[3vw] mr-[3vw] h-[5vmin] items-center"
-                style={{backgroundColor: '#474964', fontSize: '1vw'}}
+                className="flex flex-row text-xs flex justify-between ml-[3vmin] mr-[3vmin] h-[5vmin] items-center"
+                style={{backgroundColor: '#474964', fontSize: '2.5vmin'}}
             >
               <div style={style_long}>侧影</div>
               <div style={style_short}>稀有度</div>
@@ -89,12 +89,12 @@ const HistoryModal = ({ showHistory, setShowHistory, history }) => {
                 return (
                     <div
                         key={idx}
-                        style={{backgroundColor, fontSize: '1vw'}}
-                        className={`flex flex-row text-xs mb-2 flex justify-between ml-[3vw] mr-[3vw] h-[4vmin] items-center`}
+                        style={{backgroundColor, fontSize: '2.5vmin'}}
+                        className={`flex flex-row text-xs mb-2 flex justify-between ml-[3vmin] mr-[3vmin] h-[4vmin] items-center`}
                     >
                       <div style={style1}>{card.主角}·{card.卡名}</div>
                       <div style={style2}>{card.稀有度}</div>
-                      <div style={style1}>{card.获取途径}</div>
+                      <div style={style1}>{card.获取途径.split("】").length === 1 ? card.获取途径 : card.获取途径.split("】")[0]+"】"}</div>
                       <div style={style1}>{formatDate(card.timestamp)}</div>
                     </div>
                 );

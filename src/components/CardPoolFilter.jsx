@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo } from "react";
 import {playClickSound} from "../utils/playClickSound.js";
-import {filterCards, getAvailablePools, getDynamicAttributeCounts } from "../utils/cardDataUtils.js";
+import { getAvailablePools } from "../utils/cardDataUtils.js";
 import cardData from "../assets/cards.json";
 
 const CardPoolFilter = ({
@@ -20,6 +20,7 @@ const CardPoolFilter = ({
     selectedPools,
     setSelectedPools,
 }) => {
+    console.log(selectedPools)
 
 
     const characters = valuesList["主角"] || [];
@@ -113,25 +114,6 @@ const CardPoolFilter = ({
     };
 
 
-
-    console.log("effectiveSelectedPools",effectiveSelectedPools);
-    console.log("selectedPools", selectedPools)
-
-    const filteredCards = filterCards({
-        selectedRole,
-        effectiveSelectedPools,
-        onlySelectedRoleCard,
-        includeThreeStar,
-        includeThreeStarM,
-        cardData
-    });
-    console.log("filteredCards",filteredCards);
-    const filteredPools = getDynamicAttributeCounts(filteredCards);
-    console.log("filteredPools", filteredPools.countByAttributes);
-
-
-
-
     return (
         showCardPoolFilter && (
             <div
@@ -193,7 +175,7 @@ const CardPoolFilter = ({
                                     包含辰星卡
                                 </label>
                                 <input
-                                    style={{width: '2vmin'}}
+                                    // style={{width: '5vmin'}}
                                     type="checkbox"
                                     checked={includeThreeStarM}
                                     onChange={(e) => setIncludeThreeStarM(e.target.checked)}
@@ -203,7 +185,7 @@ const CardPoolFilter = ({
                                     包含星卡
                                 </label>
                                 <input
-                                    style={{width: '2vmin'}}
+                                    // style={{width: '5vmin'}}
                                     type="checkbox"
                                     checked={includeThreeStar}
                                     onChange={(e) => setIncludeThreeStar(e.target.checked)}
@@ -215,7 +197,7 @@ const CardPoolFilter = ({
                                     启用大小保底
                                 </label>
                                 <input
-                                    style={{width: '2vmin'}}
+                                    // style={{width: '5vmin'}}
                                     type="checkbox"
                                     checked={useSoftGuarantee}
                                     onChange={(e) =>{
@@ -232,7 +214,7 @@ const CardPoolFilter = ({
                                     <label style={{fontWeight: 800, color:'gold'}}>{selectedRole.join('、')}</label>
                                     <label className="flex items-center ml-[1vmin] mr-[1vmin]"> 的卡</label>
                                     <input
-                                        style={{width: '2vmin'}}
+                                        // style={{width: '5vmin'}}
                                         type="checkbox"
                                         checked={onlySelectedRoleCard}
                                         onChange={(e) => {
@@ -248,7 +230,7 @@ const CardPoolFilter = ({
                                 <div className="flex flex-row gap-[1vmin]">
                                     <label className="">选择全部限定卡池</label>
                                     <input
-                                        style={{width: '2vmin'}}
+                                        // style={{width: '3vmin'}}
                                         type="checkbox"
                                         checked={isAllLimitedSelected}
                                         onChange={(e) => {

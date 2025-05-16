@@ -35,29 +35,6 @@ const SettingsLayer = ({
 }) => {
 
 
-
-    // const excludedAttributes = ['图片信息', '相会事件', '体魄','思维','魅力','灵巧','感知','详情页', '卡名'];
-    // const countByAttributesDynamic = cardData.reduce((acc, item) => {
-    //   Object.keys(item).forEach((key) => {
-    //     // 如果当前属性在排除列表中，跳过
-    //     if (excludedAttributes.includes(key)) return;
-    //     if (item.稀有度 !== '世界') return;
-    //     // 否则统计这个属性
-    //     if (!acc[key]) {
-    //       acc[key] = {};
-    //     }
-    //     acc[key][item[key]] = (acc[key][item[key]] || 0) + 1;
-    //   });
-    //   return acc;
-    // }, {});
-    // console.log("countByAttributesDynamic", countByAttributesDynamic);
-
-    // console.log(cardData)
-
-
-
-
-
     const filtered_cardData = cardData.filter(card => card.稀有度 === '世界');
 
     const [showDetailedImage, setShowDetailedImage] = useState(false);
@@ -239,6 +216,30 @@ const SettingsLayer = ({
                         <label className="text-shadow">平均出金数: {totalFiveStarCount === 0 ?
                             '0' : (totalDrawCount / totalFiveStarCount).toFixed(2)}</label>
 
+                    </div>
+
+                    {/*保底显示*/}
+                    <div
+                        className="flex items-center justify-end font-extrabold"
+                        style={{
+                            fontSize: '2.5vmin',
+                            color: 'white',
+                            textShadow: '0 0 10px gold'
+                        }}
+                    >
+                        {selectedRole === '随机' || !useSoftGuarantee ? (
+                            <>
+                                还剩 {70 - pityCount} 抽 必得世界卡
+                            </>
+                        ) : softPityFailed ? (
+                            <>
+                                还剩 {70 - pityCount} 抽 大保底
+                            </>
+                        ) : (
+                            <>
+                                还剩 {70 - pityCount} 抽 小保底
+                            </>
+                        )}
                     </div>
                 </div>
 
