@@ -23,6 +23,15 @@ const Home = () => {
         return getDynamicAttributeCounts(cardData);
     }, [cardData]);
 
+    const { availablePools, permanentPools } = useMemo(
+        () => getAvailablePools(cardData),
+        [cardData]
+    );
+    const allPools = [...permanentPools, ...availablePools];
+
+
+
+
 
     // ======================================================== 数据存储与恢复
     // 总抽卡数
@@ -30,7 +39,7 @@ const Home = () => {
     // 选择的角色
     const [selectedRole, setSelectedRole] = useLocalStorageState('bw_selectedRole', ['随机']);
     // 选择的池子
-    const [selectedPools, setSelectedPools] = useLocalStorageState("bw_selectedPools", ["全部"])
+    const [selectedPools, setSelectedPools] = useLocalStorageState("bw_selectedPools", allPools);
     // 总出金数
     const [totalFiveStarCount, setTotalFiveStarCount] = useLocalStorageState('bw_totalFiveStarCount', 0);
     // 下次出金还需要多少
@@ -119,12 +128,13 @@ const Home = () => {
     // ========================================================  用于抽卡动画相关
     const [showAnimationDrawCards, setShowAnimationDrawCards] = useState(false);
 
-    // 每次抽卡开始时触发动画组件加载
+    // ------------------------------- 每次抽卡开始时触发动画组件加载
     const handleStartDraw = () => {
         setShowAnimationDrawCards(true);
     };
 
-    // 抽卡动画播放完成后的处理逻辑
+
+    // ------------------------------- 抽卡动画播放完成后的处理逻辑
     const handleDrawCardsAnimationEnd = () => {
         const finalResults = drawResultsRef.current;
         const finalPity = currentPityRef.current;
@@ -148,14 +158,8 @@ const Home = () => {
 
 
 
-
-
-
-
-    // ========================================================
-    // 图鉴相关
-
-    // 去重逻辑
+    // ======================================================== 图鉴相关
+    // ------------------------------- 去重逻辑
     const removeDuplicates = (arr) => {
         const seen = new Set();
         return arr.filter((item) => {
@@ -165,7 +169,7 @@ const Home = () => {
         });
     };
 
-    // 初始化 galleryHistory
+    // ------------------------------- 初始化 galleryHistory
     useEffect(() => {
         if (galleryHistory.length === 0 && history.length > 0) {
             const uniqueHistory = removeDuplicates(history);
@@ -173,9 +177,7 @@ const Home = () => {
         }
     }, [history, galleryHistory.length]);
 
-    // console.log("galleryHistory:", galleryHistory)
-
-    // 合并新的抽卡记录
+    // ------------------------------- 合并新的抽卡记录
     useEffect(() => {
         if (drawResultsRef.current && drawResultsRef.current.length > 0) {
             const newCards = drawResultsRef.current.map(item => item.card).filter(Boolean); // 提取所有有效 card
@@ -191,106 +193,87 @@ const Home = () => {
 
 
 
-
-
-// ========================================================
-  // 输出当前卡片信息
-  useEffect(() => {
-    const card = drawResultsRef.current[currentCardIndex]?.card;
-    if (card) {
-      console.log('当前展示卡片：', {
-        名称: card.卡名,
-        角色: card.主角,
-        星级: card.稀有度,
-      });
-    }
-  }, [currentCardIndex]);
-
-
-
-  // ========================================================
-  // 判断当前卡片是不是五星
-  useEffect(() => {
-    const card = drawResultsRef.current[currentCardIndex]?.card;
-    if (card?.star === '5星') {
-      setIsFiveStar(true); // 是五星卡片
-    } else {
-      setIsFiveStar(false); // 不是五星卡片，直接展示卡片
-    }
-  }, [currentCardIndex]);
-
-
-
-
-
-
-
-    // ========================================================
-  //抽卡动画结束后开始展示卡片
-  // 处理跳过视频的逻辑
-// ==============================
-// ✅ useEffect：控制卡片展示或结算页展示
-  useEffect(() => {
-    const allResults = drawResultsRef.current || [];
-    const onlyFiveStars = allResults.filter(item => item.card?.稀有度 === '世界');
-
-    if (
-      allResults.length > 0 &&
-      !hasShownSummary &&
-      !isDrawing &&
-      !isAnimatingDrawCards &&
-      !showAnimationDrawCards
-    ) {
-      if (isSkipped) {
-        if (onlyFiveStars.length === 0) {
-          // 跳过且没有五星卡，直接展示结算
-          setShowCardOverlay(false);
-          setShowSummary(true);
-          setHasShownSummary(true);
-        } else {
-          // 跳过但有五星卡，只展示五星卡片
-          displayResultsRef.current = onlyFiveStars;
-          setShowCardOverlay(true);
-          setShowSummary(false);
+    // ======================================================== 输出当前卡片信息
+    useEffect(() => {
+        const card = drawResultsRef.current[currentCardIndex]?.card;
+        if (card) {
+            console.log('当前展示卡片：', {
+                名称: card.卡名,
+                角色: card.主角,
+                星级: card.稀有度,
+            });
         }
-      } else {
-        // 正常播放流程，展示全部卡片
-        displayResultsRef.current = allResults;
-        setCurrentCardIndex(0);
-        setShowCardOverlay(true);
-        setShowSummary(false);
-      }
-    }
-  }, [
-    isSkipped,
-    showAnimationDrawCards,
-    isDrawing,
-    isAnimatingDrawCards,
-    hasShownSummary,
-  ]);
-
-  const handleNextCard = () => {
-    // 每次点下一张卡时都先重置视频播放状态
-    setVideoPlayed(false);
-
-    if (showSummary) return;
-
-    if (currentCardIndex < displayResultsRef.current.length - 1) {
-      const nextIndex = currentCardIndex + 1;
-      setCurrentCardIndex(nextIndex);
-    } else {
-      setShowCardOverlay(false);
-      setSummaryCards(drawnCards);
-      if (!hasShownSummary) {
-        setShowSummary(true);
-        setHasShownSummary(true);
-      }
-    }
-  };
+    }, [currentCardIndex]);
 
 
 
-console.log("selectedPools", selectedPools)
+    // ======================================================== 判断当前卡片是不是五星
+    useEffect(() => {
+        const card = drawResultsRef.current[currentCardIndex]?.card;
+        if (card?.star === '5星') {
+          setIsFiveStar(true); // 是五星卡片
+        } else {
+          setIsFiveStar(false); // 不是五星卡片，直接展示卡片
+        }
+    }, [currentCardIndex]);
+
+
+
+    // ======================================================== 抽卡动画结束后开始展示卡片
+    // ------------------------------- 控制卡片展示或结算页展示
+    useEffect(() => {
+        const allResults = drawResultsRef.current || [];
+        const onlyFiveStars = allResults.filter(item => item.card?.稀有度 === '世界');
+
+        if (
+            allResults.length > 0 &&
+            !hasShownSummary &&
+            !isDrawing &&
+            !isAnimatingDrawCards &&
+            !showAnimationDrawCards
+        ) {
+            if (isSkipped) {
+                if (onlyFiveStars.length === 0) {
+                    // 跳过且没有五星卡，直接展示结算
+                    setShowCardOverlay(false);
+                    setShowSummary(true);
+                    setHasShownSummary(true);
+                } else {
+                    // 跳过但有五星卡，只展示五星卡片
+                    displayResultsRef.current = onlyFiveStars;
+                    setShowCardOverlay(true);
+                    setShowSummary(false);
+                }
+            } else {
+                // 正常播放流程，展示全部卡片
+                displayResultsRef.current = allResults;
+                setCurrentCardIndex(0);
+                setShowCardOverlay(true);
+                setShowSummary(false);
+            }
+        }
+    }, [isSkipped, showAnimationDrawCards, isDrawing, isAnimatingDrawCards, hasShownSummary,]);
+
+    // ------------------------------- 每次点下一张卡时都先重置视频播放状态
+    const handleNextCard = () => {
+        setVideoPlayed(false);
+        if (showSummary) return;
+        if (currentCardIndex < displayResultsRef.current.length - 1) {
+            const nextIndex = currentCardIndex + 1;
+            setCurrentCardIndex(nextIndex);
+        } else {
+            setShowCardOverlay(false);
+            setSummaryCards(drawnCards);
+            if (!hasShownSummary) {
+                setShowSummary(true);
+                setHasShownSummary(true);
+            }
+        }
+    };
+
+
+
+// console.log("selectedPools", selectedPools)
 const handleDraw = async (count) => {
   if (isDrawing || isAnimatingDrawCards) return;
 
@@ -331,14 +314,14 @@ const handleDraw = async (count) => {
           selectedPools,
           cardData
         );
-      } while (!includeThreeStar && result.rarity === '3');
+      } while (!includeThreeStar && result.rarity === '星');
 
-      if (result.rarity === '5') {
+      if (result.rarity === '世界') {
         currentPity = 0;
         currentFourStarCounter = 0;
       } else {
         currentPity++;
-        currentFourStarCounter = result.rarity === '4' ? 0 : currentFourStarCounter + 1;
+        currentFourStarCounter = result.rarity === '月' ? 0 : currentFourStarCounter + 1;
       }
     } else {
       // 启用或关闭大小保底逻辑
@@ -356,9 +339,9 @@ const handleDraw = async (count) => {
           selectedPools,
           cardData
         );
-      } while (!includeThreeStar && result.rarity === '3');
+      } while (!includeThreeStar && result.rarity === '星');
 
-      if (result.rarity === '5') {
+      if (result.rarity === '世界') {
         currentPity = 0;
         currentFourStarCounter = 0;
 
@@ -371,13 +354,13 @@ const handleDraw = async (count) => {
         }
       } else {
         currentPity++;
-        currentFourStarCounter = result.rarity === '4' ? 0 : currentFourStarCounter + 1;
+        currentFourStarCounter = result.rarity === '月' ? 0 : currentFourStarCounter + 1;
       }
     }
 
     drawResults.push(result);
     setTotalDrawCount(prev => prev + 1);
-    if (result.rarity === '5') setTotalFiveStarCount(prev => prev + 1);
+    if (result.rarity === '世界') setTotalFiveStarCount(prev => prev + 1);
   }
 
   // 更新状态
@@ -386,7 +369,7 @@ const handleDraw = async (count) => {
   currentPityRef.current = currentPity;
   currentFourStarRef.current = currentFourStarCounter;
   setSoftPityFailed(localSoftPityFailed);
-  setHasFiveStarAnimation(drawResults.some(r => r.rarity === '5'));
+  setHasFiveStarAnimation(drawResults.some(r => r.rarity === '世界'));
   setShowAnimationDrawCards(true);
   setDrawnCards(drawResults.map(r => r.card).filter(Boolean));
 };
@@ -481,6 +464,7 @@ const getRandomCard = (
   selectedPools = ['全部'],
   cardData = []
 ) => {
+
   let rarity;
   let pool = cardData;
 
@@ -566,7 +550,7 @@ const getRandomCard = (
 
 // 目前问题：抽卡第二个十抽必出全月卡；筛选卡池会出现选择单一角色和单卡池时的两种情况：常驻+限定，限定
 
-console.log("drawResultsRef", drawResultsRef)
+// console.log("drawResultsRef", drawResultsRef)
 
 
 

@@ -39,7 +39,7 @@ for index, row in enumerate(rows):
     tds = row.find_all('td')
 
     if tds[-1] and "获取途径" in tds[-1].text:
-        card['获取途径'] = tds[-1].text.split("获取途径：")[-1].replace("\n", "")
+        card['获取途径'] = tds[-1].text.split("获取途径：")[-1].replace("\n", "").replace("【群星启明时】","")
 
     name_div = row.find('div', class_='cardname')
     if name_div:
