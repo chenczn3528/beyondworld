@@ -187,6 +187,14 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage }) => {
 
   return (
       <div className="w-full bg-black flex items-center justify-center relative">
+
+          {showDetailedImage && (
+              <DetailedImage
+                card={detailedImage}  // 确保传递 fullImage，而不是其他东西
+                onClose={() => setShowDetailedImage(false)}
+              />
+            )}
+
         {/* 将轮播图居中，使用 absolute 定位 */}
         <div
             className="absolute w-[150vmin] h-[150vmin] left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2
@@ -204,12 +212,7 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage }) => {
           </div>
         </div>
 
-        {showDetailedImage && (
-          <DetailedImage
-            card={detailedImage}  // 确保传递 fullImage，而不是其他东西
-            onClose={() => setShowDetailedImage(false)}
-          />
-        )}
+
 
 
     </div>

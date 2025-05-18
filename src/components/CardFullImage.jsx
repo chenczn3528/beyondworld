@@ -7,6 +7,7 @@ const CardFullImage = (
         card,
         onClick,
         setIsSkipped,
+        setCurrentIndex,
         isSecondImage = false,
         isShowCardResult = false,
     }) => {
@@ -111,6 +112,7 @@ const CardFullImage = (
                     }}
                     onClick={() => {
                         setIsSkipped(true);
+                        setCurrentIndex(0);
                     }}
                 >
                     跳过

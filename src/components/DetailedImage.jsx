@@ -14,7 +14,7 @@ const DetailedImage = ({ card, onClose }) => {
     return (
         <div
             id="app"
-            className="fixed inset-0 z-50 w-full h-full flex justify-center items-center"
+            className="fixed inset-[0] z-50 w-full h-full flex justify-center items-center"
             onClick={()=>{playClickSound(); onClose();}}
             style={{backgroundColor: 'rgba(0, 0, 0, 0.8)',}}
         >

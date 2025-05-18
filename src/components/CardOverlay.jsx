@@ -20,8 +20,13 @@ const CardOverlay = ({
   const remainingCards = allCards.slice(1);
   const fiveStarCards = remainingCards.filter(card => card.稀有度 === '世界');
 
+
+
   // ⭐ 跳过后展示：第一张 + 剩余五星卡
   const displayCards = isSkipped ? [firstCard, ...fiveStarCards] : allCards;
+
+  // console.log(currentCardIndex, displayCards)
+
   const card = displayCards[currentCardIndex];
 
   const isCurrentFiveStar = card?.稀有度 === '世界';
@@ -66,6 +71,7 @@ const CardOverlay = ({
 
   // ⭐ 跳过后展示完所有五星卡就关闭
   useEffect(() => {
+    // console.log("judge", currentCardIndex, displayCards.length)
     if (isSkipped && currentCardIndex >= displayCards.length) {
       setShowCardOverlay(false);
       setIsSkipped(false);
@@ -89,6 +95,8 @@ const CardOverlay = ({
           card={card}
           isSecondImage={isCurrentFiveStar && isSecondImage}
           setIsSkipped={setIsSkipped}
+          setCurrentIndex={setCurrentIndex}
+          isShowCardResult={false}
         />
       </div>
     )

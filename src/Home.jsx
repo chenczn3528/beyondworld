@@ -10,6 +10,8 @@ import { forceLandscape, useDynamicRem } from 'single-screen-utils';
 import CardSummary from "./components/CardSummary.jsx";
 import CardPoolFilter from "./components/CardPoolFilter.jsx";
 import {getAvailablePools, getDynamicAttributeCounts} from "./utils/cardDataUtils.js";
+import CardFullImage from "./components/CardFullImage.jsx";
+import GalleryFullImage from "./components/GalleryFullImage.jsx";
 
 
 const Home = () => {
@@ -120,7 +122,9 @@ const Home = () => {
 
     const [galleryHistory, setGalleryHistory] = useState([]);  // 图鉴历史
 
-    const [showCardPoolFilter, setShowCardPoolFilter] = useState(false);
+    const [showCardPoolFilter, setShowCardPoolFilter] = useState(false); // 展示筛选页面
+
+    // const [showGalleryFullImage, setShowGalleryFullImage] = useState(false); // 展示图鉴页面
 
 
 
@@ -270,6 +274,12 @@ const Home = () => {
             }
         }
     };
+
+    useEffect(()=>{
+        drawResultsRef.current.forEach((item, index) => {
+            console.log(`第 ${index + 1} 张卡:\t`, item.rarity, "\t", item.card.卡名);
+        });
+    },[history.length])
 
 
 
@@ -548,14 +558,6 @@ const getRandomCard = (
 
 
 
-// 目前问题：抽卡第二个十抽必出全月卡；筛选卡池会出现选择单一角色和单卡池时的两种情况：常驻+限定，限定
-
-// console.log("drawResultsRef", drawResultsRef)
-
-
-
-
-
 
 
 
@@ -608,7 +610,7 @@ const getRandomCard = (
                 />
             )}
 
-
+            {/*抽卡展示卡片*/}
             <CardOverlay
                 showCardOverlay={showCardOverlay}
                 setShowCardOverlay={setShowCardOverlay}
@@ -621,12 +623,21 @@ const getRandomCard = (
                 setCurrentIndex={setCurrentCardIndex}
             />
 
+            {/*展示历史记录*/}
             <HistoryModal
                 showHistory={showHistory}
                 setShowHistory={setShowHistory}
                 history={history}
             />
 
+            {/*展示图鉴中的图片*/}
+            <GalleryFullImage
+              card={cardData[2]}
+              showGalleryFullImage={showGallery}
+              setShowGalleryFullImage={setShowGallery}
+            />
+
+            {/*展示筛选卡片页*/}
             <CardPoolFilter
                 selectedRole={selectedRole}
                 setSelectedRole={setSelectedRole}
@@ -644,10 +655,6 @@ const getRandomCard = (
                 selectedPools={selectedPools}
                 setSelectedPools={setSelectedPools}
             />
-
-
-
-
 
             {/* 控件层（中间层） */}
             <SettingsLayer

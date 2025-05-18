@@ -51,7 +51,7 @@ const SettingsLayer = ({
                 justifyContent: 'center',
                 alignItems: 'center',
                 outline: 'none',
-                overflow: 'visible',
+                overflow: 'visible'
             }}
         >
 
@@ -125,6 +125,7 @@ const SettingsLayer = ({
                             zIndex: showDetailedImage ? 2 : 4
                         }}
                         onClick={() => {
+                            setShowGallery(true);
                             playClickSound();
                         }}
                     >

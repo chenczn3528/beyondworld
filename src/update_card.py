@@ -76,7 +76,7 @@ for index, row in enumerate(rows):
             # 提取前两个resp-tab-content里的src和srcset
             image_info = []
             resp_tabs = detail_soup.select('.resp-tabs-container .resp-tab-content')
-            for i, tab in enumerate(resp_tabs[:2]):  # 只取前两个
+            for i, tab in enumerate(resp_tabs[:3]):  # 只取前3个
                 img_tag = tab.find('img')
                 if img_tag:
                     src = img_tag.get('src')
