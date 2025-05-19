@@ -1,1 +1,1 @@
-if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/beyondworld/sw-beyond.js', { scope: '/beyondworld/' })})}
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/sw-beyond.js', { scope: '/beyondworld/' })})}
