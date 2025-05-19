@@ -1,8 +1,9 @@
-import React from "react";
+import React, {useState} from "react";
 import CloseIcon from "../icons/CloseIcon.jsx";
 
 const CardMeet = ({ card, showMeet, setShowMeet })=>{
 
+    const [showMeetNumber, setShowMeetNumber] = useState(0);
 
     return (
         showMeet && (
@@ -12,7 +13,7 @@ const CardMeet = ({ card, showMeet, setShowMeet })=>{
                 style={{backgroundColor: 'rgba(0, 0, 0, 0.8)'}}
             >
                 {/*返回按钮*/}
-                <button className="absolute z-[70] top-[3vmin] right-[21vmin] w-[12vmin] flex items-center justify-center"
+                <button className="absolute z-[70] top-[6vmin] right-[9vmin] w-auto flex items-center justify-center"
                     onClick={()=>setShowMeet(false)}
                     style={{
                         background: 'transparent',
@@ -24,8 +25,8 @@ const CardMeet = ({ card, showMeet, setShowMeet })=>{
                     <CloseIcon size={16} color="white"/>
                 </button>
 
-                <div className="h-[100vmin] w-[100vmin] object-contain" >
-
+                <div className="absolute top-[6vmin] left-[6vmin] flex flex-row w-full h-full" style={{border: 'red 3px'}}>
+                    <label>相会事件</label>
                 </div>
             </div>
         )

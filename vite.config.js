@@ -27,7 +27,7 @@ export default defineConfig({
       cleanupOutdatedCaches: true,
     })
   ],
-  base: '/beyondworld/',
+  base: '/',
   define: {
     'process.env': {},
   },

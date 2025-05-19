@@ -73,7 +73,7 @@ const GalleryFullImage = (
                 {showInformation && (
                     <div>
                         {/*角色名 世界*/}
-                        <div className="absolute flex items-center bottom-[36vmin] left-[24vmin]"
+                        <div className="absolute flex items-center bottom-[36vmin] left-[12vmin]"
                              style={{color: 'lightgray', textShadow: '0 0 1px gray, 0 0 2px gray',}}>
                             <label style={{fontSize: '4.5vmin', fontWeight: 800, marginRight: '2vmin'}}>{card.主角}</label>
                             <StarIcon color="lightgray" size={12}/>
@@ -81,7 +81,7 @@ const GalleryFullImage = (
                         </div>
 
                         {/*稀有度 卡名*/}
-                        <div className="absolute flex items-center" style={{left: '21vmin', bottom: '24vmin',}}>
+                        <div className="absolute flex items-center" style={{left: '8vmin', bottom: '24vmin',}}>
                             <img className="mr-[1vmin]" src={rarityMap[card.稀有度]} style={{height: '12vmin', width: 'auto',}}/>
                             <label
                                 style={{
@@ -98,7 +98,7 @@ const GalleryFullImage = (
                         </div>
 
                         {/*各属性的值*/}
-                        <div className="absolute flex flex-row" style={{left: '24vmin', bottom: '10vmin',}}>
+                        <div className="absolute flex flex-row" style={{left: '11vmin', bottom: '10vmin',}}>
                             {attributes.map(attr => (
                                 <div key={attr} className="flex flex-col mr-[2vw] items-center">
                                     <img src={`images/60px-${attr}.png`} className="w-[3vw]"/>
@@ -116,7 +116,7 @@ const GalleryFullImage = (
                         </div>
 
                         {/*返回按钮*/}
-                        <button className="absolute top-[3vmin] left-[21vmin] w-[12vmin] flex items-center justify-center"
+                        <button className="absolute top-[5vmin] left-[8vmin] w-auto flex items-center justify-center"
                             onClick={()=>setShowGalleryFullImage(false)}
                             style={{
                                 background: 'transparent',
@@ -129,7 +129,7 @@ const GalleryFullImage = (
                         </button>
 
                         {/*右下角按钮*/}
-                        <div className="absolute bottom-[3vmin] right-[19vmin] flex flex-col items-end justify-center">
+                        <div className="absolute bottom-[3vmin] right-[8vmin] flex flex-col items-end justify-center">
                             {/*相会*/}
                             <button style={button_style} onClick={() => setShowMeet(true)}>相会</button>
                             {/*初始、重逢、无色卡面*/}
