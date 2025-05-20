@@ -1,1 +1,1 @@
-{"name":"BeyondWorld 抽卡模拟器","short_name":"BeyondWorld","start_url":"/beyondworld/","display":"standalone","background_color":"#ffffff","theme_color":"#42b883","lang":"en","scope":"/beyondworld/","icons":[{"src":"images/icon.jpg","sizes":"512x512","type":"image/png"}]}
+{"name":"世界之外 抽卡模拟器","short_name":"世外抽卡","start_url":"/","display":"standalone","background_color":"#ffffff","theme_color":"#42b883","lang":"en","scope":"/","icons":[{"src":"images/icon.jpg","sizes":"512x512","type":"image/png"}]}
