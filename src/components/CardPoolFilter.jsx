@@ -149,7 +149,7 @@ const CardPoolFilter = ({
                 >
                     <div className="relative flex flex-col h-full mt-[2vh] mb-[2vh]">
                         <label
-                            className="flex justify-center items-center mt-[3vmin] mb-[3vmin]"
+                            className="flex justify-center items-center mt-[1vmin] mb-[3vmin]"
                             style={{ fontSize: "4vmin", fontWeight: "800" }}>筛选卡池</label>
 
                         <div className="mb-[8vmin] overflow-y-auto">

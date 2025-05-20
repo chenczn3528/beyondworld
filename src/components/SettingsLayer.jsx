@@ -27,28 +27,35 @@ const SettingsLayer = ({
     clearLocalData,
     toggleMusic,
     isMusicPlaying,
-    setShowGallery,
     showProbability,
     setShowProbability,
     handleStartDraw,
     setShowCardPoolFilter,
+    showDetailedImage,
+    setShowDetailedImage,
+    detailedImage,
+    setDetailedImage,
+    showGallery,
+    setShowGallery,
 }) => {
 
 
     const filtered_cardData = cardData.filter(card => card.稀有度 === '世界');
 
-    const [showDetailedImage, setShowDetailedImage] = useState(false);
 
 
-    const handleCopy = async () => {
-        try {
-            await navigator.clipboard.writeText("你要复制的固定内容");
-            alert("复制成功!");
-        } catch (err) {
-            console.error("复制失败:", err);
-            alert("复制失败!");
+    const [copyState, setCopyState] = useState(0);
+
+    useEffect(()=>{
+        if (copyState === 1) {
+            const timer = setTimeout(() => {
+                  setCopyState(0);
+                }, 2000);
+                return () => clearTimeout(timer);
         }
-      };
+    }, [copyState])
+
+
 
 
 
@@ -63,7 +70,8 @@ const SettingsLayer = ({
                 justifyContent: 'center',
                 alignItems: 'center',
                 outline: 'none',
-                overflow: 'visible'
+                overflow: 'visible',
+                filter: showDetailedImage ? 'blur(5px)' : 'none', transition: 'filter 0.3s ease'
             }}
         >
 
@@ -73,6 +81,8 @@ const SettingsLayer = ({
                     cardData={filtered_cardData}
                     showDetailedImage={showDetailedImage}
                     setShowDetailedImage={setShowDetailedImage}
+                    detailedImage={detailedImage}
+                    setDetailedImage={setDetailedImage}
                 />
             </div>
 
@@ -257,19 +267,41 @@ const SettingsLayer = ({
 
             </div>
 
-            <button
-                className="absolute bottom-[5vmin] left-[10vmin]"
-                style={{
-                    fontSize: '3vmin',
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                    boxShadow: '0 0 10px #111214, 0 0 20px #111214',
-                    color: 'white',
-                    textShadow: '0 0 5px gray'
-                }}
-                onClick={handleCopy}
-            >复制</button>
-
-
+            <div className="absolute bottom-[5vmin] left-[10vmin] flex flex-col">
+                <label
+                    className="mb-[2vmin]"
+                    style={{
+                        fontSize: '3vmin',
+                        color: 'white',
+                        textShadow: '0 0 10px gold'
+                    }}
+                >
+                    {copyState !== 2 ? "反馈bug或功能需求" : "小红书号840305422"}
+                </label>
+                <button
+                    style={{
+                        fontSize: '3vmin',
+                        backgroundColor: 'rgba(255,255,255,0.2)',
+                        boxShadow: '0 0 10px #111214, 0 0 20px #111214',
+                        color: 'white',
+                        textShadow: '0 0 5px gray'
+                    }}
+                    onClick={async () => {
+                        if (copyState === 2) setCopyState(0);
+                        try {
+                            await navigator.clipboard.writeText("你要复制的固定内容");
+                            setCopyState(1);
+                            // alert("复制成功!");
+                        } catch (err) {
+                            console.error("复制失败:", err);
+                            setCopyState(2);
+                            // alert("复制失败!");
+                        }
+                    }}
+                >
+                    {copyState === 0 ? "复制小红书号" : copyState === 1 ? "复制成功" : "复制失败" }
+                </button>
+            </div>
 
 
         </div>

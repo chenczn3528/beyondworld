@@ -11,6 +11,8 @@ const DetailedImage = ({ card, onClose }) => {
       星: 'images/star2.png',
     };
 
+    const attributes = ['思维', '魅力', '体魄', '感知', '灵巧'];
+
     return (
         <div
             id="app"
@@ -67,26 +69,20 @@ const DetailedImage = ({ card, onClose }) => {
                         <label style={{color: 'white', fontWeight: 800, fontSize: '6vmin'}}>{card.卡名}</label>
 
                         <div className="ml-[4vmin] mt-[3vmin] flex flex-row w-[60%] h-[60%]">
-                            <div className="flex flex-col items-center">
-                                <img src="images/60px-思维.png" className="w-[3vw]"/>
-                                <label style={{color: 'white', fontWeight: 800, fontSize: '3vmin'}}>{card.思维}</label>
-                            </div>
-                            <div className="flex flex-col ml-[2vw] items-center">
-                                <img src="images/60px-魅力.png" className="w-[3vw]"/>
-                                <label style={{color: 'white', fontWeight: 800, fontSize: '3vmin'}}>{card.魅力}</label>
-                            </div>
-                            <div className="flex flex-col ml-[2vw] items-center">
-                                <img src="images/60px-体魄.png" className="w-[3vw]"/>
-                                <label style={{color: 'white', fontWeight: 800, fontSize: '3vmin'}}>{card.体魄}</label>
-                            </div>
-                            <div className="flex flex-col ml-[2vw] items-center">
-                                <img src="images/60px-思维.png" className="w-[3vw]"/>
-                                <label style={{color: 'white', fontWeight: 800, fontSize: '3vmin'}}>{card.思维}</label>
-                            </div>
-                            <div className="flex flex-col ml-[2vw] items-center">
-                                <img src="images/60px-灵巧.png" className="w-[3vw]"/>
-                                <label style={{color: 'white', fontWeight: 800, fontSize: '3vmin'}}>{card.灵巧}</label>
-                            </div>
+                            {attributes.map(attr => (
+                                <div key={attr} className="flex flex-col mr-[2vw] items-center">
+                                    <img src={`images/60px-${attr}.png`} className="w-[7vmin]"/>
+                                    <label
+                                        style={{
+                                            color: card.属性 === attr ? 'gold' : 'white',
+                                            fontWeight: 800,
+                                            fontSize: '3vmin',
+                                        }}
+                                    >
+                                        {card[attr]}
+                                    </label>
+                                </div>
+                            ))}
                       </div>
                   </div>
               </div>

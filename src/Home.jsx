@@ -12,6 +12,8 @@ import CardPoolFilter from "./components/CardPoolFilter.jsx";
 import {getAvailablePools, getDynamicAttributeCounts} from "./utils/cardDataUtils.js";
 import CardFullImage from "./components/CardFullImage.jsx";
 import GalleryFullImage from "./components/GalleryFullImage.jsx";
+import DetailedImage from "./components/DetailedImage.jsx";
+import GalleryPage from "./components/GalleryPage.jsx";
 
 
 const Home = () => {
@@ -125,6 +127,12 @@ const Home = () => {
     const [showCardPoolFilter, setShowCardPoolFilter] = useState(false); // 展示筛选页面
 
     // const [showGalleryFullImage, setShowGalleryFullImage] = useState(false); // 展示图鉴页面
+
+    const [detailedImage, setDetailedImage] = useState(null); // 轮播图的内容设置
+    const [showDetailedImage, setShowDetailedImage] = useState(false); // 是否展示轮播图
+    const [showGalleryFullImage, setShowGalleryFullImage] = useState(false); // 图鉴图片的内容设置
+    const [galleryCard, setGalleryCard] = useState(null);
+
 
 
 
@@ -560,15 +568,12 @@ const getRandomCard = (
 
 
 
-
-
-
     // ========================================================
     // 返回数据时显示的页面
     return (
         <div
             id="app"
-            className="relative w-screen h-screen cursor-pointer overflow-hidden outline-none focus:outline-none"
+            className="relative w-full h-full cursor-pointer overflow-hidden outline-none focus:outline-none"
             tabIndex={0}
         >
             {/* 视频层（最底层） */}
@@ -631,11 +636,29 @@ const getRandomCard = (
             />
 
             {/*展示图鉴中的图片*/}
-            <GalleryFullImage
-              card={cardData[2]}
-              showGalleryFullImage={showGallery}
-              setShowGalleryFullImage={setShowGallery}
+            <GalleryPage
+                cards={galleryHistory}
+                showGallery={showGallery}
+                setShowGallery={setShowGallery}
+                showGalleryFullImage={showGalleryFullImage}
+                setShowGalleryFullImage={setShowGalleryFullImage}
+                galleryCard={galleryCard}
+                setGalleryCard={setGalleryCard}
             />
+
+            <GalleryFullImage
+              card={galleryCard}
+              showGalleryFullImage={showGalleryFullImage}
+              setShowGalleryFullImage={setShowGalleryFullImage}
+            />
+
+
+            {showDetailedImage && (
+              <DetailedImage
+                card={detailedImage}  // 确保传递 fullImage，而不是其他东西
+                onClose={() => setShowDetailedImage(false)}
+              />
+            )}
 
 
             {/*展示筛选卡片页*/}
@@ -682,11 +705,16 @@ const getRandomCard = (
                 clearLocalData={clearLocalData}
                 // toggleMusic={toggleMusic}
                 // isMusicPlaying={isMusicPlaying}
-                setShowGallery={setShowGallery}
                 showProbability={showProbability}
                 setShowProbability={setShowProbability}
                 handleStartDraw={handleStartDraw} // 抽卡动画处理
                 setShowCardPoolFilter={setShowCardPoolFilter}
+                showDetailedImage={showDetailedImage}
+                setShowDetailedImage={setShowDetailedImage}
+                detailedImage={detailedImage}
+                setDetailedImage={setDetailedImage}
+                showGallery={showGallery}
+                setShowGallery={setShowGallery}
             />
 
         </div>
