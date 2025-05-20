@@ -8,12 +8,12 @@ export default defineConfig({
     react(),
     VitePWA({
       filename: 'sw-beyond.js', // ✅ 与模拟器 A 区分
-      scope: '/beyondworld/',   // ✅ base 路径一致
+      scope: '/',   // ✅ base 路径一致
       registerType: 'autoUpdate',
       manifest: {
-        name: 'BeyondWorld 抽卡模拟器',
-        short_name: 'BeyondWorld',
-        start_url: '/beyondworld/',
+        name: '世界之外 抽卡模拟器',
+        short_name: '世外抽卡',
+        start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
         icons: [

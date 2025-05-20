@@ -25,7 +25,7 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage }) => {
       clearInterval(timerRef.current);
       timerRef.current = setInterval(() => {
         setCurrent((prev) => (prev + 1) % cardData.length);
-      }, 2000);
+      }, 4000);
     };
 
     const pauseAutoPlay = () => {

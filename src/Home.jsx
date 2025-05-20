@@ -637,6 +637,7 @@ const getRandomCard = (
               setShowGalleryFullImage={setShowGallery}
             />
 
+
             {/*展示筛选卡片页*/}
             <CardPoolFilter
                 selectedRole={selectedRole}

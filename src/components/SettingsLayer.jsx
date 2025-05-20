@@ -40,6 +40,17 @@ const SettingsLayer = ({
     const [showDetailedImage, setShowDetailedImage] = useState(false);
 
 
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText("你要复制的固定内容");
+            alert("复制成功!");
+        } catch (err) {
+            console.error("复制失败:", err);
+            alert("复制失败!");
+        }
+      };
+
+
 
 
     return (
@@ -56,9 +67,7 @@ const SettingsLayer = ({
         >
 
             {/*主页显示卡片轮播图*/}
-            <div
-                className="mt-[12vmin]"
-            >
+            <div className="mt-[12vmin]">
                 <Carousel
                     cardData={filtered_cardData}
                     showDetailedImage={showDetailedImage}
@@ -246,6 +255,18 @@ const SettingsLayer = ({
 
 
             </div>
+
+            <button
+                className="absolute bottom-[5vmin] left-[10vmin]"
+                style={{
+                    fontSize: '3vmin',
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    boxShadow: '0 0 10px #111214, 0 0 20px #111214',
+                    color: 'white',
+                    textShadow: '0 0 5px gray'
+                }}
+                onClick={handleCopy}
+            >复制</button>
 
 
 
