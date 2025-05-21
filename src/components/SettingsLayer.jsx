@@ -219,7 +219,7 @@ const SettingsLayer = ({
                     >
                         <label className="text-shadow" style={{fontSize: '4.5vmin'}}> {70 - pityCount} </label>
                         <label className="text-shadow"> 次感召必出 </label>
-                        <img src="images/world.png" className="w-[8vmin] h-auto"/>
+                        <img src="https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png" className="w-[8vmin] h-auto"/>
                         <label className="text-shadow"> 侧影 </label>
                     </div>
 

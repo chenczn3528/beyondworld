@@ -42,10 +42,10 @@ const GalleryFullImage = (
     });
 
     const rarityMap = {
-        世界: 'images/world.png',
-        月: 'images/moon.png',
-        辰星: 'images/star1.png',
-        星: 'images/star2.png',
+        世界: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png',
+        月: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png',
+        辰星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png',
+        星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png',
     };
 
 
@@ -103,7 +103,7 @@ const GalleryFullImage = (
                             <div className="absolute flex flex-row" style={{left: '11vmin', bottom: '10vmin',}}>
                                 {attributes.map(attr => (
                                     <div key={attr} className="flex flex-col mr-[2vw] items-center">
-                                        <img src={`images/60px-${attr}.png`} className="w-[7vmin]"/>
+                                        <img src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${attr}.png`} className="w-[7vmin]"/>
                                         <label
                                             style={{
                                                 color: card.属性 === attr ? 'gold' : 'white',

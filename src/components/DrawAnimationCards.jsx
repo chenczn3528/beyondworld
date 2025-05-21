@@ -47,7 +47,7 @@ const DrawAnimationCards = ({ isFiveStar, onAnimationEnd }) => {
             controls={false}
         >
           <source
-              src={isFiveStar ? 'videos/gold.mp4' : 'videos/no_gold.mp4'}
+              src={isFiveStar ? 'https://cdn.chenczn3528.dpdns.org/beyondworld/videos/gold.mp4' : 'https://cdn.chenczn3528.dpdns.org/beyondworld/videos/no_gold.mp4'}
               type="video/mp4"
           />
           Your browser does not support the video tag.
@@ -61,7 +61,7 @@ const DrawAnimationCards = ({ isFiveStar, onAnimationEnd }) => {
             muted={false}
         >
           <source
-              src='audios/抽卡音频.mp3'
+              src='https://cdn.chenczn3528.dpdns.org/beyondworld/audios/抽卡音频.mp3'
               type="audio/mp3"
           />
           Your browser does not support the audio element.

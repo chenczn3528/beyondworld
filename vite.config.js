@@ -18,7 +18,7 @@ export default defineConfig({
         background_color: '#ffffff',
         icons: [
           {
-            src: 'images/icon.jpg',
+            src: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/icon.jpg',
             sizes: '512x512',
             type: 'image/png'
           }

@@ -23,10 +23,10 @@ const CardFullImage = (
     });
 
     const rarityMap = {
-        世界: 'images/world.png',
-        月: 'images/moon.png',
-        辰星: 'images/star1.png',
-        星: 'images/star2.png',
+        世界: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png',
+        月: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png',
+        辰星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png',
+        星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png',
     };
 
     const isFiveStar = card.稀有度 === '世界';
@@ -91,7 +91,7 @@ const CardFullImage = (
                     {card.卡名}
                 </label>
                 <img
-                    src={`images/60px-${card.属性}.png`}
+                    src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${card.属性}.png`}
                     alt="图标"
                     style={{
                         height: '5vmin',

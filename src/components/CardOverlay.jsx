@@ -37,11 +37,11 @@ const CardOverlay = ({
 
     let sound;
     if (card.稀有度 === '世界') {
-      sound = 'audios/金卡音效.mp3';
+      sound = 'https://cdn.chenczn3528.dpdns.org/beyondworld/audios/金卡音效.mp3';
     } else if (card.稀有度 === '月') {
-      sound = 'audios/月卡音效.mp3';
+      sound = 'https://cdn.chenczn3528.dpdns.org/beyondworld/audios/月卡音效.mp3';
     } else {
-      sound = 'audios/切换音效.mp3';
+      sound = 'https://cdn.chenczn3528.dpdns.org/beyondworld/audios/切换音效.mp3';
     }
 
     const audio = new Audio(sound);

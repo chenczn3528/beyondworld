@@ -5,10 +5,10 @@ import {playClickSound} from "../utils/playClickSound.js";
 const DetailedImage = ({ card, onClose }) => {
 
     const rarityMap = {
-      世界: 'images/world.png',
-      月: 'images/moon.png',
-      辰星: 'images/star1.png',
-      星: 'images/star2.png',
+      世界: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png',
+      月: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png',
+      辰星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png',
+      星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png',
     };
 
     const attributes = ['思维', '魅力', '体魄', '感知', '灵巧'];
@@ -53,7 +53,7 @@ const DetailedImage = ({ card, onClose }) => {
 
                             {/* 重逢图标：贴在卡面右上角 */}
                             <img
-                                src="images/重逢.png"
+                                src="https://cdn.chenczn3528.dpdns.org/beyondworld/images/重逢.png"
                                 alt="重逢图标"
                                 className="absolute top-[-1vw] right-[0] w-[20%] h-auto"
                             />
@@ -71,7 +71,7 @@ const DetailedImage = ({ card, onClose }) => {
                         <div className="ml-[4vmin] mt-[3vmin] flex flex-row w-[60%] h-[60%]">
                             {attributes.map(attr => (
                                 <div key={attr} className="flex flex-col mr-[2vw] items-center">
-                                    <img src={`images/60px-${attr}.png`} className="w-[7vmin]"/>
+                                    <img src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${attr}.png`} className="w-[7vmin]"/>
                                     <label
                                         style={{
                                             color: card.属性 === attr ? 'gold' : 'white',

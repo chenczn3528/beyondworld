@@ -57,10 +57,10 @@ const GalleryPage = ({ cards, showGallery, setShowGallery, showGalleryFullImage,
 
 
     const rarityMap = {
-      世界: 'images/world.png',
-      月: 'images/moon.png',
-      辰星: 'images/star1.png',
-      星: 'images/star2.png',
+      世界: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png',
+      月: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png',
+      辰星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png',
+      星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png',
     };
 
 
@@ -110,7 +110,7 @@ const GalleryPage = ({ cards, showGallery, setShowGallery, showGalleryFullImage,
                                 <label style={{fontSize: '4vmin'}}>{cards[currentCardIndex]?.主角}</label>
                                 <div className="flex flex-row gap-[1vmin]">
                                     <img
-                                        src={`images/60px-${cards[currentCardIndex]?.属性}.png`}
+                                        src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${cards[currentCardIndex]?.属性}.png`}
                                         className="w-[7vmin] h-auto"
                                     />
                                     <label style={{fontSize: '6vmin'}}>{cards[currentCardIndex]?.卡名}</label>
@@ -139,7 +139,7 @@ const GalleryPage = ({ cards, showGallery, setShowGallery, showGalleryFullImage,
                     const curveOffset = curveFactor * Math.sin(t * Math.PI);
                     const x = startX + t * deltaX;
                     const y = startY + t * deltaY + curveOffset;
-                    const defaultWhiteImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/WMZ+ZcAAAAASUVORK5CYII=\n";
+                    const defaultWhiteImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/WMZ+ZcAAAAASUVORK5CYII=";
 
 
                     const cardIndex = i - paddingCount;
@@ -189,7 +189,7 @@ const GalleryPage = ({ cards, showGallery, setShowGallery, showGalleryFullImage,
                                     left: `${x}vmin`,
                                     top: `${y}vmin`,
                                     width: "36vmin",
-                                    height: "auto",
+                                    height: "20vmin",
                                     objectFit: "cover",
                                     opacity,
                                     cursor: isRealImage ? "pointer" : "default",
@@ -201,7 +201,7 @@ const GalleryPage = ({ cards, showGallery, setShowGallery, showGalleryFullImage,
                             {imageAttr && (
                                 <div>
                                     <img
-                                        src={`images/60px-${imageAttr}.png`}
+                                        src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${imageAttr}.png`}
                                         className="absolute w-[5vmin]"
                                         style={{
                                             left: `${x + 1}vmin`,

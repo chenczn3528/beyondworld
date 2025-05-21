@@ -12,10 +12,10 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage, detailedI
 
 
   const rarityMap = {
-      世界: 'images/world.png',
-      月: 'images/moon.png',
-      辰星: 'images/star1.png',
-      星: 'images/star2.png',
+      世界: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png',
+      月: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png',
+      辰星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png',
+      星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png',
     };
 
     const timerRef = useRef(null);
