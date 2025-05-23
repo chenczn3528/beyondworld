@@ -7,7 +7,7 @@ function App() {
     const gameRef = useRef()
 
     if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock("landscape").catch(err => {
+        screen.orientation.lock("portrait").catch(err => {
             console.warn('屏幕方向锁定失败', err)
         })
     }
