@@ -8,7 +8,8 @@ const useResponsiveFontSize = () => {
     const height = window.innerHeight;
     const longer = Math.max(width, height);
     const shorter = Math.min(width, height);
-    setFontsize((longer / shorter) * 2);
+    // setFontsize((longer / shorter) * 2);
+    setFontsize( shorter / 900 * 3)
   };
 
   useEffect(() => {

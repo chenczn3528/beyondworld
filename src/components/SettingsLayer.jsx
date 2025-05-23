@@ -95,8 +95,8 @@ const SettingsLayer = ({
 
             {/*抽卡按钮*/}
             <div
-                className="absolute flex justify-center bottom-[8vmin] gap-[4vmin] left-[4vmin] right-[4vmin]"
-                style={{zIndex: showDetailedImage ? 2 : 4,}}>
+                className="absolute flex justify-center gap-[4vmin]"
+                style={{zIndex: showDetailedImage ? 2 : 4, bottom: `${fontsize * 3}vmin`, left: `${fontsize * 2}vmin`, right: `${fontsize * 2}vmin`}}>
                 <button
                     style={{
                         fontSize: `${fontsize}vmin`,
@@ -137,7 +137,10 @@ const SettingsLayer = ({
 
 
             {/*最上层按钮和文字*/}
-            <div className="absolute flex flex-row justify-between top-[4vmin] left-[4vmin] right-[4vmin]">
+            <div
+                className="absolute flex flex-row justify-between"
+                style={{top: `${fontsize * 2}vmin`, left: `${fontsize * 2}vmin`, right: `${fontsize * 2}vmin`}}
+            >
                 {/*左侧按钮*/}
                 <div className="flex items-start justify-start gap-[1vmin]">
                     <button
@@ -270,7 +273,7 @@ const SettingsLayer = ({
             </div>
 
             {/*左下反馈*/}
-            <div className="absolute bottom-[4vmin] left-[4vmin] flex flex-col">
+            <div className="absolute flex flex-col" style={{left: `${fontsize * 2}vmin`, bottom: `${fontsize * 2}vmin`}}>
                 <label
                     className="mb-[2vmin]"
                     style={{
