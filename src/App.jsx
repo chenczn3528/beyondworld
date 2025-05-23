@@ -50,11 +50,11 @@ function App() {
 
   return (
     <div className="viewport">
-      {/*{!isPortrait && (*/}
-      {/*  <div className="fixed top-0 left-0 w-screen h-screen bg-black text-white flex items-center justify-center z-50 text-xl">*/}
-      {/*    请将设备旋转回竖屏方向以继续使用*/}
-      {/*  </div>*/}
-      {/*)}*/}
+      {!isPortrait && (
+        <div className="fixed top-0 left-0 w-screen h-screen bg-black text-white flex items-center justify-center z-50 text-xl">
+          请将设备旋转回竖屏方向以继续使用
+        </div>
+      )}
       <div className="wrapper" ref={wrapperRef}>
         <div className="game relative border" ref={gameRef}>
           <Home />
