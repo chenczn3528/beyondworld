@@ -3,10 +3,17 @@ import { useState, useEffect } from 'react';
 const useResponsiveFontSize = () => {
   const [fontsize, setFontsize] = useState(16);
 
+  const getShorterSide = () => {
+    if (window.visualViewport) {
+      const { width, height } = window.visualViewport;
+      return Math.min(width, height);
+    } else {
+      return Math.min(window.innerWidth, window.innerHeight);
+    }
+  };
+
   const updateFontSize = () => {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const shorter = Math.min(width, height);
+    const shorter = getShorterSide();
 
     let base, scale, min, max;
 
@@ -35,20 +42,27 @@ const useResponsiveFontSize = () => {
   useEffect(() => {
     updateFontSize();
 
-    window.addEventListener('resize', updateFontSize);
-    window.addEventListener('orientationchange', () => {
-      setTimeout(updateFontSize, 100); // 等待刷新完毕后再判断
-    });
-
-    // fallback 定时轮询（防止某些浏览器不触发事件）
-    const interval = setInterval(() => {
+    const handleViewportChange = () => {
       updateFontSize();
-    }, 500);
+    };
+
+    window.visualViewport?.addEventListener('resize', handleViewportChange);
+    window.visualViewport?.addEventListener('scroll', handleViewportChange);
+
+    // fallback：轮询 viewport 改变（特别是 iOS Safari、微信浏览器）
+    let lastShorter = getShorterSide();
+    const intervalId = setInterval(() => {
+      const newShorter = getShorterSide();
+      if (Math.abs(newShorter - lastShorter) > 1) {
+        lastShorter = newShorter;
+        updateFontSize();
+      }
+    }, 300);
 
     return () => {
-      window.removeEventListener('resize', updateFontSize);
-      window.removeEventListener('orientationchange', updateFontSize);
-      clearInterval(interval);
+      window.visualViewport?.removeEventListener('resize', handleViewportChange);
+      window.visualViewport?.removeEventListener('scroll', handleViewportChange);
+      clearInterval(intervalId);
     };
   }, []);
 
