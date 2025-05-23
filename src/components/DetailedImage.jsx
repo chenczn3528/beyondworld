@@ -39,9 +39,9 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                     effect="blur"
                     className="absolute object-contain edge-blur-mask"
                     style={{
-                        top: `${fontsize * 5}vmin`,
-                        left: `${fontsize * 11}vmin`,
-                        width: `${fontsize * 20}vmin`
+                        top: `${fontsize * 8}px`,
+                        left: `${fontsize * 14}px`,
+                        width: `${fontsize * 20}px`
                     }}
                 />
                 {/* 角标图标：定位在主图右上角 */}
@@ -49,9 +49,9 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                     className="absolute"
                     src={rarityMap[card.稀有度]}
                     style={{
-                        top: `${fontsize * 4.5}vmin`,
-                        left: `${fontsize * 27.7}vmin`,
-                        width: `${fontsize * 3}vmin`
+                        top: `${fontsize * 7.5}px`,
+                        left: `${fontsize * 30.7}px`,
+                        width: `${fontsize * 3}px`
                     }}
                 />
 
@@ -61,9 +61,9 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                     effect="blur"
                     className="absolute object-contain edge-blur-mask"
                     style={{
-                        top: `${fontsize * 14}vmin`,
-                        left: `${fontsize * 6}vmin`,
-                        width: `${fontsize * 10}vmin`
+                        top: `${fontsize * 17}px`,
+                        left: `${fontsize * 9}px`,
+                        width: `${fontsize * 10}px`
                     }}
                 />
 
@@ -74,26 +74,26 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                     alt="重逢图标"
                     className="absolute"
                     style={{
-                        top: `${fontsize * 13.5}vmin`,
-                        left: `${fontsize * 14}vmin`,
-                        width: `${fontsize * 2}vmin`
+                        top: `${fontsize * 16.5}px`,
+                        left: `${fontsize * 17}px`,
+                        width: `${fontsize * 2}px`
                     }}
                 />
 
                 <div
                     className="absolute overflow-hidden"
                     style={{
-                        top: `${fontsize * 6}vmin`,
-                        left: `${fontsize * 31.5}vmin`,
-                        width: `${fontsize * 13}vmin`,
-                        height: `${fontsize * 10}vmin`,
+                        top: `${fontsize * 9}px`,
+                        left: `${fontsize * 34.5}px`,
+                        width: `${fontsize * 13}px`,
+                        height: `${fontsize * 10}px`,
                     }}
                 >
                     <label
                         style={{
                             color: 'lightgray',
                             fontWeight: 600,
-                            fontSize: `${fontsize}vmin`,
+                            fontSize: `${fontsize}px`,
                     }}
                         className="absolute"
                     >
@@ -102,17 +102,17 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
 
                     <label
                         style={{
-                            top: `${fontsize * 1.2}vmin`,
+                            top: `${fontsize * 1.4}px`,
                             color: 'white',
                             fontWeight: 800,
-                            fontSize: `${fontsize * 1.5}vmin`,
+                            fontSize: `${fontsize * 1.5}px`,
                         }}
                         className="absolute"
                     >
                         {card.卡名}
                     </label>
 
-                    <div className="absolute flex flex-row" style={{top: `${fontsize * 5.2}vmin`}}>
+                    <div className="absolute flex flex-row" style={{top: `${fontsize * 5}px`}}>
                         {attributes.map(attr => (
                             <div
                                 key={attr}
@@ -123,14 +123,14 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                                 <img
                                     src={`images/60px-${attr}.png`}
                                     className="mb-[0.5vmin]"
-                                    style={{width: `${fontsize * 1.5}vmin`}}
+                                    style={{width: `${fontsize * 1.5}px`}}
                                 />
 
                                 <label
                                     style={{
                                         color: card.属性 === attr ? 'gold' : 'white',
                                         fontWeight: 800,
-                                        fontSize: `${fontsize * 0.6}vmin`,
+                                        fontSize: `${fontsize * 0.6}px`,
                                     }}
                                 >
                                     {card[attr]}

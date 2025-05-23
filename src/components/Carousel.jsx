@@ -146,7 +146,7 @@ const Carousel = ({
                 src={card.图片信息[0]?.src}
                 alt={`slide-${index}`}
                 className="object-contain rounded-lg shadow-xl edge-blur-mask"
-                style={{width: `${fontsize * 20}vmin`}}
+                style={{width: `${fontsize * 20}px`}}
                 onClick={() => {
                   playClickSound();
                   if (index === current) {
@@ -160,14 +160,14 @@ const Carousel = ({
 
               <div
                   className="absolute flex flex-row justify-end"
-                  style={{top: `${fontsize / 4}vmin`, right: `${fontsize / 3}vmin`}}
+                  style={{top: `${fontsize / 4}px`, right: `${fontsize / 3}px`}}
               >
                   {/* 卡片标题 */}
                 <label
                     className="font-normal"
                     style={{
                       color: 'white',
-                      fontSize: `${fontsize * 0.8}vmin`,
+                      fontSize: `${fontsize * 0.8}px`,
                       fontWeight: 800,
                       textAlign: 'right', // 文字右对齐
                       textShadow: '0 0 2px gray, 0 0 4px gray',
@@ -178,7 +178,7 @@ const Carousel = ({
                 {/* 稀有度角标 */}
                 <img
                     src={rarityMap[card.稀有度]}
-                    style={{width: `${fontsize * 3}vmin`}}
+                    style={{width: `${fontsize * 3}px`}}
                     alt="Rarity Badge"
                 />
               </div>

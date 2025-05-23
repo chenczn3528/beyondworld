@@ -130,7 +130,7 @@ const Home = () => {
     const [showGalleryFullImage, setShowGalleryFullImage] = useState(false); // 图鉴图片的内容设置
     const [galleryCard, setGalleryCard] = useState(null);
 
-    const fontsize = useResponsiveFontSize();
+    const fontsize = useResponsiveFontSize({scale: 0.9});
 
 
 

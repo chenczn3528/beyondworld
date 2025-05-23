@@ -76,10 +76,10 @@ const SettingsLayer = ({
             <div
                 className="absolute flex justify-center"
                 style={{
-                    top: `${fontsize * 6}vmin`,
-                    bottom: `${fontsize * 6}vmin`,
-                    left: `${fontsize * 6}vmin`,
-                    right: `${fontsize * 6}vmin`,
+                    top: `${fontsize * 6}px`,
+                    bottom: `${fontsize * 6}px`,
+                    left: `${fontsize * 6}px`,
+                    right: `${fontsize * 6}px`,
             }}
             >
                 <Carousel
@@ -96,10 +96,10 @@ const SettingsLayer = ({
             {/*抽卡按钮*/}
             <div
                 className="absolute flex justify-center gap-[4vmin]"
-                style={{zIndex: showDetailedImage ? 2 : 4, bottom: `${fontsize * 3}vmin`, left: `${fontsize * 2}vmin`, right: `${fontsize * 2}vmin`}}>
+                style={{zIndex: showDetailedImage ? 2 : 4, bottom: `${fontsize * 3}px`, left: `${fontsize * 2}px`, right: `${fontsize * 2}px`}}>
                 <button
                     style={{
-                        fontSize: `${fontsize}vmin`,
+                        fontSize: `${fontsize}px`,
                         backgroundColor: 'rgba(122,138,166,0.8)',
                         boxShadow: '0 0 10px #111214, 0 0 20px #111214',
                         color: 'white',
@@ -117,7 +117,7 @@ const SettingsLayer = ({
 
                 <button
                     style={{
-                        fontSize: `${fontsize}vmin`,
+                        fontSize: `${fontsize}px`,
                         backgroundColor: 'rgba(239,218,160,0.8)', // 或者用 Tailwind 的 bg-yellow-400
                         boxShadow: '0 0 10px gold, 0 0 20px gold',
                         color: 'white',
@@ -139,13 +139,13 @@ const SettingsLayer = ({
             {/*最上层按钮和文字*/}
             <div
                 className="absolute flex flex-row justify-between"
-                style={{top: `${fontsize * 2}vmin`, left: `${fontsize * 2}vmin`, right: `${fontsize * 2}vmin`}}
+                style={{top: `${fontsize * 2}px`, left: `${fontsize * 2}px`, right: `${fontsize * 2}px`}}
             >
                 {/*左侧按钮*/}
                 <div className="flex items-start justify-start gap-[1vmin]">
                     <button
                         style={{
-                            fontSize: `${fontsize}vmin`,
+                            fontSize: `${fontsize}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -160,7 +160,7 @@ const SettingsLayer = ({
 
                     <button
                         style={{
-                            fontSize: `${fontsize}vmin`,
+                            fontSize: `${fontsize}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -177,7 +177,7 @@ const SettingsLayer = ({
                     <button
                         style={{
                             marginLeft: '3vmin',
-                            fontSize: `${fontsize}vmin`,
+                            fontSize: `${fontsize}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -195,7 +195,7 @@ const SettingsLayer = ({
                     <button
                         style={{
                             marginLeft: '6vmin',
-                            fontSize: `${fontsize}vmin`,
+                            fontSize: `${fontsize}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -211,7 +211,7 @@ const SettingsLayer = ({
                     <div
                         className="flex items-center justify-end text-white font-extrabold"
                         style={{
-                            fontSize: `${fontsize}vmin`,
+                            fontSize: `${fontsize}px`,
                             color: 'white',
                             textShadow: `
                                 0 0 10px gold,
@@ -223,10 +223,10 @@ const SettingsLayer = ({
                         }}
                     >
                         <label className="text-shadow"
-                               style={{fontSize: `${fontsize * 1.5}vmin`,}}> {70 - pityCount} </label>
+                               style={{fontSize: `${fontsize * 1.5}px`,}}> {70 - pityCount} </label>
                         <label className="text-shadow"> 次感召必出 </label>
                         {/*<img src="https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png" style={{width: `${fontsize * 3}vmin`}}/>*/}
-                        <img src="images/world.png" style={{width: `${fontsize * 3}vmin`}}/>
+                        <img src="images/world.png" style={{width: `${fontsize * 3}px`}}/>
                         <label className="text-shadow">侧影</label>
                     </div>
 
@@ -234,7 +234,7 @@ const SettingsLayer = ({
                     <div
                         className="flex items-center justify-end gap-[1.5vmin]"
                         style={{
-                            fontSize: `${fontsize * 0.8}vmin`,
+                            fontSize: `${fontsize * 0.8}px`,
                             color: 'white',
                             textShadow: '0 0 10px gold'
                         }}
@@ -250,7 +250,7 @@ const SettingsLayer = ({
                     <div
                         className="flex items-center justify-end"
                         style={{
-                            fontSize: `${fontsize * 0.8}vmin`,
+                            fontSize: `${fontsize * 0.8}px`,
                             color: 'white',
                             textShadow: '0 0 10px gold'
                         }}
@@ -273,11 +273,11 @@ const SettingsLayer = ({
             </div>
 
             {/*左下反馈*/}
-            <div className="absolute flex flex-col" style={{left: `${fontsize * 2}vmin`, bottom: `${fontsize * 2}vmin`}}>
+            <div className="absolute flex flex-col" style={{left: `${fontsize * 2}px`, bottom: `${fontsize * 2}px`}}>
                 <label
                     className="mb-[2vmin]"
                     style={{
-                        fontSize: `${fontsize}vmin`,
+                        fontSize: `${fontsize}px`,
                         color: 'white',
                         textShadow: '0 0 10px gold'
                     }}
@@ -286,7 +286,7 @@ const SettingsLayer = ({
                 </label>
                 <button
                     style={{
-                        fontSize: `${fontsize}vmin`,
+                        fontSize: `${fontsize}px`,
                         backgroundColor: 'rgba(255,255,255,0.2)',
                         boxShadow: '0 0 10px #111214, 0 0 20px #111214',
                         color: 'white',
