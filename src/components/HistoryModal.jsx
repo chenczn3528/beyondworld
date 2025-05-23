@@ -44,7 +44,7 @@ const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
             onClick={(e) => {playClickSound(); e.stopPropagation()}}
               style={{
                 backgroundColor: '#2a2d39',
-                width: `${fontsize * 35}px`,
+                width: `${fontsize * 40}px`,
                 height: `${fontsize * 25}px`,
               }}
         >
@@ -67,7 +67,7 @@ const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
                 style={{
                   backgroundColor: '#474964',
                   fontSize: `${fontsize}px`,
-                  width: `${fontsize * 30}px`,
+                  width: `${fontsize * 36}px`,
                   height: `${fontsize * 2.2}px`,
                 }}
             >
@@ -83,7 +83,7 @@ const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
                   className="flex-1 overflow-y-auto"
                   style={{
                     fontSize: `${fontsize}px`,
-                    width: `${fontsize * 30}px`,
+                    width: `${fontsize * 36}px`,
                     marginBottom: `${fontsize * 2.2}px`,
                   }}
               >
