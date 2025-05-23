@@ -295,7 +295,7 @@ const SettingsLayer = ({
                     onClick={async () => {
                         if (copyState === 2) setCopyState(0);
                         try {
-                            await navigator.clipboard.writeText("你要复制的固定内容");
+                            await navigator.clipboard.writeText("840305422");
                             setCopyState(1);
                             // alert("复制成功!");
                         } catch (err) {

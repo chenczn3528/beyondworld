@@ -15,7 +15,7 @@ import {playClickSound} from "../utils/playClickSound.js";
   return `${year}/${month}/${day} ${hour}:${minute}`;
 };
 
-const HistoryModal = ({ showHistory, setShowHistory, history }) => {
+const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
 
   const style_long = {
     color: 'lightgray',
@@ -36,25 +36,40 @@ const HistoryModal = ({ showHistory, setShowHistory, history }) => {
   return (
     showHistory && (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center w-full h-full"
+        className="absolute w-full h-full flex justify-center items-center z-50"
         onClick={() => {playClickSound(); setShowHistory(false)}}
       >
         <div
-          className="relative flex flex-col w-[90vmin] h-[70vmin] p-4 rounded-lg overflow-hidden"
-          onClick={(e) => {playClickSound(); e.stopPropagation()}}
-          style={{backgroundColor: '#2a2d39'}}
+            className="absolute flex flex-col items-center"
+            onClick={(e) => {playClickSound(); e.stopPropagation()}}
+              style={{
+                backgroundColor: '#2a2d39',
+                width: `${fontsize * 35}px`,
+                height: `${fontsize * 25}px`,
+              }}
         >
-          <div className="relative z-10 flex flex-col h-full" style={{color: 'white'}}>
-
             {/*历史记录*/}
-            <label className="text-center mt-[5vmin] mb-[5vmin]" style={{color: 'white', fontSize: '4vmin', fontWeight: 800}}>
+            <label
+                style={{
+                  color: 'white',
+                  fontSize: `${fontsize * 1.5}px`,
+                  fontWeight: 800,
+                  marginTop: `${fontsize * 1.5}px`,
+                  marginBottom: `${fontsize * 1.5}px`,
+                }}
+            >
               历史记录
             </label>
 
             {/*表头*/}
             <div
-                className="flex flex-row text-xs flex justify-between ml-[3vmin] mr-[3vmin] h-[5vmin] items-center"
-                style={{backgroundColor: '#474964', fontSize: '2.5vmin'}}
+                className="flex flex-row items-center justify-center"
+                style={{
+                  backgroundColor: '#474964',
+                  fontSize: `${fontsize}px`,
+                  width: `${fontsize * 30}px`,
+                  height: `${fontsize * 2.2}px`,
+                }}
             >
               <div style={style_long}>侧影</div>
               <div style={style_short}>稀有度</div>
@@ -62,7 +77,16 @@ const HistoryModal = ({ showHistory, setShowHistory, history }) => {
               <div style={style_long}>时间</div>
             </div>
 
-            <div className="flex-1 overflow-y-auto mb-[2vmin]">
+
+
+              <div
+                  className="flex-1 overflow-y-auto"
+                  style={{
+                    fontSize: `${fontsize}px`,
+                    width: `${fontsize * 30}px`,
+                    marginBottom: `${fontsize * 2.2}px`,
+                  }}
+              >
               {history.slice().reverse().map((card, idx) => {
                 const cardHistoryColors = {
                   "星": {color: "gray"},
@@ -89,8 +113,9 @@ const HistoryModal = ({ showHistory, setShowHistory, history }) => {
                 return (
                     <div
                         key={idx}
-                        style={{backgroundColor, fontSize: '2.5vmin'}}
-                        className={`flex flex-row text-xs mb-2 flex justify-between ml-[3vmin] mr-[3vmin] h-[4vmin] items-center`}
+                        style={{backgroundColor, fontSize: `${fontsize}px`, height: `${fontsize * 1.5}px`,}}
+                        className="flex flex-row"
+                        // className={`absolute flex flex-row text-xs mb-2 flex justify-between ml-[3vmin] mr-[3vmin] h-[4vmin] items-center`}
                     >
                       <div style={style1}>{card.主角}·{card.卡名}</div>
                       <div style={style2}>{card.稀有度}</div>
@@ -100,8 +125,6 @@ const HistoryModal = ({ showHistory, setShowHistory, history }) => {
                 );
               })}
             </div>
-            <div className="pb-[10px]"></div>
-          </div>
         </div>
       </div>
     )

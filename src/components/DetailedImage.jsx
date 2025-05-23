@@ -39,7 +39,7 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                     effect="blur"
                     className="absolute object-contain edge-blur-mask"
                     style={{
-                        top: `${fontsize * 8}px`,
+                        top: `${fontsize * 9}px`,
                         left: `${fontsize * 14}px`,
                         width: `${fontsize * 20}px`
                     }}
@@ -49,7 +49,7 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                     className="absolute"
                     src={rarityMap[card.稀有度]}
                     style={{
-                        top: `${fontsize * 7.5}px`,
+                        top: `${fontsize * 8.5}px`,
                         left: `${fontsize * 30.7}px`,
                         width: `${fontsize * 3}px`
                     }}
@@ -61,7 +61,7 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                     effect="blur"
                     className="absolute object-contain edge-blur-mask"
                     style={{
-                        top: `${fontsize * 17}px`,
+                        top: `${fontsize * 18}px`,
                         left: `${fontsize * 9}px`,
                         width: `${fontsize * 10}px`
                     }}
@@ -74,7 +74,7 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                     alt="重逢图标"
                     className="absolute"
                     style={{
-                        top: `${fontsize * 16.5}px`,
+                        top: `${fontsize * 17.5}px`,
                         left: `${fontsize * 17}px`,
                         width: `${fontsize * 2}px`
                     }}
@@ -83,7 +83,7 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                 <div
                     className="absolute overflow-hidden"
                     style={{
-                        top: `${fontsize * 9}px`,
+                        top: `${fontsize * 10}px`,
                         left: `${fontsize * 34.5}px`,
                         width: `${fontsize * 13}px`,
                         height: `${fontsize * 10}px`,

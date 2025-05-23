@@ -590,45 +590,46 @@ const getRandomCard = (
             </video>
 
 
-            {/*/!* 抽卡动画层 *!/*/}
-            {/*{showAnimationDrawCards && (*/}
-            {/*  <DrawAnimationCards*/}
-            {/*    isFiveStar={hasFiveStarAnimation}*/}
-            {/*    onAnimationEnd={handleDrawCardsAnimationEnd}*/}
-            {/*  />*/}
-            {/*)}*/}
+            {/* 抽卡动画层 */}
+            {showAnimationDrawCards && (
+              <DrawAnimationCards
+                isFiveStar={hasFiveStarAnimation}
+                onAnimationEnd={handleDrawCardsAnimationEnd}
+              />
+            )}
 
-            {/*/!*十抽后结算层*!/*/}
-            {/*{showSummary && drawResultsRef.current.length > 1 && (*/}
-            {/*    <CardSummary*/}
-            {/*        drawResults={drawResultsRef.current}  // 传递卡片数据*/}
-            {/*        onClose={() => setShowSummary(false)}  // 关闭总结页面的回调*/}
-            {/*        setHasShownSummary={setHasShownSummary}*/}
-            {/*        setShowSummary={setShowSummary}*/}
-            {/*        handleDraw={handleDraw}*/}
-            {/*        handleStartDraw={handleStartDraw}*/}
-            {/*    />*/}
-            {/*)}*/}
+            {/*十抽后结算层*/}
+            {showSummary && drawResultsRef.current.length > 1 && (
+                <CardSummary
+                    drawResults={drawResultsRef.current}  // 传递卡片数据
+                    onClose={() => setShowSummary(false)}  // 关闭总结页面的回调
+                    setHasShownSummary={setHasShownSummary}
+                    setShowSummary={setShowSummary}
+                    handleDraw={handleDraw}
+                    handleStartDraw={handleStartDraw}
+                />
+            )}
 
-            {/*/!*抽卡展示卡片*!/*/}
-            {/*<CardOverlay*/}
-            {/*    showCardOverlay={showCardOverlay}*/}
-            {/*    setShowCardOverlay={setShowCardOverlay}*/}
-            {/*    currentCardIndex={currentCardIndex}*/}
-            {/*    drawResultsRef={drawResultsRef}*/}
-            {/*    handleNextCard={handleNextCard}*/}
-            {/*    isSkipped={isSkipped}*/}
-            {/*    setIsSkipped={setIsSkipped}*/}
-            {/*    currentIndex={currentCardIndex}*/}
-            {/*    setCurrentIndex={setCurrentCardIndex}*/}
-            {/*/>*/}
+            {/*抽卡展示卡片*/}
+            <CardOverlay
+                showCardOverlay={showCardOverlay}
+                setShowCardOverlay={setShowCardOverlay}
+                currentCardIndex={currentCardIndex}
+                drawResultsRef={drawResultsRef}
+                handleNextCard={handleNextCard}
+                isSkipped={isSkipped}
+                setIsSkipped={setIsSkipped}
+                currentIndex={currentCardIndex}
+                setCurrentIndex={setCurrentCardIndex}
+            />
 
-            {/*/!*展示历史记录*!/*/}
-            {/*<HistoryModal*/}
-            {/*    showHistory={showHistory}*/}
-            {/*    setShowHistory={setShowHistory}*/}
-            {/*    history={history}*/}
-            {/*/>*/}
+            {/*展示历史记录*/}
+            <HistoryModal
+                showHistory={showHistory}
+                setShowHistory={setShowHistory}
+                history={history}
+                fontsize={fontsize}
+            />
 
             {/*/!*展示图鉴中的图片*!/*/}
             {/*<GalleryPage*/}
