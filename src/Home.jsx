@@ -14,7 +14,7 @@ import CardFullImage from "./components/CardFullImage.jsx";
 import GalleryFullImage from "./components/GalleryFullImage.jsx";
 import DetailedImage from "./components/DetailedImage.jsx";
 import GalleryPage from "./components/GalleryPage.jsx";
-import adaptableFontsize from "./utils/adaptableFontsize.js";
+import useResponsiveFontSize from "./utils/useResponsiveFontSize.js";
 
 
 const Home = () => {
@@ -130,7 +130,7 @@ const Home = () => {
     const [showGalleryFullImage, setShowGalleryFullImage] = useState(false); // 图鉴图片的内容设置
     const [galleryCard, setGalleryCard] = useState(null);
 
-    const fontsize = adaptableFontsize();
+    const fontsize = useResponsiveFontSize();
 
 
 
