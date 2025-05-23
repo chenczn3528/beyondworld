@@ -105,19 +105,7 @@ button:focus-visible {
 
 
 
-.black-mask-ellipse {
-  width: 100%;        /* 16:9 宽高比的容器建议你在父级限制 */
-  aspect-ratio: 16 / 9;
-  position: relative;
 
-  background:
-    radial-gradient(
-      ellipse 60% 40% at 35% 50%,    /* 椭圆: 60%宽，40%高，中心在左偏35%，垂直居中50% */
-      rgba(0, 0, 0, 0) 0%,           /* 中心完全透明 */
-      rgba(0, 0, 0, 0.9) 80%,        /* 80%处变成接近黑 */
-      rgba(0, 0, 0, 1) 100%          /* 边缘全黑 */
-    );
-}
 
 
 

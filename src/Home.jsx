@@ -14,13 +14,10 @@ import CardFullImage from "./components/CardFullImage.jsx";
 import GalleryFullImage from "./components/GalleryFullImage.jsx";
 import DetailedImage from "./components/DetailedImage.jsx";
 import GalleryPage from "./components/GalleryPage.jsx";
+import adaptableFontsize from "./utils/adaptableFontsize.js";
 
 
 const Home = () => {
-
-    useEffect(()=>{
-        forceLandscape();
-    },[])
 
 
     const { valuesList } = useMemo(() => {
@@ -133,7 +130,7 @@ const Home = () => {
     const [showGalleryFullImage, setShowGalleryFullImage] = useState(false); // 图鉴图片的内容设置
     const [galleryCard, setGalleryCard] = useState(null);
 
-
+    const fontsize = adaptableFontsize();
 
 
 
@@ -571,11 +568,7 @@ const getRandomCard = (
     // ========================================================
     // 返回数据时显示的页面
     return (
-        <div
-            id="app"
-            className="relative w-full h-full cursor-pointer overflow-hidden outline-none focus:outline-none"
-            tabIndex={0}
-        >
+        <div className="w-full h-full relative overflow-hidden">
             {/* 视频层（最底层） */}
             <video
                 preload="auto"
@@ -585,100 +578,108 @@ const getRandomCard = (
                 muted
                 controls={false}
                 onEnded={() => {
-                  const validDrawId = drawSessionIdRef.current;
-                  if (!validDrawId) return;
-                  setisAnimatingDrawCards(false);
-                  drawSessionIdRef.current = 0; // 重置流程 ID，防止后续重复触发
+                    const validDrawId = drawSessionIdRef.current;
+                    if (!validDrawId) return;
+                    setisAnimatingDrawCards(false);
+                    drawSessionIdRef.current = 0; // 重置流程 ID，防止后续重复触发
                 }}
-                className="fixed top-0 left-0 w-full h-full object-cover">
-                <source src="https://cdn.chenczn3528.dpdns.org/beyondworld/videos/background.mp4" type="video/mp4"/>
+                className="absolute w-full h-full object-cover">
+                {/*<source src="https://cdn.chenczn3528.dpdns.org/beyondworld/videos/background.mp4" type="video/mp4"/>*/}
+                <source src="videos/background.mp4" type="video/mp4"/>
+
             </video>
 
 
-            {/* 抽卡动画层 */}
-            {showAnimationDrawCards && (
-              <DrawAnimationCards
-                isFiveStar={hasFiveStarAnimation}
-                onAnimationEnd={handleDrawCardsAnimationEnd}
-              />
-            )}
+            {/*/!* 抽卡动画层 *!/*/}
+            {/*{showAnimationDrawCards && (*/}
+            {/*  <DrawAnimationCards*/}
+            {/*    isFiveStar={hasFiveStarAnimation}*/}
+            {/*    onAnimationEnd={handleDrawCardsAnimationEnd}*/}
+            {/*  />*/}
+            {/*)}*/}
 
-            {/*十抽后结算层*/}
-            {showSummary && drawResultsRef.current.length > 1 && (
-                <CardSummary
-                    drawResults={drawResultsRef.current}  // 传递卡片数据
-                    onClose={() => setShowSummary(false)}  // 关闭总结页面的回调
-                    setHasShownSummary={setHasShownSummary}
-                    setShowSummary={setShowSummary}
-                    handleDraw={handleDraw}
-                    handleStartDraw={handleStartDraw}
-                />
-            )}
+            {/*/!*十抽后结算层*!/*/}
+            {/*{showSummary && drawResultsRef.current.length > 1 && (*/}
+            {/*    <CardSummary*/}
+            {/*        drawResults={drawResultsRef.current}  // 传递卡片数据*/}
+            {/*        onClose={() => setShowSummary(false)}  // 关闭总结页面的回调*/}
+            {/*        setHasShownSummary={setHasShownSummary}*/}
+            {/*        setShowSummary={setShowSummary}*/}
+            {/*        handleDraw={handleDraw}*/}
+            {/*        handleStartDraw={handleStartDraw}*/}
+            {/*    />*/}
+            {/*)}*/}
 
-            {/*抽卡展示卡片*/}
-            <CardOverlay
-                showCardOverlay={showCardOverlay}
-                setShowCardOverlay={setShowCardOverlay}
-                currentCardIndex={currentCardIndex}
-                drawResultsRef={drawResultsRef}
-                handleNextCard={handleNextCard}
-                isSkipped={isSkipped}
-                setIsSkipped={setIsSkipped}
-                currentIndex={currentCardIndex}
-                setCurrentIndex={setCurrentCardIndex}
-            />
+            {/*/!*抽卡展示卡片*!/*/}
+            {/*<CardOverlay*/}
+            {/*    showCardOverlay={showCardOverlay}*/}
+            {/*    setShowCardOverlay={setShowCardOverlay}*/}
+            {/*    currentCardIndex={currentCardIndex}*/}
+            {/*    drawResultsRef={drawResultsRef}*/}
+            {/*    handleNextCard={handleNextCard}*/}
+            {/*    isSkipped={isSkipped}*/}
+            {/*    setIsSkipped={setIsSkipped}*/}
+            {/*    currentIndex={currentCardIndex}*/}
+            {/*    setCurrentIndex={setCurrentCardIndex}*/}
+            {/*/>*/}
 
-            {/*展示历史记录*/}
-            <HistoryModal
-                showHistory={showHistory}
-                setShowHistory={setShowHistory}
-                history={history}
-            />
+            {/*/!*展示历史记录*!/*/}
+            {/*<HistoryModal*/}
+            {/*    showHistory={showHistory}*/}
+            {/*    setShowHistory={setShowHistory}*/}
+            {/*    history={history}*/}
+            {/*/>*/}
 
-            {/*展示图鉴中的图片*/}
-            <GalleryPage
-                cards={galleryHistory}
-                showGallery={showGallery}
-                setShowGallery={setShowGallery}
-                showGalleryFullImage={showGalleryFullImage}
-                setShowGalleryFullImage={setShowGalleryFullImage}
-                galleryCard={galleryCard}
-                setGalleryCard={setGalleryCard}
-            />
+            {/*/!*展示图鉴中的图片*!/*/}
+            {/*<GalleryPage*/}
+            {/*    cards={galleryHistory}*/}
+            {/*    showGallery={showGallery}*/}
+            {/*    setShowGallery={setShowGallery}*/}
+            {/*    showGalleryFullImage={showGalleryFullImage}*/}
+            {/*    setShowGalleryFullImage={setShowGalleryFullImage}*/}
+            {/*    galleryCard={galleryCard}*/}
+            {/*    setGalleryCard={setGalleryCard}*/}
+            {/*/>*/}
 
-            <GalleryFullImage
-              card={galleryCard}
-              showGalleryFullImage={showGalleryFullImage}
-              setShowGalleryFullImage={setShowGalleryFullImage}
-            />
+            {/*<GalleryFullImage*/}
+            {/*  card={galleryCard}*/}
+            {/*  showGalleryFullImage={showGalleryFullImage}*/}
+            {/*  setShowGalleryFullImage={setShowGalleryFullImage}*/}
+            {/*/>*/}
 
 
             {showDetailedImage && (
               <DetailedImage
                 card={detailedImage}  // 确保传递 fullImage，而不是其他东西
                 onClose={() => setShowDetailedImage(false)}
+                fontsize={fontsize}
               />
             )}
 
 
-            {/*展示筛选卡片页*/}
-            <CardPoolFilter
-                selectedRole={selectedRole}
-                setSelectedRole={setSelectedRole}
-                useSoftGuarantee={useSoftGuarantee}
-                setUseSoftGuarantee={setUseSoftGuarantee}
-                includeThreeStar={includeThreeStar}
-                setIncludeThreeStar={setIncludeThreeStar}
-                includeThreeStarM={includeThreeStarM}
-                setIncludeThreeStarM={setIncludeThreeStarM}
-                onlySelectedRoleCard={onlySelectedRoleCard}
-                setOnlySelectedRoleCard={setOnlySelectedRoleCard}
-                showCardPoolFilter={showCardPoolFilter}
-                setShowCardPoolFilter={setShowCardPoolFilter}
-                valuesList={valuesList}
-                selectedPools={selectedPools}
-                setSelectedPools={setSelectedPools}
-            />
+            {/*/!*展示筛选卡片页*!/*/}
+            {/*<CardPoolFilter*/}
+            {/*    selectedRole={selectedRole}*/}
+            {/*    setSelectedRole={setSelectedRole}*/}
+            {/*    useSoftGuarantee={useSoftGuarantee}*/}
+            {/*    setUseSoftGuarantee={setUseSoftGuarantee}*/}
+            {/*    includeThreeStar={includeThreeStar}*/}
+            {/*    setIncludeThreeStar={setIncludeThreeStar}*/}
+            {/*    includeThreeStarM={includeThreeStarM}*/}
+            {/*    setIncludeThreeStarM={setIncludeThreeStarM}*/}
+            {/*    onlySelectedRoleCard={onlySelectedRoleCard}*/}
+            {/*    setOnlySelectedRoleCard={setOnlySelectedRoleCard}*/}
+            {/*    showCardPoolFilter={showCardPoolFilter}*/}
+            {/*    setShowCardPoolFilter={setShowCardPoolFilter}*/}
+            {/*    valuesList={valuesList}*/}
+            {/*    selectedPools={selectedPools}*/}
+            {/*    setSelectedPools={setSelectedPools}*/}
+            {/*/>*/}
+
+
+
+
+
 
             {/* 控件层（中间层） */}
             <SettingsLayer
@@ -715,6 +716,7 @@ const getRandomCard = (
                 setDetailedImage={setDetailedImage}
                 showGallery={showGallery}
                 setShowGallery={setShowGallery}
+                fontsize={fontsize}
             />
 
         </div>

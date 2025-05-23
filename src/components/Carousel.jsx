@@ -2,7 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import DetailedImage from './DetailedImage.jsx';
 import {playClickSound} from "../utils/playClickSound.js";
 
-const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage, detailedImage, setDetailedImage }) => {
+const Carousel = ({
+    cardData,
+    // showDetailedImage,
+    setShowDetailedImage,
+    // detailedImage,
+    setDetailedImage,
+    fontsize,
+}) => {
 
   const [current, setCurrent] = useState(2); // 默认中间是第三张图片
   const startX = useRef(0);
@@ -11,11 +18,17 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage, detailedI
 
 
 
-  const rarityMap = {
-      世界: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png',
-      月: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png',
-      辰星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png',
-      星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png',
+  // const rarityMap = {
+  //     世界: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png',
+  //     月: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png',
+  //     辰星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png',
+  //     星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png',
+  //   };
+    const rarityMap = {
+        世界: 'images/world.png',
+        月: 'images/moon.png',
+        辰星: 'images/star1.png',
+        星: 'images/star2.png',
     };
 
     const timerRef = useRef(null);
@@ -124,13 +137,7 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage, detailedI
     return (
         <div
             key={index}
-            style={{
-              ...baseStyle,
-              transform,
-              zIndex: zIndex,
-              maxWidth: '100%',
-              maxHeight: '100%',
-            }}
+            style={{...baseStyle, transform, zIndex: zIndex,}}
             className="cursor-pointer flex items-center justify-center"
         >
           <div className="relative">
@@ -138,7 +145,8 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage, detailedI
             <img
                 src={card.图片信息[0]?.src}
                 alt={`slide-${index}`}
-                className="max-w-full max-h-full object-contain rounded-lg shadow-xl edge-blur-mask"
+                className="object-contain rounded-lg shadow-xl edge-blur-mask"
+                style={{width: `${fontsize * 20}vmin`}}
                 onClick={() => {
                   playClickSound();
                   if (index === current) {
@@ -150,13 +158,16 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage, detailedI
                 }}
             />
 
-              <div className="absolute flex flex-row justify-end top-[0vmin] right-[2vmin]">
+              <div
+                  className="absolute flex flex-row justify-end"
+                  style={{top: `${fontsize / 4}vmin`, right: `${fontsize / 3}vmin`}}
+              >
                   {/* 卡片标题 */}
                 <label
                     className="font-normal"
                     style={{
                       color: 'white',
-                      fontSize: '2.5vmin',
+                      fontSize: `${fontsize * 0.8}vmin`,
                       fontWeight: 800,
                       textAlign: 'right', // 文字右对齐
                       textShadow: '0 0 2px gray, 0 0 4px gray',
@@ -166,13 +177,11 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage, detailedI
                 </label>
                 {/* 稀有度角标 */}
                 <img
-                    className="w-[8vmin] h-auto"
                     src={rarityMap[card.稀有度]}
+                    style={{width: `${fontsize * 3}vmin`}}
                     alt="Rarity Badge"
                 />
               </div>
-
-
           </div>
         </div>
 
@@ -186,12 +195,10 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage, detailedI
   };
 
   return (
-      <div className="w-full bg-black flex items-center justify-center relative">
+      <div >
 
         {/* 将轮播图居中，使用 absolute 定位 */}
         <div
-            className="absolute w-[150vmin] h-[150vmin] left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2
-             bg-transparent flex items-center justify-center overflow-hidden"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -199,7 +206,7 @@ const Carousel = ({ cardData,showDetailedImage , setShowDetailedImage, detailedI
             onMouseMove={(e) => e.buttons === 1 && handleTouchMove(e)}
             onMouseUp={handleTouchEnd}
         >
-          <div className="relative w-full h-full flex items-center justify-center">
+          <div >
             {/* 渲染卡片 */}
             {cardData.map((card, index) => renderImage(card, index))}
           </div>

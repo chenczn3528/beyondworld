@@ -12,7 +12,8 @@ const CardSummary = ({ drawResults, onClose, setShowSummary, setHasShownSummary,
   const [showFullImage, setShowFullImage] = useState(false);
 
   useEffect(() => {
-    summaryAudioRef.current = new Audio("https://cdn.chenczn3528.dpdns.org/beyondworld/audios/展示总结音效.mp3");
+    // summaryAudioRef.current = new Audio("https://cdn.chenczn3528.dpdns.org/beyondworld/audios/展示总结音效.mp3");
+    summaryAudioRef.current = new Audio("audios/展示总结音效.mp3");
     summaryAudioRef.current.volume = 1;
     summaryAudioRef.current.currentTime = 0;
 
@@ -68,7 +69,8 @@ const CardSummary = ({ drawResults, onClose, setShowSummary, setHasShownSummary,
     >
       {/*底部图片（绝对定位） */}
       <img
-        src="https://cdn.chenczn3528.dpdns.org/beyondworld/images/background.png"
+        // src="https://cdn.chenczn3528.dpdns.org/beyondworld/images/background.png"
+        src="images/background.png"
         alt="底部装饰"
         className="absolute z-30 w-full h-full opacity-100"
       />
@@ -114,13 +116,20 @@ const CardSummary = ({ drawResults, onClose, setShowSummary, setHasShownSummary,
 
                           <img
                               src={
-                                card.card.稀有度 === "世界"
-                                    ? "https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png"
+                                // card.card.稀有度 === "世界"
+                                //     ? "https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png"
+                                //     : card.card.稀有度 === "月"
+                                //         ? "https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png"
+                                //         : card.card.稀有度 === "辰星"
+                                //             ? "https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png"
+                                //             : "https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png"
+                                  card.card.稀有度 === "世界"
+                                    ? "images/world.png"
                                     : card.card.稀有度 === "月"
-                                        ? "https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png"
+                                        ? "images/moon.png"
                                         : card.card.稀有度 === "辰星"
-                                            ? "https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png"
-                                            : "https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png"
+                                            ? "images/star1.png"
+                                            : "images/star2.png"
                               }
                               className="absolute top-[-3vmin] right-[0] w-[8vmin] h-auto z-10"
                           />
@@ -132,7 +141,8 @@ const CardSummary = ({ drawResults, onClose, setShowSummary, setHasShownSummary,
                               }}
                           >
                             <img
-                                src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${card.card.属性}.png`}
+                                // src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${card.card.属性}.png`}
+                                src={`images/60px-${card.card.属性}.png`}
                                 className="w-[4vmin] h-auto"
                                 alt="属性图标"
                             />

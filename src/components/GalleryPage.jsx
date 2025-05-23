@@ -56,13 +56,19 @@ const GalleryPage = ({ cards, showGallery, setShowGallery, showGalleryFullImage,
     }, [scrollT]);
 
 
-    const rarityMap = {
-      世界: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png',
-      月: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png',
-      辰星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png',
-      星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png',
-    };
+    // const rarityMap = {
+    //   世界: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png',
+    //   月: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png',
+    //   辰星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png',
+    //   星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png',
+    // };
 
+    const rarityMap = {
+        世界: 'images/world.png',
+        月: 'images/moon.png',
+        辰星: 'images/star1.png',
+        星: 'images/star2.png',
+    };
 
     return (
         showGallery && (
@@ -110,7 +116,8 @@ const GalleryPage = ({ cards, showGallery, setShowGallery, showGalleryFullImage,
                                 <label style={{fontSize: '4vmin'}}>{cards[currentCardIndex]?.主角}</label>
                                 <div className="flex flex-row gap-[1vmin]">
                                     <img
-                                        src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${cards[currentCardIndex]?.属性}.png`}
+                                        // src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${cards[currentCardIndex]?.属性}.png`}
+                                        src={`images/60px-${cards[currentCardIndex]?.属性}.png`}
                                         className="w-[7vmin] h-auto"
                                     />
                                     <label style={{fontSize: '6vmin'}}>{cards[currentCardIndex]?.卡名}</label>
@@ -201,7 +208,8 @@ const GalleryPage = ({ cards, showGallery, setShowGallery, showGalleryFullImage,
                             {imageAttr && (
                                 <div>
                                     <img
-                                        src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${imageAttr}.png`}
+                                        // src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${imageAttr}.png`}
+                                        src={`images/60px-${imageAttr}.png`}
                                         className="absolute w-[5vmin]"
                                         style={{
                                             left: `${x + 1}vmin`,

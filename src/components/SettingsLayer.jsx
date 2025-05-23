@@ -37,7 +37,12 @@ const SettingsLayer = ({
     setDetailedImage,
     showGallery,
     setShowGallery,
+    fontsize,
 }) => {
+
+
+
+
 
 
     const filtered_cardData = cardData.filter(card => card.稀有度 === '世界');
@@ -62,46 +67,44 @@ const SettingsLayer = ({
 
     return (
         <div
-            id="app"
-            style={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                outline: 'none',
-                overflow: 'visible',
-                filter: showDetailedImage ? 'blur(5px)' : 'none', transition: 'filter 0.3s ease'
-            }}
+            className="absolute w-full h-full"
+            style={{filter: showDetailedImage ? 'blur(5px)' : 'none', transition: 'filter 0.3s ease'}}
         >
 
+
             {/*主页显示卡片轮播图*/}
-            <div className="mt-[12vmin]">
+            <div
+                className="absolute flex justify-center"
+                style={{
+                    top: `${fontsize * 6}vmin`,
+                    bottom: `${fontsize * 6}vmin`,
+                    left: `${fontsize * 6}vmin`,
+                    right: `${fontsize * 6}vmin`,
+            }}
+            >
                 <Carousel
                     cardData={filtered_cardData}
-                    showDetailedImage={showDetailedImage}
+                    // showDetailedImage={showDetailedImage}
                     setShowDetailedImage={setShowDetailedImage}
-                    detailedImage={detailedImage}
+                    // detailedImage={detailedImage}
                     setDetailedImage={setDetailedImage}
+                    fontsize={fontsize}
                 />
             </div>
 
 
             {/*抽卡按钮*/}
             <div
-                className="absolute flex  justify-center bottom-[10vmin] w-full"
-                style={{
-                    zIndex: showDetailedImage ? 2 : 4, // 确保按钮在动画下方
-                }}
-            >
+                className="absolute flex justify-center bottom-[8vmin] gap-[4vmin] left-[4vmin] right-[4vmin]"
+                style={{zIndex: showDetailedImage ? 2 : 4,}}>
                 <button
-                    className="mr-[1vmin] items-center justify-center" style={{
-                    fontSize: '3vmin',
-                    backgroundColor: 'rgba(122,138,166,0.8)', // 或者用 Tailwind 的 bg-yellow-400
-                    boxShadow: '0 0 10px #111214, 0 0 20px #111214',
-                    color: 'white',
-                    textShadow: '0 0 5px gray'
-                }}
+                    style={{
+                        fontSize: `${fontsize}vmin`,
+                        backgroundColor: 'rgba(122,138,166,0.8)',
+                        boxShadow: '0 0 10px #111214, 0 0 20px #111214',
+                        color: 'white',
+                        textShadow: '0 0 5px gray'
+                    }}
                     onClick={() => {
                         setHasShownSummary(false);
                         setShowSummary(false);
@@ -113,9 +116,8 @@ const SettingsLayer = ({
                 </button>
 
                 <button
-                    className="ml-[1vmin] items-center justify-center"
                     style={{
-                        fontSize: '3vmin',
+                        fontSize: `${fontsize}vmin`,
                         backgroundColor: 'rgba(239,218,160,0.8)', // 或者用 Tailwind 的 bg-yellow-400
                         boxShadow: '0 0 10px gold, 0 0 20px gold',
                         color: 'white',
@@ -135,11 +137,12 @@ const SettingsLayer = ({
 
 
             {/*最上层按钮和文字*/}
-            <div className="absolute flex flex-row w-full justify-between top-[5vmin]">
-                <div className="flex items-start justify-start gap-[1vmin] ml-[10vmin]">
+            <div className="absolute flex flex-row justify-between top-[4vmin] left-[4vmin] right-[4vmin]">
+                {/*左侧按钮*/}
+                <div className="flex items-start justify-start gap-[1vmin]">
                     <button
                         style={{
-                            fontSize: '3vmin',
+                            fontSize: `${fontsize}vmin`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -154,7 +157,7 @@ const SettingsLayer = ({
 
                     <button
                         style={{
-                            fontSize: '3vmin',
+                            fontSize: `${fontsize}vmin`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -171,7 +174,7 @@ const SettingsLayer = ({
                     <button
                         style={{
                             marginLeft: '3vmin',
-                            fontSize: '3vmin',
+                            fontSize: `${fontsize}vmin`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -188,8 +191,8 @@ const SettingsLayer = ({
 
                     <button
                         style={{
-                            marginLeft: '10vmin',
-                            fontSize: '3vmin',
+                            marginLeft: '6vmin',
+                            fontSize: `${fontsize}vmin`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -200,13 +203,12 @@ const SettingsLayer = ({
                     </button>
                 </div>
 
-
                 {/* 保底显示 */}
-                <div className="flex flex-col mr-[10vmin]">
+                <div className="flex flex-col">
                     <div
                         className="flex items-center justify-end text-white font-extrabold"
                         style={{
-                            fontSize: '3vmin',
+                            fontSize: `${fontsize}vmin`,
                             color: 'white',
                             textShadow: `
                                 0 0 10px gold,
@@ -217,17 +219,19 @@ const SettingsLayer = ({
                             `
                         }}
                     >
-                        <label className="text-shadow" style={{fontSize: '4.5vmin'}}> {70 - pityCount} </label>
+                        <label className="text-shadow"
+                               style={{fontSize: `${fontsize * 1.5}vmin`,}}> {70 - pityCount} </label>
                         <label className="text-shadow"> 次感召必出 </label>
-                        <img src="https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png" className="w-[8vmin] h-auto"/>
-                        <label className="text-shadow"> 侧影 </label>
+                        {/*<img src="https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png" style={{width: `${fontsize * 3}vmin`}}/>*/}
+                        <img src="images/world.png" style={{width: `${fontsize * 3}vmin`}}/>
+                        <label className="text-shadow">侧影</label>
                     </div>
 
                     {/*总抽卡数、总出金数、平均出金数*/}
                     <div
-                        className="flex items-center justify-end font-extrabold gap-[1.5vmin]"
+                        className="flex items-center justify-end gap-[1.5vmin]"
                         style={{
-                            fontSize: '2.5vmin',
+                            fontSize: `${fontsize * 0.8}vmin`,
                             color: 'white',
                             textShadow: '0 0 10px gold'
                         }}
@@ -235,15 +239,15 @@ const SettingsLayer = ({
                         <label className="text-shadow"> 总抽卡数：{totalDrawCount}</label>
                         <label className="text-shadow">总出金数：{totalFiveStarCount}</label>
                         <label className="text-shadow">平均出金数: {totalFiveStarCount === 0 ?
-                            '0' : (totalDrawCount / totalFiveStarCount).toFixed(2)}</label>
-
+                            '0' : (totalDrawCount / totalFiveStarCount).toFixed(2)}
+                        </label>
                     </div>
 
                     {/*保底显示*/}
                     <div
-                        className="flex items-center justify-end font-extrabold"
+                        className="flex items-center justify-end"
                         style={{
-                            fontSize: '2.5vmin',
+                            fontSize: `${fontsize * 0.8}vmin`,
                             color: 'white',
                             textShadow: '0 0 10px gold'
                         }}
@@ -263,15 +267,14 @@ const SettingsLayer = ({
                         )}
                     </div>
                 </div>
-
-
             </div>
 
-            <div className="absolute bottom-[5vmin] left-[10vmin] flex flex-col">
+            {/*左下反馈*/}
+            <div className="absolute bottom-[4vmin] left-[4vmin] flex flex-col">
                 <label
                     className="mb-[2vmin]"
                     style={{
-                        fontSize: '3vmin',
+                        fontSize: `${fontsize}vmin`,
                         color: 'white',
                         textShadow: '0 0 10px gold'
                     }}
@@ -280,7 +283,7 @@ const SettingsLayer = ({
                 </label>
                 <button
                     style={{
-                        fontSize: '3vmin',
+                        fontSize: `${fontsize}vmin`,
                         backgroundColor: 'rgba(255,255,255,0.2)',
                         boxShadow: '0 0 10px #111214, 0 0 20px #111214',
                         color: 'white',
@@ -302,8 +305,6 @@ const SettingsLayer = ({
                     {copyState === 0 ? "复制小红书号" : copyState === 1 ? "复制成功" : "复制失败" }
                 </button>
             </div>
-
-
         </div>
     );
 };
