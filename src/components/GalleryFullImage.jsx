@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { forceLandscape, useDynamicRem } from 'single-screen-utils';
 import StarIcon from "../icons/StarIcon.jsx";

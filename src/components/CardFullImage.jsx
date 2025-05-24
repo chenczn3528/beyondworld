@@ -1,6 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
-import { forceLandscape, useDynamicRem } from 'single-screen-utils';
 
 const CardFullImage = (
     {

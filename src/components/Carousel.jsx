@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import DetailedImage from './DetailedImage.jsx';
 import {playClickSound} from "../utils/playClickSound.js";
 
 const Carousel = ({
