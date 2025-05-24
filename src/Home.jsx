@@ -6,7 +6,6 @@ import SettingsLayer from "./components/SettingsLayer.jsx";
 import DrawAnimationCards from "./components/DrawAnimationCards.jsx";
 import CardOverlay from "./components/CardOverlay.jsx";
 import HistoryModal from "./components/HistoryModal.jsx";
-import { forceLandscape, useDynamicRem } from 'single-screen-utils';
 import CardSummary from "./components/CardSummary.jsx";
 import CardPoolFilter from "./components/CardPoolFilter.jsx";
 import {getAvailablePools, getDynamicAttributeCounts} from "./utils/cardDataUtils.js";
@@ -607,6 +606,7 @@ const getRandomCard = (
                     setShowSummary={setShowSummary}
                     handleDraw={handleDraw}
                     handleStartDraw={handleStartDraw}
+                    fontsize={fontsize}
                 />
             )}
 
@@ -621,6 +621,7 @@ const getRandomCard = (
                 setIsSkipped={setIsSkipped}
                 currentIndex={currentCardIndex}
                 setCurrentIndex={setCurrentCardIndex}
+                fontsize={fontsize}
             />
 
             {/*展示历史记录*/}
@@ -631,16 +632,17 @@ const getRandomCard = (
                 fontsize={fontsize}
             />
 
-            {/*/!*展示图鉴中的图片*!/*/}
-            {/*<GalleryPage*/}
-            {/*    cards={galleryHistory}*/}
-            {/*    showGallery={showGallery}*/}
-            {/*    setShowGallery={setShowGallery}*/}
-            {/*    showGalleryFullImage={showGalleryFullImage}*/}
-            {/*    setShowGalleryFullImage={setShowGalleryFullImage}*/}
-            {/*    galleryCard={galleryCard}*/}
-            {/*    setGalleryCard={setGalleryCard}*/}
-            {/*/>*/}
+            {/*展示图鉴中的图片*/}
+            <GalleryPage
+                cards={galleryHistory}
+                showGallery={showGallery}
+                setShowGallery={setShowGallery}
+                showGalleryFullImage={showGalleryFullImage}
+                setShowGalleryFullImage={setShowGalleryFullImage}
+                galleryCard={galleryCard}
+                setGalleryCard={setGalleryCard}
+                fontsize={fontsize}
+            />
 
             {/*<GalleryFullImage*/}
             {/*  card={galleryCard}*/}

@@ -17,14 +17,14 @@ const useResponsiveFontSize = () => {
 
     let base, scale, min, max;
 
-    if (shorter < 400) {
+    if (shorter < 500) {
       base = 30;
       scale = 0.85;
       min = 12;
       max = 20;
     } else if (shorter < 600) {
-      base = 25;
-      scale = 0.95;
+      base = 34;
+      scale = 0.85;
       min = 14;
       max = 24;
     } else {

@@ -4,7 +4,22 @@ import clsx from "clsx";
 import CardFullImage from "./CardFullImage.jsx";
 import {playClickSound} from "../utils/playClickSound.js";
 
-const CardSummary = ({ drawResults, onClose, setShowSummary, setHasShownSummary, handleDraw, handleStartDraw }) => {
+const CardSummary = ({
+    drawResults,
+    onClose,
+    setShowSummary,
+    setHasShownSummary,
+    handleDraw,
+    handleStartDraw,
+    fontsize,
+}) => {
+
+    let scale = 0.65;
+    const picWidthRatio = 16 * scale;
+    const picHeightRatio = 9 * scale;
+
+
+
   // ========================================================
   // 设置音效
   const summaryAudioRef = useRef(null);
@@ -63,21 +78,27 @@ const CardSummary = ({ drawResults, onClose, setShowSummary, setHasShownSummary,
   });
 
   return (
-    <div
-      className="flex top-[0] left-[0] items-center justify-center w-full h-full"
-      style={{ border: "red 2px" }}
-    >
+    <div className="absolute w-full h-full flex items-center justify-center">
       {/*底部图片（绝对定位） */}
       <img
         // src="https://cdn.chenczn3528.dpdns.org/beyondworld/images/background.png"
         src="images/background.png"
         alt="底部装饰"
-        className="absolute z-30 w-full h-full opacity-100"
+        className="absolute z-30 w-full h-full"
       />
 
-      <div className="fixed inset-0 z-30 mt-[-10vmin]">
+        {/*结算图片*/}
+      <div
+          className="absolute z-30"
+          style={{
+              bottom: `${fontsize * 6.5}px`,
+              top: `${fontsize * 2.5}px`,
+              left: `${fontsize * 2.5}px`,
+              right: `${fontsize * 2.5}px`
+      }}
+      >
         {grid.map((row, rowIndex) => (
-          <div key={rowIndex} className="flex justify-center z-20">
+          <div key={rowIndex} className="flex justify-center z-20" style={{marginTop: `${fontsize * 1}px`,marginBottom: `${fontsize * 0.5}px`, gap: `${fontsize}px`}}>
             {row.map((card, colIndex) => {
               let glowStyle = {};
 
@@ -92,12 +113,7 @@ const CardSummary = ({ drawResults, onClose, setShowSummary, setHasShownSummary,
               }
 
               return (
-                  <div
-                      key={colIndex}
-                      className={clsx(
-                          "shadow-lg flex items-center justify-center relative mb-[4vmin] mr-[3vmin]",
-                      )}
-                  >
+                  <div key={colIndex} className={clsx("relative flex items-center justify-center")}>
                     {card && (
                         <>
                           <LazyLoadImage
@@ -105,8 +121,8 @@ const CardSummary = ({ drawResults, onClose, setShowSummary, setHasShownSummary,
                               placeholderSrc={card.card.图片信息[0].src}
                               effect="blur"
                               alt={card.card.卡名}
-                              className="w-[36vmin] h-auto object-contain flex justify-center"
-                              style={glowStyle}
+                              className="object-contain flex justify-center"
+                              style={{...glowStyle, maxWidth: `${fontsize * picWidthRatio}px`, maxHeight: `${fontsize * picHeightRatio}px`}}
                               onClick={()=>{
                                   playClickSound();
                                   setFullImage(card.card);
@@ -131,34 +147,32 @@ const CardSummary = ({ drawResults, onClose, setShowSummary, setHasShownSummary,
                                             ? "images/star1.png"
                                             : "images/star2.png"
                               }
-                              className="absolute top-[-3vmin] right-[0] w-[8vmin] h-auto z-10"
+                              className="absolute h-auto z-10"
+                              style={{top: `${fontsize * -1.1}px`, right: "0px", height: `${fontsize * 2.5}px`,}}
                           />
 
                           <div
-                              className="absolute top-[0vmin] left-[0vmin] w-[5vmin] h-[5vmin] rounded-full flex items-center justify-center z-10"
-                              style={{
-                                background: "radial-gradient(circle, rgba(256,256,256,0.5) 0%, rgba(128,128,128,0) 60%)",
-                              }}
+                              className="absolute top-[0] left-[0] rounded-full flex items-center justify-center z-10"
+                              style={{background: "radial-gradient(circle, rgba(256,256,256,0.5) 0%, rgba(128,128,128,0) 60%)"}}
                           >
                             <img
                                 // src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${card.card.属性}.png`}
                                 src={`images/60px-${card.card.属性}.png`}
-                                className="w-[4vmin] h-auto"
+                                style={{height: `${fontsize * 1.5}px`}}
                                 alt="属性图标"
                             />
                           </div>
 
                           <div
-                              className="absolute bottom-[0.2vmin] left-[1vmin] flex flex-row z-10 items-center"
+                              className="absolute bottom-[0] left-[1px] flex flex-row z-10 items-center"
                               style={{
-                                fontSize: '2.5vmin',
+                                fontSize: `${fontsize * 0.8}px`,
                                 fontWeight: '800',
                                 color: 'white',
                                 textShadow: '0 0 2px gray, 0 0 4px gray',
                               }}
                           >
                             <label>{card.card.主角}·{card.card.卡名}</label>
-                            <label style={{fontSize: '3vmin'}}></label>
                           </div>
                         </>
                     )}
@@ -170,17 +184,19 @@ const CardSummary = ({ drawResults, onClose, setShowSummary, setHasShownSummary,
         ))}
       </div>
 
+        {/*按钮*/}
       <div
-          className="absolute inset-0 z-30 w-full bottom-[10vmin] flex items-center justify-center gap-[10vmin]"
+          className="absolute z-30 w-full flex items-center justify-center"
+          style={{bottom: `${fontsize * 2.5}px`, gap: `${fontsize * 4}px`}}
       >
         <button
             style={{
-              fontSize: '3vmin',
+              fontSize: `${fontsize}px`,
               backgroundColor: 'rgba(122,138,166,0.8)',
               boxShadow: '0 0 10px #111214, 0 0 20px #111214',
               color: 'white',
               textShadow: '0 0 5px gray',
-              width: '20vmin'
+              width: `${fontsize * 8}px`,
           }}
             onClick={()=>{playClickSound();onClose();}}
         >
@@ -188,12 +204,12 @@ const CardSummary = ({ drawResults, onClose, setShowSummary, setHasShownSummary,
         </button>
         <button
             style={{
-              fontSize: '3vmin',
+              fontSize: `${fontsize}px`,
               backgroundColor: 'rgba(239,218,160,0.8)',
               boxShadow: '0 0 10px gold, 0 0 20px gold',
               color: 'white',
               textShadow: '0 0 5px gray',
-              width: '20vmin'
+              width: `${fontsize * 8}px`,
           }}
             onClick={(e) => {
                         setHasShownSummary(false);
@@ -208,14 +224,18 @@ const CardSummary = ({ drawResults, onClose, setShowSummary, setHasShownSummary,
       </div>
 
 
-        {showFullImage && (
-        <CardFullImage
-            card={fullImage}  // 确保传递 fullImage，而不是其他东西
-            onClose={()=>{playClickSound(); setShowFullImage(false)}}
-            onClick={()=>{playClickSound(); setShowFullImage(false)}}
-            isShowCardResult={true}
-        />
-        )}
+        <div className="absolute w-full h-full">
+            {showFullImage && (
+            <CardFullImage
+                card={fullImage}  // 确保传递 fullImage，而不是其他东西
+                onClose={()=>{playClickSound(); setShowFullImage(false)}}
+                onClick={()=>{playClickSound(); setShowFullImage(false)}}
+                isShowCardResult={true}
+                fontsize={fontsize}
+            />
+            )}
+        </div>
+
 
     </div>
   );

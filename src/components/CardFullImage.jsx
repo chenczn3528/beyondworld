@@ -10,6 +10,7 @@ const CardFullImage = (
         setCurrentIndex,
         isSecondImage = false,
         isShowCardResult = false,
+        fontsize,
     }) => {
 
     // const rarityMap = {
@@ -30,27 +31,25 @@ const CardFullImage = (
 
     return (
         <div
-            id="app"
             style={{ backgroundColor: 'black' }}
-            className="fixed z-70 w-full h-full flex justify-center items-center"
+            className="relative w-full h-full flex z-100"
         >
             <LazyLoadImage
                 src={isSecondImage ? card.图片信息[1].srcset2 : card.图片信息[0].srcset2}
                 placeholderSrc={isSecondImage ? card.图片信息[1].src : card.图片信息[0].src}
                 effect="blur"
-                alt="Full View"
-                className="h-[100vmin] w-auto object-contain rounded-lg shadow-2xl"
+                className="w-full h-full object-cover"
                 onClick={onClick}
             />
+
 
             <img
                 className="absolute"
                 src={rarityMap[card.稀有度]}
                 style={{
-                    height: '12vmin',
-                    width: 'auto',
-                    left: '18vmin',
-                    top: '4vmin',
+                    height: `${fontsize * 5}px`,
+                    left: `${fontsize * 4}px`,
+                    top: `${fontsize * 2}px`,
                 }}
             />
 
@@ -58,10 +57,10 @@ const CardFullImage = (
                 className="absolute"
                 style={{
                     color: 'white',
-                    fontSize: '3.5vmin',
-                    fontWeight: 800,
-                    left: '20vmin',
-                    bottom: '20vmin',
+                    fontSize: `${fontsize * 1.5}px`,
+                    fontWeight: 600,
+                    left: `${fontsize * 5.5}px`,
+                    bottom: `${fontsize * 7.5}px`,
                     textShadow: '0 0 2px gray, 0 0 4px gray',
                 }}
             >
@@ -71,16 +70,16 @@ const CardFullImage = (
             <div
                 className="absolute flex items-center"
                 style={{
-                    left: '21vmin',
-                    bottom: '12vmin',
+                    left: `${fontsize * 7.5}px`,
+                    bottom: `${fontsize * 4.5}px`,
                 }}
             >
                 <label
                     style={{
                         color: 'white',
-                        fontSize: '5vmin',
+                        fontSize: `${fontsize * 2.3}px`,
                         fontWeight: 800,
-                        marginRight: '1vmin',
+                        marginRight: '1px',
                         textShadow: '0 0 2px gray, 0 0 4px gray',
                     }}
                 >
@@ -91,7 +90,7 @@ const CardFullImage = (
                     src={`images/60px-${card.属性}.png`}
                     alt="图标"
                     style={{
-                        height: '5vmin',
+                        height: `${fontsize * 3}px`,
                         width: 'auto',
                     }}
                 />
@@ -102,10 +101,11 @@ const CardFullImage = (
                     className="absolute"
                     style={{
                         backgroundColor: 'rgba(255,255,255,0.3)',
-                        right: '14vmin',
-                        top: '3vmin',
+                        right: `${fontsize * 3}px`,
+                        top: `${fontsize * 2}px`,
                         color: 'white',
-                        fontSize: '2vmin',
+                        fontSize: `${fontsize}px`,
+                        textShadow: '0 0 2px black, 0 0 4px black',
                     }}
                     onClick={() => {
                         setIsSkipped(true);

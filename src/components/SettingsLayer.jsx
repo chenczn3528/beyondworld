@@ -308,6 +308,14 @@ const SettingsLayer = ({
                     {copyState === 0 ? "复制小红书号" : copyState === 1 ? "复制成功" : "复制失败" }
                 </button>
             </div>
+
+
+            <div className="absolute flex flex-col items-end" style={{right: `${fontsize * 2}px`, bottom: `${fontsize * 2}px`, fontSize: fontsize}}>
+                <label style={{color: 'red', fontWeight: 800}}>重要提示：</label>
+                <label>手机请竖屏，平板请横屏</label>
+                <label>频繁旋转手机或平板可能会卡住</label>
+                <label>关掉重开或刷新可解决</label>
+            </div>
         </div>
     );
 };

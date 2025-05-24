@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
-import {forceLandscape} from "single-screen-utils";
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import LeftIcon from "../icons/LeftIcon.jsx";
 
-const GalleryPage = ({ cards, showGallery, setShowGallery, showGalleryFullImage, setShowGalleryFullImage, galleryCard, setGalleryCard }) => {
-
-    useEffect(()=>{
-        forceLandscape();
-    },[])
+const GalleryPage = ({
+    cards,
+    showGallery,
+    setShowGallery,
+    showGalleryFullImage,
+    setShowGalleryFullImage,
+    galleryCard,
+    setGalleryCard,
+    fontsize
+}) => {
 
     const [scrollT, setScrollT] = useState(0);
     const timeoutRef = useRef(null);
@@ -15,17 +19,17 @@ const GalleryPage = ({ cards, showGallery, setShowGallery, showGalleryFullImage,
     const paddingCount = 5; // 前后各留5张空白卡片
     const targetIndex = 1; // 希望第几张显示在视觉焦点位（第三张）
     const totalSlots = cards.length + paddingCount * 2;
-    const spacingFactor = 7.5; // 控制卡片间距
+    const spacingFactor = 12.5; // 控制卡片间距
 
     const rawIndex = Math.round(scrollT * (totalSlots - 1)) - paddingCount;
     const currentCardIndex = rawIndex + 1;
 
     // 控制路径和偏移参数（基于屏幕尺寸百分比）
-    const startX = 10;
-    const startY = 10;
-    const deltaX = 90;
-    const deltaY = 70;
-    const curveFactor = 20;
+    const startX = -10;
+    const startY = -5;
+    const deltaX = 100;
+    const deltaY = 80;
+    const curveFactor = 22;
 
     const scrollToIndex = (index) => {
         const targetSlot = index + paddingCount;
@@ -70,10 +74,19 @@ const GalleryPage = ({ cards, showGallery, setShowGallery, showGalleryFullImage,
         星: 'images/star2.png',
     };
 
+
+    const widthBias = fontsize * 0.25;
+    const heightBias = fontsize * 0.3;
+
+
+
+
+
+
+
     return (
         showGallery && (
             <div
-                id="app"
                 className="relative w-full h-full z-20"
                 onWheel={handleWheel}
                 style={{
@@ -83,44 +96,50 @@ const GalleryPage = ({ cards, showGallery, setShowGallery, showGalleryFullImage,
                 }}
             >
 
-                <button className="absolute z-[70] top-[5vmin] left-[8vmin] w-auto flex items-center justify-center"
+                {/*返回按钮*/}
+                <button className="absolute z-[70] w-auto flex items-center justify-center"
                         onClick={() => setShowGallery(false)}
                         style={{
                             background: 'transparent',
                             border: 'none',
                             padding: 10,
+                            top: `${fontsize * 1}px`,
+                            left: `${fontsize * 1}px`,
                         }}
                 >
-                    <LeftIcon size={36} color="white"/>
+                    <LeftIcon size={fontsize * 2} color="white"/>
                 </button>
 
-
-                <div className="absolute top-[0] right-[0] h-[100vmin] w-auto">
+                {/*大图*/}
+                <div className="relative w-full h-full flex">
                     <LazyLoadImage
                         src={cards[currentCardIndex]?.图片信息?.[0]?.srcset2}
                         placeholderSrc={cards[currentCardIndex]?.图片信息?.[0].src}
                         effect="blur"
                         alt="Full View"
-                        className="w-auto h-[130vmin] object-cover"
+                        className="w-full h-full object-cover"
                         onClick={() => {
                             setShowGalleryFullImage(!showGalleryFullImage);
                         }}
                     />
-                    <div className="absolute flex flex-row top-[5vmin] right-[3vmin] items-center">
+                    <div className="absolute flex flex-row items-center"
+                         style={{top: `${fontsize}px`, right: `${fontsize}px`}}>
                         <div className="flex flex-row">
 
                             <div
                                 className="flex flex-col items-end justify-end"
                                 style={{color: "white", textShadow: '0 0 2px gray, 0 0 4px gray', fontWeight: 800}}
                             >
-                                <label style={{fontSize: '4vmin'}}>{cards[currentCardIndex]?.主角}</label>
-                                <div className="flex flex-row gap-[1vmin]">
+                                <label style={{fontSize: `${fontsize}px`}}>{cards[currentCardIndex]?.主角}</label>
+                                <div className="flex flex-row gap-[1px]">
                                     <img
                                         // src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${cards[currentCardIndex]?.属性}.png`}
                                         src={`images/60px-${cards[currentCardIndex]?.属性}.png`}
-                                        className="w-[7vmin] h-auto"
+                                        className="h-auto"
+                                        style={{width: `${fontsize * 2}px`}}
                                     />
-                                    <label style={{fontSize: '6vmin'}}>{cards[currentCardIndex]?.卡名}</label>
+                                    <label
+                                        style={{fontSize: `${fontsize * 1.3}px`}}>{cards[currentCardIndex]?.卡名}</label>
                                 </div>
 
                             </div>
@@ -128,132 +147,145 @@ const GalleryPage = ({ cards, showGallery, setShowGallery, showGalleryFullImage,
 
                         <img
                             src={rarityMap[cards[currentCardIndex]?.稀有度]}
-                            className="w-[22vmin]"
+                            style={{width: `${fontsize * 5}px`}}
                         />
 
                     </div>
                 </div>
 
 
-                {Array.from({length: totalSlots}).map((_, i) => {
-                    const relativeIndex = (i - scrollT * (totalSlots - 1)) * spacingFactor;
-                    const t = relativeIndex / (totalSlots - 1);
 
-                    let opacity = 1;
-                    if (t < 0) opacity = Math.max(0, 1 + t);
-                    else if (t > 1) opacity = Math.max(0, 1 - (t - 1));
+                <div>
+                    {Array.from({length: totalSlots}).map((_, i) => {
+                        const relativeIndex = (i - scrollT * (totalSlots - 1)) * spacingFactor;
+                        const t = relativeIndex / (totalSlots - 1);
 
-                    const curveOffset = curveFactor * Math.sin(t * Math.PI);
-                    const x = startX + t * deltaX;
-                    const y = startY + t * deltaY + curveOffset;
-                    const defaultWhiteImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/WMZ+ZcAAAAASUVORK5CYII=";
+                        const curveOffset = curveFactor * Math.sin(t * Math.PI * 0.9);
+                        const x = startX + t * deltaX;
+                        const y = startY + t * deltaY + curveOffset;
+                        return (
+                            <div key={i}>
 
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        left: `${x * widthBias}px`,
+                                        top: `${y * heightBias}px`,
+                                        width: `${fontsize * 16 * 0.9}px`,
+                                        height: `${fontsize * 9 * 0.9}px`,
+                                        borderRadius: "0%", // 可选，加上更像扩散雾
+                                        background: "rgba(0,0,0,0.01)", // 有背景才能产生阴影
+                                        boxShadow: "0 0 100px 100px rgba(23, 25, 33, 0.4)",
+                                        pointerEvents: "none",
+                                        transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
+                                        zIndex: 1,
+                                    }}
+                                />
+                            </div>
 
-                    const cardIndex = i - paddingCount;
-                    const isRealImage = cardIndex >= 0 && cardIndex < cards.length;
-                    const imageSrc = isRealImage ? cards[cardIndex]["图片信息"][0].src : defaultWhiteImage;
-                    const imageAttr = isRealImage ? cards[cardIndex]["属性"] : null;
-                    const imageCardName = isRealImage ? cards[cardIndex]["卡名"] : null;
-                    const imageRarity = isRealImage ? cards[cardIndex]['稀有度'] : null;
-
-                    return (
-                        <div key={i} className="w-[50vmin] h-[40vmin]">
-                            <div
-                                style={{
-                                    position: "absolute",
-                                    left: `${x - 30}vmin`,
-                                    top: `${y}vmin`,
-                                    width: "34vmin",
-                                    height: "auto",
-                                    boxShadow: "0 0 100px 100px rgba(23, 25, 33, 40%)", // 调整阴影大小/浓度
-                                    zIndex: 0, // 放到最底层
-                                    pointerEvents: "none", // 避免遮挡鼠标交互
-                                }}
-                            />
-
-                            <div
-                                style={{
-                                    position: "absolute",
-                                    left: `${x - 60}vmin`,
-                                    top: `${y + 40}vmin`,
-                                    width: "80vmin",
-                                    height: "auto",
-                                    boxShadow: "0 0 100px 100px rgba(23, 25, 33, 60%)", // 调整阴影大小/浓度
-                                    zIndex: 0, // 放到最底层
-                                    pointerEvents: "none", // 避免遮挡鼠标交互
-                                }}
-                            />
-
-                            <img
-                                src={imageSrc}
-                                alt={`img-${i}`}
-                                onClick={() => {
-                                    if (isRealImage) scrollToIndex(cardIndex);
-                                }}
-                                className="edge-blur-mask"
-                                style={{
-                                    position: "absolute",
-                                    left: `${x}vmin`,
-                                    top: `${y}vmin`,
-                                    width: "36vmin",
-                                    height: "20vmin",
-                                    objectFit: "cover",
-                                    opacity,
-                                    cursor: isRealImage ? "pointer" : "default",
-                                    pointerEvents: isRealImage ? "auto" : "none",
-                                    transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
-                                    zIndex: totalSlots - i,
-                                }}
-                            />
-                            {imageAttr && (
-                                <div>
-                                    <img
-                                        // src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${imageAttr}.png`}
-                                        src={`images/60px-${imageAttr}.png`}
-                                        className="absolute w-[5vmin]"
-                                        style={{
-                                            left: `${x + 1}vmin`,
-                                            top: `${y + 1}vmin`,
-                                            zIndex: totalSlots - i,
-                                            transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
-                                        }}
-                                    />
-
-                                    <label
-                                        className="absolute"
-                                        style={{
-                                            fontSize: '3vmin',
-                                            color: 'white',
-                                            textShadow: '0 0 1px gray, 0 0 2px gray',
-                                            transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
-                                            zIndex: totalSlots - i,
-                                            left: `${x + 1}vmin`,
-                                            transform: 'translateY(-100%)',
-                                            top: `${y + 20}vmin`,
-                                        }}
-                                    >
-                                        {imageCardName}
-                                    </label>
-
-                                    <img
-                                        src={rarityMap[imageRarity]}
-                                        className="absolute w-[8vmin]"
-                                        style={{
-                                            left: `${x + 28}vmin`,
-                                            top: `${y}vmin`,
-                                            zIndex: totalSlots - i,
-                                            transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
-                                        }}
-                                    />
-                                </div>
+                        );
+                    })}
+                </div>
 
 
-                            )}
+                {/*小图*/}
+                <div className="overflow-y-auto">
 
-                        </div>
+                    {Array.from({length: totalSlots}).map((_, i) => {
+                        const relativeIndex = (i - scrollT * (totalSlots - 1)) * spacingFactor;
+                        const t = relativeIndex / (totalSlots - 1);
 
-                    );
-                })}
+                        const curveOffset = curveFactor * Math.sin(t * Math.PI * 0.9);
+                        const x = startX + t * deltaX;
+                        const y = startY + t * deltaY + curveOffset;
+                        const defaultWhiteImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/WMZ+ZcAAAAASUVORK5CYII=";
+
+
+                        const cardIndex = i - paddingCount;
+                        const isRealImage = cardIndex >= 0 && cardIndex < cards.length;
+                        const imageSrc = isRealImage ? cards[cardIndex]["图片信息"][0].src : defaultWhiteImage;
+                        const imageAttr = isRealImage ? cards[cardIndex]["属性"] : null;
+                        const imageCardName = isRealImage ? cards[cardIndex]["卡名"] : null;
+                        const imageRarity = isRealImage ? cards[cardIndex]['稀有度'] : null;
+
+                        return (
+                            <div key={i}>
+
+                                <img
+                                    src={imageSrc}
+                                    alt={`img-${i}`}
+                                    onClick={() => {
+                                        if (isRealImage) scrollToIndex(cardIndex);
+                                    }}
+                                    className="edge-blur-mask"
+                                    style={{
+                                        position: "absolute",
+                                        left: `${x * widthBias}px`,
+                                        top: `${y * heightBias}px`,
+                                        width: `${fontsize * 16 * 0.9}px`,
+                                        height: `${fontsize * 9 * 0.9}px`,
+                                        objectFit: "cover",
+                                        cursor: isRealImage ? "pointer" : "default",
+                                        pointerEvents: isRealImage ? "auto" : "none",
+                                        transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
+                                        zIndex: totalSlots - i,
+                                    }}
+                                />
+                                {imageAttr && (
+                                    <div>
+                                        <img
+                                            // src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${imageAttr}.png`}
+                                            src={`images/60px-${imageAttr}.png`}
+                                            className="absolute"
+                                            style={{
+                                                width: `${fontsize * 2}px`,
+                                                left: `${(x + 1) * widthBias}px`,
+                                                top: `${(y + 1) * heightBias}px`,
+                                                zIndex: totalSlots - i,
+                                                transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
+                                            }}
+                                        />
+
+                                        <label
+                                            className="absolute"
+                                            style={{
+                                                fontSize: `${fontsize}px`,
+                                                color: 'white',
+                                                textShadow: '0 0 1px gray, 0 0 2px gray',
+                                                transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
+                                                zIndex: totalSlots - i,
+                                                left: `${(x + 1) * widthBias}px`,
+                                                transform: 'translateY(-100%)',
+                                                top: `${(y + 27) * heightBias}px`,
+                                            }}
+                                        >
+                                            {imageCardName}
+                                        </label>
+
+                                        <img
+                                            src={rarityMap[imageRarity]}
+                                            className="absolute"
+                                            style={{
+                                                width: `${fontsize * 3}px`,
+                                                left: `${(x + 48) * widthBias}px`,
+                                                top: `${y * heightBias}px`,
+                                                zIndex: totalSlots - i,
+                                                transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
+                                            }}
+                                        />
+                                    </div>
+
+
+                                )}
+
+                            </div>
+
+                        );
+                    })}
+
+                </div>
+
+
             </div>
         )
     );

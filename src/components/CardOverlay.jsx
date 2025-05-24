@@ -10,6 +10,7 @@ const CardOverlay = ({
   handleNextCard,
   isSkipped,
   setIsSkipped,
+  fontsize,
 }) => {
   const [isSecondImage, setIsSecondImage] = useState(false);
   const [isClickable, setIsClickable] = useState(true);
@@ -89,7 +90,7 @@ const CardOverlay = ({
   return (
     showCardOverlay && (
       <div
-        className="fixed inset-0 z-30 bg-black bg-opacity-70"
+          className="absolute w-full h-full"
         onClick={()=>{
           handleNextCard();
         }}
@@ -100,6 +101,7 @@ const CardOverlay = ({
           setIsSkipped={setIsSkipped}
           setCurrentIndex={setCurrentIndex}
           isShowCardResult={false}
+          fontsize={fontsize}
         />
       </div>
     )
