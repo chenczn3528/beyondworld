@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
-import { forceLandscape, useDynamicRem } from 'single-screen-utils';
 import StarIcon from "../icons/StarIcon.jsx";
 import LeftIcon from "../icons/LeftIcon.jsx";
 import CardMeet from "./CardMeet.jsx";
@@ -31,15 +30,6 @@ const GalleryFullImage = (
         textShadow: showPictureNumber === index ? button_style.textShadow : null
     });
 
-    useEffect(()=>{
-        forceLandscape();
-    },[])
-
-    useDynamicRem({
-        pageWidth: 750,
-        pageHeight: 1334,
-        mode: 'landscape'
-    });
 
     // const rarityMap = {
     //     世界: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png',
