@@ -65,8 +65,8 @@ const GalleryPage = ({
 
     const handleWheel = (e) => {
         e.preventDefault();
-        const delta = e.deltaY > 0 ? 0.002 : -0.002;
-        const newScroll = scrollT + delta;
+        const delta = e.deltaY > 0 ? 0.02 : -0.02;
+        const newScroll = scrollT + delta * 0.1;
 
         // 防止超出限制区间
         if ((newScroll < SCROLL_T_MIN && delta < 0) || (newScroll > SCROLL_T_MAX && delta > 0)) return;
@@ -104,7 +104,7 @@ const GalleryPage = ({
         if (!touchStartRef.current) return;
         const deltaY = touchStartRef.current - e.touches[0].clientY;
         const direction = deltaY > 0 ? 1 : -1;
-        const newScroll = scrollT + direction * 0.02;
+        const newScroll = scrollT + direction * 0.002;
 
         // 防止超出限制区间
         if ((newScroll < SCROLL_T_MIN && direction < 0) || (newScroll > SCROLL_T_MAX && direction > 0)) return;
