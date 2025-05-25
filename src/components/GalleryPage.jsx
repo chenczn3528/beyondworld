@@ -65,7 +65,7 @@ const GalleryPage = ({
 
     const handleWheel = (e) => {
         e.preventDefault();
-        const delta = e.deltaY > 0 ? 0.008 : -0.008;
+        const delta = e.deltaY > 0 ? 0.002 : -0.002;
         const newScroll = scrollT + delta;
 
         // 防止超出限制区间
@@ -176,46 +176,7 @@ const GalleryPage = ({
                     <LeftIcon size={fontsize * 2} color="white"/>
                 </button>
 
-                {/*大图*/}
-                <div className="relative w-full h-full flex">
-                    <LazyLoadImage
-                        src={displayCard?.图片信息?.[0]?.srcset2}
-                        placeholderSrc={displayCard?.图片信息?.[0].src}
-                        effect="blur"
-                        alt="Full View"
-                        className="w-full h-full object-cover"
-                        onClick={() => {
-                            setShowGalleryFullImage(!showGalleryFullImage);
-                        }}
-                    />
-                    {/*大图标注*/}
-                    <div className="absolute flex flex-row items-center"
-                         style={{top: `${fontsize}px`, right: `${fontsize}px`}}>
-                        <div className="flex flex-row">
-                            <div
-                                className="flex flex-col items-end justify-end"
-                                style={{color: "white", textShadow: '0 0 2px gray, 0 0 4px gray', fontWeight: 800}}
-                            >
-                                <label style={{fontSize: `${fontsize}px`}}>{displayCard?.主角}</label>
-                                <div className="flex flex-row gap-[1px]">
-                                    <img
-                                        // src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${cards[currentCardIndex]?.属性}.png`}
-                                        src={`images/60px-${displayCard?.属性}.png`}
-                                        className="h-auto"
-                                        style={{width: `${fontsize * 2}px`}}
-                                    />
-                                    <label
-                                        style={{fontSize: `${fontsize * 1.3}px`}}>{displayCard?.卡名}</label>
-                                </div>
 
-                            </div>
-                        </div>
-                        <img
-                            src={rarityMap[displayCard?.稀有度]}
-                            style={{width: `${fontsize * 5}px`}}
-                        />
-                    </div>
-                </div>
 
 
                 {/*阴影*/}
@@ -349,6 +310,47 @@ const GalleryPage = ({
 
                 </div>
 
+                {/*大图*/}
+                <div className="relative w-full h-full flex">
+                    <LazyLoadImage
+                        src={displayCard?.图片信息?.[0]?.srcset2}
+                        placeholderSrc={displayCard?.图片信息?.[0].src}
+                        effect="blur"
+                        alt="Full View"
+                        className="w-full h-full object-cover"
+                        onClick={() => {
+                            setShowGalleryFullImage(!showGalleryFullImage);
+                        }}
+                    />
+                    {/*大图标注*/}
+                    <div className="absolute flex flex-row items-center z-10"
+                         style={{top: `${fontsize}px`, right: `${fontsize}px`}}>
+                        <div className="flex flex-row">
+                            <div
+                                className="flex flex-col items-end justify-end"
+                                style={{color: "white", textShadow: '0 0 2px gray, 0 0 4px gray', fontWeight: 800}}
+                            >
+                                <label style={{fontSize: `${fontsize}px`}}>{displayCard?.主角}</label>
+                                <div className="flex flex-row gap-[1px]">
+                                    <img
+                                        // src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${cards[currentCardIndex]?.属性}.png`}
+                                        src={`images/60px-${displayCard?.属性}.png`}
+                                        className="h-auto"
+                                        style={{width: `${fontsize * 2}px`}}
+                                    />
+                                    <label
+                                        style={{fontSize: `${fontsize * 1.3}px`}}>{displayCard?.卡名}</label>
+                                </div>
+
+                            </div>
+                        </div>
+                        <img
+                            src={rarityMap[displayCard?.稀有度]}
+                            style={{width: `${fontsize * 5}px`}}
+                        />
+                    </div>
+                </div>
+
                 {/*让小图能滚动*/}
                 <div
                     onWheel={handleWheel}
@@ -356,11 +358,12 @@ const GalleryPage = ({
                     onTouchMove={handleTouchMove}
                     style={{
                         position: 'absolute',
+                        pointerEvents: "none",
                         top: 0,
                         left: 0,
                         width: '100%',
                         height: '100%',
-                        zIndex: 1, // 避免挡住其他按钮等
+                        zIndex: 0, // 避免挡住其他按钮等
                     }}
                 />
 
