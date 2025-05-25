@@ -122,8 +122,6 @@ const Home = () => {
 
     const [showCardPoolFilter, setShowCardPoolFilter] = useState(false); // 展示筛选页面
 
-    // const [showGalleryFullImage, setShowGalleryFullImage] = useState(false); // 展示图鉴页面
-
     const [detailedImage, setDetailedImage] = useState(null); // 轮播图的内容设置
     const [showDetailedImage, setShowDetailedImage] = useState(false); // 是否展示轮播图
     const [showGalleryFullImage, setShowGalleryFullImage] = useState(false); // 图鉴图片的内容设置
@@ -568,6 +566,7 @@ const getRandomCard = (
     // 返回数据时显示的页面
     return (
         <div className="w-full h-full relative overflow-hidden">
+
             {/* 视频层（最底层） */}
             <video
                 preload="auto"
@@ -591,10 +590,10 @@ const getRandomCard = (
 
             {/* 抽卡动画层 */}
             {showAnimationDrawCards && (
-              <DrawAnimationCards
-                isFiveStar={hasFiveStarAnimation}
-                onAnimationEnd={handleDrawCardsAnimationEnd}
-              />
+                <DrawAnimationCards
+                    isFiveStar={hasFiveStarAnimation}
+                    onAnimationEnd={handleDrawCardsAnimationEnd}
+                />
             )}
 
             {/*十抽后结算层*/}
@@ -632,6 +631,14 @@ const getRandomCard = (
                 fontsize={fontsize}
             />
 
+            <GalleryFullImage
+                card={galleryCard}
+                showGalleryFullImage={showGalleryFullImage}
+                setShowGalleryFullImage={setShowGalleryFullImage}
+                fontsize={fontsize}
+            />
+
+
             {/*展示图鉴中的图片*/}
             <GalleryPage
                 cards={galleryHistory}
@@ -644,19 +651,12 @@ const getRandomCard = (
                 fontsize={fontsize}
             />
 
-            {/*<GalleryFullImage*/}
-            {/*  card={galleryCard}*/}
-            {/*  showGalleryFullImage={showGalleryFullImage}*/}
-            {/*  setShowGalleryFullImage={setShowGalleryFullImage}*/}
-            {/*/>*/}
-
-
             {showDetailedImage && (
-              <DetailedImage
-                card={detailedImage}  // 确保传递 fullImage，而不是其他东西
-                onClose={() => setShowDetailedImage(false)}
-                fontsize={fontsize}
-              />
+                <DetailedImage
+                    card={detailedImage}  // 确保传递 fullImage，而不是其他东西
+                    onClose={() => setShowDetailedImage(false)}
+                    fontsize={fontsize}
+                />
             )}
 
 
@@ -678,10 +678,6 @@ const getRandomCard = (
             {/*    selectedPools={selectedPools}*/}
             {/*    setSelectedPools={setSelectedPools}*/}
             {/*/>*/}
-
-
-
-
 
 
             {/* 控件层（中间层） */}

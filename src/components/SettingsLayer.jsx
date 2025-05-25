@@ -68,7 +68,7 @@ const SettingsLayer = ({
     return (
         <div
             className="absolute w-full h-full"
-            style={{filter: showDetailedImage ? 'blur(5px)' : 'none', transition: 'filter 0.3s ease'}}
+            style={{filter: showDetailedImage ? 'blur(10px)' : 'none', transition: 'filter 0.3s ease'}}
         >
 
 

@@ -9,6 +9,7 @@ const GalleryFullImage = (
     card,
     showGalleryFullImage,
     setShowGalleryFullImage,
+    fontsize,
 }) => {
 
     const [showPictureNumber, setShowPictureNumber] = useState(0);
@@ -20,7 +21,7 @@ const GalleryFullImage = (
         marginRight: '1vmin',
         color: 'white',
         textShadow: '0 0 2px gray, 0 0 4px gray',
-        fontSize: '3vmin',
+        fontSize: `${fontsize}px`,
         background: '#ffffff20',
     }
 
@@ -46,16 +47,26 @@ const GalleryFullImage = (
 
 
 
-
-
     return (
         showGalleryFullImage && (
             <div
-                id="app"
                 style={{backgroundColor: 'black'}}
-                className="fixed inset-[0] z-50 w-full h-full flex justify-center items-center"
+                className="absolute w-full h-full z-[100]"
             >
-                <div style={{filter: showMeet ? 'blur(5px)' : 'none', transition: 'filter 0.3s ease'}}>
+                <CardMeet
+                    showMeet={showMeet}
+                    setShowMeet={setShowMeet}
+                    card={card}
+                    fontsize={fontsize}
+                />
+
+
+
+
+                <div
+                    style={{filter: showMeet ? 'blur(10px)' : 'none', transition: 'filter 0.3s ease'}}
+                    className="relative w-full h-full flex"
+                >
                     <LazyLoadImage
                         src={showPictureNumber === 0 ? card?.图片信息?.[0]?.srcset2 :
                             showPictureNumber === 1 ? card?.图片信息?.[1]?.srcset2 : card?.图片信息?.[2]?.srcset2}
@@ -63,31 +74,46 @@ const GalleryFullImage = (
                             showPictureNumber === 1 ? card?.图片信息?.[1]?.src : card?.图片信息?.[2]?.src}
                         effect="blur"
                         alt="Full View"
-                        className="h-[100vmin] w-auto object-contain rounded-lg shadow-2xl"
+                        className="w-full h-full object-cover"
                         onClick={()=>setShowInformation(!showInformation)}
                     />
 
 
                     {showInformation && (
-                        <div>
+                        <div className="absolute w-full h-full">
                             {/*角色名 世界*/}
-                            <div className="absolute flex items-center bottom-[36vmin] left-[12vmin]"
-                                 style={{color: 'white', textShadow: '0 0 1px gray, 0 0 2px gray',}}>
-                                <label style={{fontSize: '4.5vmin', fontWeight: 600, marginRight: '2vmin'}}>{card.主角}</label>
-                                <StarIcon color="lightgray" size={12}/>
-                                <label style={{fontSize: '3vmin', fontStyle: "italic"}}>{card.世界}</label>
+                            <div className="absolute flex items-center"
+                                 style={{
+                                     color: 'white',
+                                     textShadow: '0 0 1px gray, 0 0 2px gray',
+                                     marginLeft: `${fontsize * 1.2}px`,
+                                     bottom: `${fontsize * 11.3}px`,
+                                     left: `${fontsize * 2}px`,
+                                 }}>
+                                <label
+                                    style={{
+                                        fontSize: `${fontsize * 1.5}px`,
+                                        fontWeight: 600,
+                                        marginRight: `${fontsize}px`,}}
+                                >
+                                    {card.主角}
+                                </label>
+                                <StarIcon color="lightgray" size={fontsize}/>
+                                <label style={{fontSize: `${fontsize}px`, fontStyle: "italic"}}>{card.世界}</label>
                             </div>
 
                             {/*稀有度 卡名*/}
-                            <div className="absolute flex items-center" style={{left: '8vmin', bottom: '24vmin',}}>
-                                <img className="mr-[1vmin]" src={rarityMap[card.稀有度]} style={{height: '12vmin', width: 'auto',}}/>
+                            <div className="absolute flex items-center" style={{bottom: `${fontsize * 6.5}px`,left: `${fontsize * 2}px`}}>
+                                <img
+                                    src={rarityMap[card.稀有度]}
+                                    style={{height: `${fontsize * 5}px`, width: 'auto', marginRight: `${fontsize / 2}px`,}}
+                                />
                                 <label
                                     style={{
                                         color: 'white',
                                         fontStyle: "italic",
-                                        fontSize: '6vmin',
+                                        fontSize: `${fontsize * 2.3}px`,
                                         fontWeight: 800,
-                                        marginRight: '1vmin',
                                         textShadow: '0 0 2px gray, 0 0 4px gray',
                                     }}
                                 >
@@ -96,17 +122,17 @@ const GalleryFullImage = (
                             </div>
 
                             {/*各属性的值*/}
-                            <div className="absolute flex flex-row" style={{left: '11vmin', bottom: '10vmin',}}>
+                            <div className="absolute flex flex-row" style={{bottom: `${fontsize * 2.5}px`,left: `${fontsize * 3}px`}}>
                                 {attributes.map(attr => (
-                                    <div key={attr} className="flex flex-col mr-[2vw] items-center">
+                                    <div key={attr} className="flex flex-col items-center" style={{marginRight: `${fontsize}px`,}}>
                                         {/*<img src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${attr}.png`} className="w-[7vmin]"/>*/}
                                         <img
-                                            src={`images/60px-${attr}.png`} className="w-[7vmin]"/>
+                                            src={`images/60px-${attr}.png`} style={{width: `${fontsize * 2}px`}}/>
                                         <label
                                             style={{
                                                 color: card.属性 === attr ? 'gold' : 'white',
-                                                fontWeight: 800,
-                                                fontSize: '3vmin',
+                                                fontWeight: 500,
+                                                fontSize: `${fontsize}px`,
                                                 textShadow: '0 0 2px gray, 0 0 4px gray',
                                             }}
                                         >
@@ -117,21 +143,31 @@ const GalleryFullImage = (
                             </div>
 
                             {/*返回按钮*/}
-                            <button className="absolute top-[5vmin] left-[8vmin] w-auto flex items-center justify-center"
+                            <button className="absolute w-auto flex items-center justify-center"
                                 onClick={()=>setShowGalleryFullImage(false)}
                                 style={{
                                     background: 'transparent',
                                     border: 'none',
                                     padding: 10,
+                                    top: `${fontsize}px`,
+                                    left: `${fontsize}px`,
                                 }}
                             >
-                                <LeftIcon size={36} color="white"/>
+                                <LeftIcon size={fontsize * 2} color="white"/>
                             </button>
 
+                            {/*相会*/}
+                            <button className="absolute w-auto flex items-center justify-center"
+                                style={{...button_style, top: `${fontsize * 2}px`, right: `${fontsize * 3}px`,}}
+                                onClick={() => setShowMeet(true)}
+                            >相会</button>
+
+
                             {/*右下角按钮*/}
-                            <div className="absolute bottom-[3vmin] right-[8vmin] flex flex-col items-end justify-center">
-                                {/*相会*/}
-                                <button style={button_style} onClick={() => setShowMeet(true)}>相会</button>
+                            <div
+                                className="absolute flex flex-col items-end justify-center"
+                                style={{right: `${fontsize * 3}px`, bottom: `${fontsize * 2}px`,}}
+                            >
                                 {/*初始、重逢、无色卡面*/}
                                 <div className="flex flex-row mt-[1vmin]">
                                     <button style={getButtonStyle(0)} onClick={() => setShowPictureNumber(0)}>初始</button>
@@ -151,11 +187,6 @@ const GalleryFullImage = (
                     )}
                 </div>
 
-                <CardMeet
-                    showMeet={showMeet}
-                    setShowMeet={setShowMeet}
-                    card={card}
-                />
 
             </div>
         )

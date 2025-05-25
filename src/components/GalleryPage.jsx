@@ -19,37 +19,69 @@ const GalleryPage = ({
     const paddingCount = 5; // 前后各留5张空白卡片
     const targetIndex = 1; // 希望第几张显示在视觉焦点位（第三张）
     const totalSlots = cards.length + paddingCount * 2;
-    const spacingFactor = 12.5; // 控制卡片间距
 
-    const rawIndex = Math.round(scrollT * (totalSlots - 1)) - paddingCount;
-    const currentCardIndex = rawIndex + 1;
+
+    const clippedT = Math.max(0, Math.min(1, scrollT));
+    const rawIndex = Math.round(clippedT * (totalSlots - 1)) - paddingCount;
+    const currentCardIndex = rawIndex + 1; // ✅ 不再 +1
+
 
     // 控制路径和偏移参数（基于屏幕尺寸百分比）
-    const startX = -10;
-    const startY = -5;
-    const deltaX = 100;
-    const deltaY = 80;
-    const curveFactor = 22;
+    const spacingFactor = 13; // 控制卡片间距
+    const startX = -5;
+    const startY = 10;
+    const deltaX = 80;
+    const deltaY = 60;
+    const curveFactor = 20; // y 轴弯曲幅度
+    const angleScale = 0.9; // π/4 = 0.25 * π
+
+    // 滑动定位
+    const SCROLL_T_MIN = -0.1;
+    const SCROLL_T_MAX = 1.1;
+
 
     const scrollToIndex = (index) => {
-        const targetSlot = index + paddingCount;
+        const clampedIndex = Math.max(0, Math.min(cards.length - 1, index)); // 防越界
+        const targetSlot = clampedIndex + paddingCount;
         const tValue = (targetSlot - targetIndex) / (totalSlots - 1);
-        setScrollT(Math.max(0, Math.min(1, tValue)));
+        setScrollT(Math.max(SCROLL_T_MIN, Math.min(SCROLL_T_MAX, tValue)));
     };
+
+
+    useEffect(() => {
+        const container = document.querySelector('#gallery-scroll-container');
+
+        if (!container) return;
+
+        container.addEventListener("wheel", handleWheel, { passive: false });
+        container.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+        return () => {
+            container.removeEventListener("wheel", handleWheel);
+            container.removeEventListener("touchmove", handleTouchMove);
+        };
+    }, [scrollT]);
+
 
     const handleWheel = (e) => {
         e.preventDefault();
-        const delta = e.deltaY > 0 ? 0.001 : -0.001;
-        const newScroll = Math.min(1, Math.max(0, scrollT + delta));
-        setScrollT(newScroll);
+        const delta = e.deltaY > 0 ? 0.02 : -0.02;
+        const newScroll = scrollT + delta;
+
+        // 防止超出限制区间
+        if ((newScroll < SCROLL_T_MIN && delta < 0) || (newScroll > SCROLL_T_MAX && delta > 0)) return;
+
+        const clipped = Math.max(SCROLL_T_MIN, Math.min(SCROLL_T_MAX, newScroll));
+        setScrollT(clipped);
 
         clearTimeout(timeoutRef.current);
+        const approxIndex = Math.round(Math.max(0, Math.min(1, clipped)) * (totalSlots - 1));
+        const alignedIndex = approxIndex - paddingCount;
         timeoutRef.current = setTimeout(() => {
-            const approxIndex = Math.round(newScroll * (totalSlots - 1));
-            const alignedIndex = approxIndex - paddingCount;
             scrollToIndex(alignedIndex);
         }, 100);
     };
+
 
     useEffect(() => {
         scrollToIndex(0); // ✅ 初始加载时将第0号卡片放到参考位置（第3张）
@@ -58,6 +90,35 @@ const GalleryPage = ({
     useEffect(() => {
         setGalleryCard(cards[currentCardIndex] ? cards[currentCardIndex] : cards[0]);
     }, [scrollT]);
+
+
+
+
+    const touchStartRef = useRef(null);
+
+    const handleTouchStart = (e) => {
+        touchStartRef.current = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e) => {
+        if (!touchStartRef.current) return;
+        const deltaY = touchStartRef.current - e.touches[0].clientY;
+        const direction = deltaY > 0 ? 1 : -1;
+        const newScroll = scrollT + direction * 0.02;
+
+        // 防止超出限制区间
+        if ((newScroll < SCROLL_T_MIN && direction < 0) || (newScroll > SCROLL_T_MAX && direction > 0)) return;
+
+        const clipped = Math.max(SCROLL_T_MIN, Math.min(SCROLL_T_MAX, newScroll));
+        setScrollT(clipped);
+
+        clearTimeout(timeoutRef.current);
+        const approxIndex = Math.round(Math.max(0, Math.min(1, clipped)) * (totalSlots - 1));
+        const alignedIndex = approxIndex - paddingCount;
+        timeoutRef.current = setTimeout(() => {
+            scrollToIndex(alignedIndex);
+        }, 100);
+    };
 
 
     // const rarityMap = {
@@ -80,15 +141,20 @@ const GalleryPage = ({
 
 
 
+    const getDisplayCardIndex = () => {
+      if (currentCardIndex < 0) return 0;
+      if (currentCardIndex >= cards.length) return cards.length - 1;
+      return currentCardIndex;
+    };
 
-
-
+    const displayCard = cards[getDisplayCardIndex()];
 
     return (
         showGallery && (
             <div
                 className="relative w-full h-full z-20"
-                onWheel={handleWheel}
+                id="gallery-scroll-container"
+                onTouchStart={handleTouchStart}
                 style={{
                     background: "black",
                     overflow: "hidden",
@@ -113,8 +179,8 @@ const GalleryPage = ({
                 {/*大图*/}
                 <div className="relative w-full h-full flex">
                     <LazyLoadImage
-                        src={cards[currentCardIndex]?.图片信息?.[0]?.srcset2}
-                        placeholderSrc={cards[currentCardIndex]?.图片信息?.[0].src}
+                        src={displayCard?.图片信息?.[0]?.srcset2}
+                        placeholderSrc={displayCard?.图片信息?.[0].src}
                         effect="blur"
                         alt="Full View"
                         className="w-full h-full object-cover"
@@ -122,34 +188,32 @@ const GalleryPage = ({
                             setShowGalleryFullImage(!showGalleryFullImage);
                         }}
                     />
+                    {/*大图标注*/}
                     <div className="absolute flex flex-row items-center"
                          style={{top: `${fontsize}px`, right: `${fontsize}px`}}>
                         <div className="flex flex-row">
-
                             <div
                                 className="flex flex-col items-end justify-end"
                                 style={{color: "white", textShadow: '0 0 2px gray, 0 0 4px gray', fontWeight: 800}}
                             >
-                                <label style={{fontSize: `${fontsize}px`}}>{cards[currentCardIndex]?.主角}</label>
+                                <label style={{fontSize: `${fontsize}px`}}>{displayCard?.主角}</label>
                                 <div className="flex flex-row gap-[1px]">
                                     <img
                                         // src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${cards[currentCardIndex]?.属性}.png`}
-                                        src={`images/60px-${cards[currentCardIndex]?.属性}.png`}
+                                        src={`images/60px-${displayCard?.属性}.png`}
                                         className="h-auto"
                                         style={{width: `${fontsize * 2}px`}}
                                     />
                                     <label
-                                        style={{fontSize: `${fontsize * 1.3}px`}}>{cards[currentCardIndex]?.卡名}</label>
+                                        style={{fontSize: `${fontsize * 1.3}px`}}>{displayCard?.卡名}</label>
                                 </div>
 
                             </div>
                         </div>
-
                         <img
-                            src={rarityMap[cards[currentCardIndex]?.稀有度]}
+                            src={rarityMap[displayCard?.稀有度]}
                             style={{width: `${fontsize * 5}px`}}
                         />
-
                     </div>
                 </div>
 
@@ -160,7 +224,7 @@ const GalleryPage = ({
                         const relativeIndex = (i - scrollT * (totalSlots - 1)) * spacingFactor;
                         const t = relativeIndex / (totalSlots - 1);
 
-                        const curveOffset = curveFactor * Math.sin(t * Math.PI * 0.9);
+                        const curveOffset = curveFactor * Math.sin(t * Math.PI * angleScale);
                         const x = startX + t * deltaX;
                         const y = startY + t * deltaY + curveOffset;
                         return (
@@ -178,7 +242,7 @@ const GalleryPage = ({
                                         boxShadow: "0 0 100px 100px rgba(23, 25, 33, 0.4)",
                                         pointerEvents: "none",
                                         transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
-                                        zIndex: 1,
+                                        zIndex: 0,
                                     }}
                                 />
                             </div>
@@ -195,7 +259,7 @@ const GalleryPage = ({
                         const relativeIndex = (i - scrollT * (totalSlots - 1)) * spacingFactor;
                         const t = relativeIndex / (totalSlots - 1);
 
-                        const curveOffset = curveFactor * Math.sin(t * Math.PI * 0.9);
+                        const curveOffset = curveFactor * Math.sin(t * Math.PI * angleScale);
                         const x = startX + t * deltaX;
                         const y = startY + t * deltaY + curveOffset;
                         const defaultWhiteImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/WMZ+ZcAAAAASUVORK5CYII=";
