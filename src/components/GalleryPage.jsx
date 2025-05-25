@@ -65,7 +65,7 @@ const GalleryPage = ({
 
     const handleWheel = (e) => {
         e.preventDefault();
-        const delta = e.deltaY > 0 ? 0.02 : -0.02;
+        const delta = e.deltaY > 0 ? 0.008 : -0.008;
         const newScroll = scrollT + delta;
 
         // 防止超出限制区间
@@ -218,7 +218,7 @@ const GalleryPage = ({
                 </div>
 
 
-
+                {/*阴影*/}
                 <div>
                     {Array.from({length: totalSlots}).map((_, i) => {
                         const relativeIndex = (i - scrollT * (totalSlots - 1)) * spacingFactor;
@@ -348,6 +348,21 @@ const GalleryPage = ({
                     })}
 
                 </div>
+
+                {/*让小图能滚动*/}
+                <div
+                    onWheel={handleWheel}
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        zIndex: 1, // 避免挡住其他按钮等
+                    }}
+                />
 
 
             </div>
