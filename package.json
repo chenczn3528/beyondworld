@@ -14,6 +14,7 @@
     "clsx": "^2.1.1",
     "crypto-browserify": "^3.12.1",
     "framer-motion": "^12.12.1",
+    "idb-keyval": "^6.2.2",
     "lucide-react": "^0.503.0",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",

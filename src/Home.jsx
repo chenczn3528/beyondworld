@@ -14,9 +14,38 @@ import GalleryFullImage from "./components/GalleryFullImage.jsx";
 import DetailedImage from "./components/DetailedImage.jsx";
 import GalleryPage from "./components/GalleryPage.jsx";
 import useResponsiveFontSize from "./utils/useResponsiveFontSize.js";
+import {useHistoryDB} from "./hooks/useHistoryDB.js";
 
 
 const Home = () => {
+
+
+    // 加载serviceWorker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker
+                .register('service_worker.js')
+                .then((reg) => {
+                    console.log('✅ SW registered:', reg);
+
+                    // 可选：注销旧的 Service Worker（如果你在更新服务工作者时需要这样做）
+                    navigator.serviceWorker.getRegistrations().then((registrations) => {
+                        registrations.forEach((registration) => {
+                            const expectedScope = location.origin + '/'; // 或者 '/deepspace/'，取决于你的路径
+                            if (registration.scope !== expectedScope) {
+                                registration.unregister().then((success) => {
+                                    console.log('🗑️ Unregistered old SW:', registration.scope, success);
+                                });
+                            }
+                        });
+                    });
+                })
+                .catch((err) => {
+                    console.error('❌ SW registration failed:', err);
+                });
+        });
+    }
+
 
 
     const { valuesList } = useMemo(() => {
@@ -56,7 +85,7 @@ const Home = () => {
     // 是否只抽当前角色的卡
     const [onlySelectedRoleCard, setOnlySelectedRoleCard] = useLocalStorageState('bw_onlySelectedRoleCard', false);
     // 历史记录
-    const [history, setHistory] = useLocalStorageState('bw_history', []);
+    const { history, loading, appendHistory, clearHistory } = useHistoryDB();
 
 
 
@@ -71,12 +100,12 @@ const Home = () => {
         'bw_includeThreeStar',
         'bw_includeThreeStarM',
         'bw_onlySelectedRoleCard',
-        'bw_history',
         'bw_selectedPools',
     ];
 
     const clearLocalData = () => {
         keysToClear.forEach(key => localStorage.removeItem(key));
+        clearHistory();
         location.reload();
     };
 
@@ -141,23 +170,23 @@ const Home = () => {
 
 
     // ------------------------------- 抽卡动画播放完成后的处理逻辑
-    const handleDrawCardsAnimationEnd = () => {
+    const handleDrawCardsAnimationEnd = async () => {
         const finalResults = drawResultsRef.current;
         const finalPity = currentPityRef.current;
 
         setPityCount(finalPity);
         setCards(finalResults.map(r => r.card));
 
-        setHistory(prev => {
-            const updated = [
-                ...prev,
-                ...finalResults.map(r => ({
-                    ...r.card,
-                    timestamp: new Date().toISOString(),
-                })),
-            ];
-            return updated.slice(-10000);
-        });
+        // 保存到 IndexedDB 中
+        const newEntries = finalResults.map(r => ({
+            卡名: r.card.卡名,
+            主角: r.card.主角,
+            稀有度: r.card.稀有度,
+            获取途径: r.card.获取途径,
+            timestamp: new Date().toISOString(),
+        }));
+        await appendHistory(newEntries); // 自动维护 100000 条限制
+
         setShowAnimationDrawCards(false);
         setisAnimatingDrawCards(false);
     };
@@ -169,33 +198,28 @@ const Home = () => {
     const removeDuplicates = (arr) => {
         const seen = new Set();
         return arr.filter((item) => {
-            const duplicate = seen.has(item.卡名);  // 假设每个卡片都有一个唯一的 id
-            seen.add(item.卡名);
-            return !duplicate;
+            const key = item.卡名;
+            const isDup = seen.has(key);
+            seen.add(key);
+            return !isDup;
         });
     };
 
     // ------------------------------- 初始化 galleryHistory
     useEffect(() => {
-        if (galleryHistory.length === 0 && history.length > 0) {
-            const uniqueHistory = removeDuplicates(history);
+        if (!loading && history.length > 0) {
+            // 合并精简记录和完整卡牌数据
+            const enriched = history
+                .map((entry) => {
+                    const fullCard = cardData.find((card) => card.卡名 === entry.卡名);
+                    return fullCard ? { ...fullCard, timestamp: entry.timestamp } : null;
+                })
+                .filter(Boolean); // 移除找不到的
+
+            const uniqueHistory = removeDuplicates(enriched);
             setGalleryHistory(uniqueHistory);
         }
-    }, [history, galleryHistory.length]);
-
-    // ------------------------------- 合并新的抽卡记录
-    useEffect(() => {
-        if (drawResultsRef.current && drawResultsRef.current.length > 0) {
-            const newCards = drawResultsRef.current.map(item => item.card).filter(Boolean); // 提取所有有效 card
-
-            if (newCards.length > 0) {
-                setGalleryHistory(prevGalleryHistory => {
-                const combined = [...prevGalleryHistory, ...newCards];
-                return removeDuplicates(combined);
-                });
-            }
-        }
-    }, [history.length]);
+    }, [loading, history]);
 
 
 
@@ -582,7 +606,6 @@ const getRandomCard = (
                     drawSessionIdRef.current = 0; // 重置流程 ID，防止后续重复触发
                 }}
                 className="absolute w-full h-full object-cover">
-                {/*<source src="https://cdn.chenczn3528.dpdns.org/beyondworld/videos/background.mp4" type="video/mp4"/>*/}
                 <source src="videos/background.mp4" type="video/mp4"/>
 
             </video>

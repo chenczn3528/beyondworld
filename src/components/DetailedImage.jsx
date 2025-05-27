@@ -4,13 +4,6 @@ import {playClickSound} from "../utils/playClickSound.js";
 
 const DetailedImage = ({ card, onClose, fontsize }) => {
 
-    // const rarityMap = {
-    //   世界: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png',
-    //   月: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png',
-    //   辰星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png',
-    //   星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png',
-    // };
-
     const rarityMap = {
         世界: 'images/world.png',
         月: 'images/moon.png',
@@ -39,9 +32,9 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                     effect="blur"
                     className="absolute object-contain edge-blur-mask"
                     style={{
-                        top: `${fontsize * 9}px`,
-                        left: `${fontsize * 14}px`,
-                        width: `${fontsize * 20}px`
+                        top: `${fontsize * 8}px`,
+                        left: `${fontsize * 12}px`,
+                        width: `${fontsize * 28}px`
                     }}
                 />
                 {/* 角标图标：定位在主图右上角 */}
@@ -49,9 +42,9 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                     className="absolute"
                     src={rarityMap[card.稀有度]}
                     style={{
-                        top: `${fontsize * 8.5}px`,
-                        left: `${fontsize * 30.7}px`,
-                        width: `${fontsize * 3}px`
+                        top: `${fontsize * 7.2}px`,
+                        left: `${fontsize * 35.8}px`,
+                        width: `${fontsize * 4}px`
                     }}
                 />
 
@@ -61,22 +54,21 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                     effect="blur"
                     className="absolute object-contain edge-blur-mask"
                     style={{
-                        top: `${fontsize * 18}px`,
-                        left: `${fontsize * 9}px`,
-                        width: `${fontsize * 10}px`
+                        top: `${fontsize * 21}px`,
+                        left: `${fontsize * 5}px`,
+                        width: `${fontsize * 14}px`
                     }}
                 />
 
                 {/* 重逢图标：贴在卡面右上角 */}
                 <img
-                    // src="https://cdn.chenczn3528.dpdns.org/beyondworld/images/重逢.png"
                     src="images/重逢.png"
                     alt="重逢图标"
                     className="absolute"
                     style={{
-                        top: `${fontsize * 17.5}px`,
-                        left: `${fontsize * 17}px`,
-                        width: `${fontsize * 2}px`
+                        top: `${fontsize * 20.3}px`,
+                        left: `${fontsize * 16.5}px`,
+                        width: `${fontsize * 2.5}px`
                     }}
                 />
 
@@ -84,16 +76,16 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                     className="absolute overflow-hidden"
                     style={{
                         top: `${fontsize * 10}px`,
-                        left: `${fontsize * 34.5}px`,
-                        width: `${fontsize * 13}px`,
-                        height: `${fontsize * 10}px`,
+                        left: `${fontsize * 42.5}px`,
+                        width: `${fontsize * 18}px`,
+                        height: `${fontsize * 16}px`,
                     }}
                 >
                     <label
                         style={{
                             color: 'lightgray',
                             fontWeight: 600,
-                            fontSize: `${fontsize}px`,
+                            fontSize: `${fontsize * 1.4}px`,
                     }}
                         className="absolute"
                     >
@@ -102,35 +94,33 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
 
                     <label
                         style={{
-                            top: `${fontsize * 1.4}px`,
+                            top: `${fontsize * 1.9}px`,
                             color: 'white',
                             fontWeight: 800,
-                            fontSize: `${fontsize * 1.5}px`,
+                            fontSize: `${fontsize * 2}px`,
                         }}
                         className="absolute"
                     >
                         {card.卡名}
                     </label>
 
-                    <div className="absolute flex flex-row" style={{top: `${fontsize * 5}px`}}>
+                    <div className="absolute flex flex-row" style={{top: `${fontsize * 6}px`}}>
                         {attributes.map(attr => (
                             <div
                                 key={attr}
-                                className="flex flex-col mr-[2vmin] items-center"
+                                className="flex flex-col mr-[3vmin] items-center"
                             >
-                                {/*<img src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${attr}.png`}*/}
-                                {/*     className="w-[7vmin]"/>*/}
                                 <img
                                     src={`images/60px-${attr}.png`}
                                     className="mb-[0.5vmin]"
-                                    style={{width: `${fontsize * 1.5}px`}}
+                                    style={{width: `${fontsize * 2}px`}}
                                 />
 
                                 <label
                                     style={{
                                         color: card.属性 === attr ? 'gold' : 'white',
                                         fontWeight: 800,
-                                        fontSize: `${fontsize * 0.6}px`,
+                                        fontSize: `${fontsize * 1}px`,
                                     }}
                                 >
                                     {card[attr]}
@@ -142,39 +132,6 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
 
 
             </div>
-
-
-            {/*<div className="absolute flex border">*/}
-
-
-            {/*    <div className="relative">*/}
-            {/*        <div className="ml-[4vmin] flex flex-col">*/}
-            {/*            <label style={{color: 'lightgray', fontWeight: 600, fontSize: '3.5vmin'}}>{card.主角}</label>*/}
-
-            {/*            <label style={{color: 'white', fontWeight: 800, fontSize: '6vmin'}}>{card.卡名}</label>*/}
-
-            {/*            <div className="ml-[4vmin] mt-[3vmin] flex flex-row w-[60%] h-[60%]">*/}
-            {/*                {attributes.map(attr => (*/}
-            {/*                    <div key={attr} className="flex flex-col mr-[2vw] items-center">*/}
-            {/*                        /!*<img src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${attr}.png`}*!/*/}
-            {/*                        /!*     className="w-[7vmin]"/>*!/*/}
-            {/*                        <img src={`images/60px-${attr}.png`} className="w-[7vmin]"/>*/}
-
-            {/*                        <label*/}
-            {/*                            style={{*/}
-            {/*                                color: card.属性 === attr ? 'gold' : 'white',*/}
-            {/*                                fontWeight: 800,*/}
-            {/*                                fontSize: '3vmin',*/}
-            {/*                            }}*/}
-            {/*                        >*/}
-            {/*                            {card[attr]}*/}
-            {/*                        </label>*/}
-            {/*                    </div>*/}
-            {/*                ))}*/}
-            {/*            </div>*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*</div>*/}
 
         </div>
     );
