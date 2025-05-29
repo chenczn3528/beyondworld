@@ -18,7 +18,7 @@ export default defineConfig({
         background_color: '#ffffff',
         icons: [
           {
-            src: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/icon.jpg',
+            src: 'images/icon.jpg',
             sizes: '512x512',
             type: 'image/png'
           }
@@ -36,4 +36,8 @@ export default defineConfig({
       crypto: 'crypto-browserify',
     },
   },
+  server: {
+    host: '0.0.0.0', // 允许局域网访问
+    port: 5174,
+  }
 })

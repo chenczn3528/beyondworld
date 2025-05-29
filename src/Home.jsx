@@ -9,7 +9,6 @@ import HistoryModal from "./components/HistoryModal.jsx";
 import CardSummary from "./components/CardSummary.jsx";
 import CardPoolFilter from "./components/CardPoolFilter.jsx";
 import {getAvailablePools, getDynamicAttributeCounts} from "./utils/cardDataUtils.js";
-import CardFullImage from "./components/CardFullImage.jsx";
 import GalleryFullImage from "./components/GalleryFullImage.jsx";
 import DetailedImage from "./components/DetailedImage.jsx";
 import GalleryPage from "./components/GalleryPage.jsx";
@@ -589,7 +588,7 @@ const getRandomCard = (
     // ========================================================
     // 返回数据时显示的页面
     return (
-        <div className="w-full h-full relative overflow-hidden">
+        <div className="w-full h-full relative overflow-hidden" style={{backgroundColor: 'black'}}>
 
             {/* 视频层（最底层） */}
             <video
@@ -605,9 +604,8 @@ const getRandomCard = (
                     setisAnimatingDrawCards(false);
                     drawSessionIdRef.current = 0; // 重置流程 ID，防止后续重复触发
                 }}
-                className="absolute w-full h-full object-cover">
-                <source src="videos/background.mp4" type="video/mp4"/>
-
+                className="absolute top-0 left-0 w-full h-full object-cover z-0">
+                <source src="videos/background1.mp4" type="video/mp4"/>
             </video>
 
 

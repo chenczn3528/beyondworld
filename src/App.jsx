@@ -48,6 +48,27 @@ function App() {
     return () => window.removeEventListener('resize', resize);
   }, []);
 
+
+
+  // App.jsx 中添加 useEffect
+  useEffect(() => {
+    const updateRealVh = () => {
+      const realHeight = window.visualViewport?.height || window.innerHeight;
+      document.documentElement.style.setProperty('--real-vh', `${realHeight}px`);
+      console.log(realHeight, window.innerHeight)
+    };
+
+    updateRealVh();
+    window.visualViewport?.addEventListener('resize', updateRealVh);
+    window.addEventListener('resize', updateRealVh);
+    return () => {
+      window.visualViewport?.removeEventListener('resize', updateRealVh);
+      window.removeEventListener('resize', updateRealVh);
+    };
+  }, []);
+
+
+
   return (
     <div className="viewport">
       <div className="wrapper" ref={wrapperRef}>

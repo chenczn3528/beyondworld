@@ -99,7 +99,7 @@ const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
                       marginBottom: `${fontsize * 2.2}px`,
                   }}
               >
-                  {history.slice().reverse().map((card, idx) => {
+                  {history.slice(-2000).reverse().map((card, idx) => {
                       const cardHistoryColors = {
                           "星": {color: "gray"},
                           "辰星": {color: "gray"},

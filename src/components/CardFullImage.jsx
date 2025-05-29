@@ -11,12 +11,6 @@ const CardFullImage = (
         fontsize,
     }) => {
 
-    // const rarityMap = {
-    //     世界: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png',
-    //     月: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png',
-    //     辰星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png',
-    //     星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png',
-    // };
     const rarityMap = {
         世界: 'images/world.png',
         月: 'images/moon.png',
@@ -26,21 +20,17 @@ const CardFullImage = (
 
     const isFiveStar = card.稀有度 === '世界';
 
-
     return (
-        <div
-            style={{ backgroundColor: 'black' }}
-            className="relative w-full h-full flex z-100"
-        >
-            <LazyLoadImage
-                src={isSecondImage ? card.图片信息[1].srcset2 : card.图片信息[0].srcset2}
-                placeholderSrc={isSecondImage ? card.图片信息[1].src : card.图片信息[0].src}
-                effect="blur"
-                className="w-full h-full object-cover"
+        <div className="relative w-full h-full flex z-100">
+            <div
+                className="absolute w-full h-full animate-fadeZoomIn"
                 onClick={onClick}
+                style={{
+                    backgroundImage: `url(${isSecondImage ? card.图片信息[1].srcset2 : card.图片信息[0].srcset2})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                }}
             />
-
-
             <img
                 className="absolute"
                 src={rarityMap[card.稀有度]}
@@ -84,7 +74,6 @@ const CardFullImage = (
                     {card.卡名}
                 </label>
                 <img
-                    // src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${card.属性}.png`}
                     src={`images/60px-${card.属性}.png`}
                     alt="图标"
                     style={{

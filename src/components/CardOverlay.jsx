@@ -26,8 +26,6 @@ const CardOverlay = ({
   // ⭐ 跳过后展示：第一张 + 剩余五星卡
   const displayCards = isSkipped ? [firstCard, ...fiveStarCards] : allCards;
 
-  // console.log(currentCardIndex, displayCards)
-
   const card = displayCards[currentCardIndex];
 
   const isCurrentFiveStar = card?.稀有度 === '世界';
@@ -38,13 +36,10 @@ const CardOverlay = ({
 
     let sound;
     if (card.稀有度 === '世界') {
-      // sound = 'https://cdn.chenczn3528.dpdns.org/beyondworld/audios/金卡音效.mp3';
       sound = 'audios/金卡音效.mp3';
     } else if (card.稀有度 === '月') {
-      // sound = 'https://cdn.chenczn3528.dpdns.org/beyondworld/audios/月卡音效.mp3';
       sound = 'audios/月卡音效.mp3';
     } else {
-      // sound = 'https://cdn.chenczn3528.dpdns.org/beyondworld/audios/切换音效.mp3';
       sound = 'audios/切换音效.mp3';
     }
 
@@ -89,19 +84,16 @@ const CardOverlay = ({
 
   return (
     showCardOverlay && (
-      <div
-          className="absolute w-full h-full"
-        onClick={()=>{
-          handleNextCard();
-        }}
-      >
+      <div className="absolute w-full h-full" onClick={handleNextCard}>
         <CardFullImage
+            key={currentCardIndex}
           card={card}
           isSecondImage={isCurrentFiveStar && isSecondImage}
           setIsSkipped={setIsSkipped}
           setCurrentIndex={setCurrentIndex}
           isShowCardResult={false}
           fontsize={fontsize}
+          onClick={handleNextCard}
         />
       </div>
     )

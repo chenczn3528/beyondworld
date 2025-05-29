@@ -26,18 +26,9 @@ const GalleryPage = ({
     const currentCardIndex = rawIndex + 1; // ✅ 不再 +1
 
 
-    // 控制路径和偏移参数（基于屏幕尺寸百分比）
-    const spacingFactor = 13; // 控制卡片间距
-    const startX = -5;
-    const startY = 10;
-    const deltaX = 80;
-    const deltaY = 60;
-    const curveFactor = 20; // y 轴弯曲幅度
-    const angleScale = 0.9; // π/4 = 0.25 * π
-
     // 滑动定位
-    const SCROLL_T_MIN = -0.1;
-    const SCROLL_T_MAX = 1.1;
+    const SCROLL_T_MIN = -10;//-0.1;
+    const SCROLL_T_MAX = 10;//1.1;
 
 
     const scrollToIndex = (index) => {
@@ -121,20 +112,6 @@ const GalleryPage = ({
     };
 
 
-    // const rarityMap = {
-    //   世界: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png',
-    //   月: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png',
-    //   辰星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png',
-    //   星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png',
-    // };
-
-    const rarityMap = {
-        世界: 'images/world.png',
-        月: 'images/moon.png',
-        辰星: 'images/star1.png',
-        星: 'images/star2.png',
-    };
-
 
     const widthBias = fontsize * 0.25;
     const heightBias = fontsize * 0.3;
@@ -158,13 +135,20 @@ const GalleryPage = ({
                 style={{
                     background: "black",
                     overflow: "hidden",
-                    position: "relative",
+                    backgroundImage : `url(${displayCard["图片信息"][0].srcset2})`,
+                    backgroundSize: 'cover'
                 }}
+                onClick={() => {
+                            setShowGalleryFullImage(!showGalleryFullImage);
+                        }}
             >
 
                 {/*返回按钮*/}
                 <button className="absolute z-[70] w-auto flex items-center justify-center"
-                        onClick={() => setShowGallery(false)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setShowGallery(false);
+                        }}
                         style={{
                             background: 'transparent',
                             border: 'none',
@@ -178,45 +162,21 @@ const GalleryPage = ({
 
 
 
-
-                {/*阴影*/}
-                <div>
-                    {Array.from({length: totalSlots}).map((_, i) => {
-                        const relativeIndex = (i - scrollT * (totalSlots - 1)) * spacingFactor;
-                        const t = relativeIndex / (totalSlots - 1);
-
-                        const curveOffset = curveFactor * Math.sin(t * Math.PI * angleScale);
-                        const x = startX + t * deltaX;
-                        const y = startY + t * deltaY + curveOffset;
-                        return (
-                            <div key={i}>
-
-                                <div
-                                    style={{
-                                        position: "absolute",
-                                        left: `${x * widthBias}px`,
-                                        top: `${y * heightBias}px`,
-                                        width: `${fontsize * 16 * 0.9}px`,
-                                        height: `${fontsize * 9 * 0.9}px`,
-                                        borderRadius: "0%", // 可选，加上更像扩散雾
-                                        background: "rgba(0,0,0,0.01)", // 有背景才能产生阴影
-                                        boxShadow: "0 0 100px 100px rgba(23, 25, 33, 0.4)",
-                                        pointerEvents: "none",
-                                        transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
-                                        zIndex: 0,
-                                    }}
-                                />
-                            </div>
-
-                        );
-                    })}
-                </div>
-
-
                 {/*小图*/}
                 <div className="overflow-y-auto">
 
                     {Array.from({length: totalSlots}).map((_, i) => {
+
+                        // 控制路径和偏移参数（基于屏幕尺寸百分比）
+                        const spacingFactor = 13; // 控制卡片间距
+                        const startX = -5;
+                        const startY = 10;
+                        const deltaX = 80;
+                        const deltaY = 60;
+                        const curveFactor = 20; // y 轴弯曲幅度
+                        const angleScale = 0.9; // π/4 = 0.25 * π
+
+
                         const relativeIndex = (i - scrollT * (totalSlots - 1)) * spacingFactor;
                         const t = relativeIndex / (totalSlots - 1);
 
@@ -229,9 +189,6 @@ const GalleryPage = ({
                         const cardIndex = i - paddingCount;
                         const isRealImage = cardIndex >= 0 && cardIndex < cards.length;
                         const imageSrc = isRealImage ? cards[cardIndex]["图片信息"][0].src : defaultWhiteImage;
-                        const imageAttr = isRealImage ? cards[cardIndex]["属性"] : null;
-                        const imageCardName = isRealImage ? cards[cardIndex]["卡名"] : null;
-                        const imageRarity = isRealImage ? cards[cardIndex]['稀有度'] : null;
 
                         return (
                             <div key={i}>
@@ -239,8 +196,9 @@ const GalleryPage = ({
                                 <img
                                     src={imageSrc}
                                     alt={`img-${i}`}
-                                    onClick={() => {
+                                    onClick={(e) => {
                                         if (isRealImage) scrollToIndex(cardIndex);
+                                        e.stopPropagation();
                                     }}
                                     className="edge-blur-mask"
                                     style={{
@@ -256,99 +214,12 @@ const GalleryPage = ({
                                         zIndex: totalSlots - i,
                                     }}
                                 />
-                                {imageAttr && (
-                                    <div>
-                                        <img
-                                            // src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${imageAttr}.png`}
-                                            src={`images/60px-${imageAttr}.png`}
-                                            className="absolute"
-                                            style={{
-                                                width: `${fontsize * 2}px`,
-                                                left: `${(x + 1) * widthBias}px`,
-                                                top: `${(y + 1) * heightBias}px`,
-                                                zIndex: totalSlots - i,
-                                                transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
-                                            }}
-                                        />
-
-                                        <label
-                                            className="absolute"
-                                            style={{
-                                                fontSize: `${fontsize}px`,
-                                                color: 'white',
-                                                textShadow: '0 0 1px gray, 0 0 2px gray',
-                                                transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
-                                                zIndex: totalSlots - i,
-                                                left: `${(x + 1) * widthBias}px`,
-                                                transform: 'translateY(-100%)',
-                                                top: `${(y + 27) * heightBias}px`,
-                                            }}
-                                        >
-                                            {imageCardName}
-                                        </label>
-
-                                        <img
-                                            src={rarityMap[imageRarity]}
-                                            className="absolute"
-                                            style={{
-                                                width: `${fontsize * 3}px`,
-                                                left: `${(x + 48) * widthBias}px`,
-                                                top: `${y * heightBias}px`,
-                                                zIndex: totalSlots - i,
-                                                transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
-                                            }}
-                                        />
-                                    </div>
-
-
-                                )}
 
                             </div>
 
                         );
                     })}
 
-                </div>
-
-                {/*大图*/}
-                <div className="relative w-full h-full flex">
-                    <LazyLoadImage
-                        src={displayCard?.图片信息?.[0]?.srcset2}
-                        placeholderSrc={displayCard?.图片信息?.[0].src}
-                        effect="blur"
-                        alt="Full View"
-                        className="w-full h-full object-cover"
-                        onClick={() => {
-                            setShowGalleryFullImage(!showGalleryFullImage);
-                        }}
-                    />
-                    {/*大图标注*/}
-                    <div className="absolute flex flex-row items-center z-10"
-                         style={{top: `${fontsize}px`, right: `${fontsize}px`}}>
-                        <div className="flex flex-row">
-                            <div
-                                className="flex flex-col items-end justify-end"
-                                style={{color: "white", textShadow: '0 0 2px gray, 0 0 4px gray', fontWeight: 800}}
-                            >
-                                <label style={{fontSize: `${fontsize}px`}}>{displayCard?.主角}</label>
-                                <div className="flex flex-row gap-[1px]">
-                                    <img
-                                        // src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${cards[currentCardIndex]?.属性}.png`}
-                                        src={`images/60px-${displayCard?.属性}.png`}
-                                        className="h-auto"
-                                        style={{width: `${fontsize * 2}px`}}
-                                    />
-                                    <label
-                                        style={{fontSize: `${fontsize * 1.3}px`}}>{displayCard?.卡名}</label>
-                                </div>
-
-                            </div>
-                        </div>
-                        <img
-                            src={rarityMap[displayCard?.稀有度]}
-                            style={{width: `${fontsize * 5}px`}}
-                        />
-                    </div>
                 </div>
 
                 {/*让小图能滚动*/}

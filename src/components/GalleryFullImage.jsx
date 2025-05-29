@@ -64,19 +64,25 @@ const GalleryFullImage = (
 
 
                 <div
-                    style={{filter: showMeet ? 'blur(10px)' : 'none', transition: 'filter 0.3s ease'}}
+                    style={{
+                        filter: showMeet ? 'blur(10px)' : 'none',
+                        transition: 'filter 0.3s ease',
+                        backgroundSize: 'cover',
+                        backgroundImage: `url(${showPictureNumber === 0 ? card?.图片信息?.[0]?.srcset2 :
+                            showPictureNumber === 1 ? card?.图片信息?.[1]?.srcset2 : card?.图片信息?.[2]?.srcset2})`
+                    }}
                     className="relative w-full h-full flex"
                 >
-                    <LazyLoadImage
-                        src={showPictureNumber === 0 ? card?.图片信息?.[0]?.srcset2 :
-                            showPictureNumber === 1 ? card?.图片信息?.[1]?.srcset2 : card?.图片信息?.[2]?.srcset2}
-                        placeholderSrc={showPictureNumber === 0 ? card?.图片信息?.[0].src :
-                            showPictureNumber === 1 ? card?.图片信息?.[1]?.src : card?.图片信息?.[2]?.src}
-                        effect="blur"
-                        alt="Full View"
-                        className="w-full h-full object-cover"
-                        onClick={()=>setShowInformation(!showInformation)}
-                    />
+                    {/*<LazyLoadImage*/}
+                    {/*    src={showPictureNumber === 0 ? card?.图片信息?.[0]?.srcset2 :*/}
+                    {/*        showPictureNumber === 1 ? card?.图片信息?.[1]?.srcset2 : card?.图片信息?.[2]?.srcset2}*/}
+                    {/*    placeholderSrc={showPictureNumber === 0 ? card?.图片信息?.[0].src :*/}
+                    {/*        showPictureNumber === 1 ? card?.图片信息?.[1]?.src : card?.图片信息?.[2]?.src}*/}
+                    {/*    effect="blur"*/}
+                    {/*    alt="Full View"*/}
+                    {/*    className="w-full h-full object-cover"*/}
+                    {/*    onClick={()=>setShowInformation(!showInformation)}*/}
+                    {/*/>*/}
 
 
                     {showInformation && (

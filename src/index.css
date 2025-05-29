@@ -2,19 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-/*html, body {*/
-/*  overflow: hidden;*/
-/*  height: 100%;*/
-/*  background-color: black;*/
-/*}*/
-
 html, body {
   height: 100%;
-  overflow: hidden; /* 禁用页面滚动 */
-  overscroll-behavior: none; /* 禁用边界回弹 */
-  position: fixed; /* 解决 iOS 仍然能滚动 */
-  width: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background-color: black;
+  padding: 0;
+  margin: 0;
 }
 
 
@@ -114,8 +108,38 @@ button:focus-visible {
 
 
 
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.05);
+    filter: blur(4px);
+  }
+}
+.animate-fadeOut {
+  animation: fadeOut 0.25s ease-in-out forwards;
+}
 
+@keyframes fadeZoomIn {
+  0% {
+    opacity: 0;
+    transform: scale(1.1);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
 
+.animate-fadeZoomIn {
+  animation: fadeZoomIn 0.25s ease-in-out forwards;
+}
 
 
 

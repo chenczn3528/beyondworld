@@ -81,7 +81,6 @@ const CardSummary = ({
     <div className="absolute w-full h-full flex items-center justify-center">
       {/*底部图片（绝对定位） */}
       <img
-        // src="https://cdn.chenczn3528.dpdns.org/beyondworld/images/background.png"
         src="images/background.png"
         alt="底部装饰"
         className="absolute z-30 w-full h-full"
@@ -132,13 +131,6 @@ const CardSummary = ({
 
                           <img
                               src={
-                                // card.card.稀有度 === "世界"
-                                //     ? "https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png"
-                                //     : card.card.稀有度 === "月"
-                                //         ? "https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png"
-                                //         : card.card.稀有度 === "辰星"
-                                //             ? "https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png"
-                                //             : "https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png"
                                   card.card.稀有度 === "世界"
                                     ? "images/world.png"
                                     : card.card.稀有度 === "月"
@@ -227,8 +219,7 @@ const CardSummary = ({
         <div className="absolute w-full h-full">
             {showFullImage && (
             <CardFullImage
-                card={fullImage}  // 确保传递 fullImage，而不是其他东西
-                onClose={()=>{playClickSound(); setShowFullImage(false)}}
+                card={fullImage}
                 onClick={()=>{playClickSound(); setShowFullImage(false)}}
                 isShowCardResult={true}
                 fontsize={fontsize}
