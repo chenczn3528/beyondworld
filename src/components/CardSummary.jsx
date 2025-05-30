@@ -216,7 +216,7 @@ const CardSummary = ({
       </div>
 
 
-        <div className="absolute w-full h-full">
+        <div className="absolute w-full h-full" style={{backgroundColor: 'black'}}>
             {showFullImage && (
             <CardFullImage
                 card={fullImage}

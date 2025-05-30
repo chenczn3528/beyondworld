@@ -126,14 +126,29 @@ const GalleryPage = ({
 
     const displayCard = cards[getDisplayCardIndex()];
 
+
+
+
+
+    const divRef = useRef(null);
+    useEffect(() => {
+        if (divRef.current) {
+            const width = divRef.current.clientWidth; // 获取宽度
+            const height = divRef.current.clientHeight; // 获取高度
+            console.log(`Current div width: ${width}, height: ${height}`);
+        }
+        }, []); // 组件加载完成后只获取一次尺寸
+
+
     return (
         showGallery && (
             <div
-                className="relative w-full h-full z-20"
+                ref={divRef}
+                className="relative w-full h-full z-20 border"
                 id="gallery-scroll-container"
                 onTouchStart={handleTouchStart}
                 style={{
-                    background: "black",
+                    background: "white",
                     overflow: "hidden",
                     backgroundImage : `url(${displayCard["图片信息"][0].srcset2})`,
                     backgroundSize: 'cover'
