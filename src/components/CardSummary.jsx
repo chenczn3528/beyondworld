@@ -219,6 +219,7 @@ const CardSummary = ({
         <div className="absolute w-full h-full" style={{backgroundColor: 'black'}}>
             {showFullImage && (
             <CardFullImage
+                key={fullImage.卡名}
                 card={fullImage}
                 onClick={()=>{playClickSound(); setShowFullImage(false)}}
                 isShowCardResult={true}

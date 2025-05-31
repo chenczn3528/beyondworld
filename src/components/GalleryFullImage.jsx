@@ -3,6 +3,7 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import StarIcon from "../icons/StarIcon.jsx";
 import LeftIcon from "../icons/LeftIcon.jsx";
 import CardMeet from "./CardMeet.jsx";
+import useCardImageIndex from "../hooks/useCardImageIndex.js";
 
 const GalleryFullImage = (
 {
@@ -12,9 +13,26 @@ const GalleryFullImage = (
     fontsize,
 }) => {
 
-    const [showPictureNumber, setShowPictureNumber] = useState(0);
+    const { getImageIndex, setImageIndex } = useCardImageIndex();
+    const currentCardName = card?.卡名 || '';
+    const showPictureNumber = getImageIndex(currentCardName);
+
+    // 按钮点击时调用 setImageIndex 更新索引
+    const onChangePictureNumber = (index) => {
+        if (currentCardName) {
+            setImageIndex(currentCardName, index);
+            // GalleryFullImage 中点击时：
+            window.dispatchEvent(
+                new CustomEvent('custom:imageIndexChanged', {
+                    detail: { cardName: card.卡名, newIndex: index }
+                })
+            );
+        }
+    };
+
     const [showInformation, setShowInformation] = useState(true);
     const [showMeet, setShowMeet] = useState(false);
+
 
     const attributes = ['思维', '魅力', '体魄', '感知', '灵巧'];
     const button_style = {
@@ -26,24 +44,41 @@ const GalleryFullImage = (
     }
 
     const getButtonStyle = (index) => ({
-        ...button_style,
-        color: showPictureNumber === index ? 'white' : 'gray',
-        textShadow: showPictureNumber === index ? button_style.textShadow : null
+      ...button_style,
+      color: showPictureNumber === index ? 'white' : 'gray',
+      textShadow: showPictureNumber === index ? button_style.textShadow : null,
     });
 
-
-    // const rarityMap = {
-    //     世界: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png',
-    //     月: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png',
-    //     辰星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png',
-    //     星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png',
-    // };
     const rarityMap = {
         世界: 'images/world.png',
         月: 'images/moon.png',
         辰星: 'images/star1.png',
         星: 'images/star2.png',
     };
+
+
+    // 预加载小图，等大图加载完以后跳出来
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+        const targetImage =
+            showPictureNumber === 0 ? card?.图片信息?.[0]?.srcset2
+                : showPictureNumber === 1 ? card?.图片信息?.[1]?.srcset2
+                    : card?.图片信息?.[2]?.srcset2;
+
+        if (!targetImage) return;
+
+        const img = new Image();
+        img.src = targetImage;
+        img.onload = () => {
+            setLoaded(true);
+        };
+
+        // 清理副作用（可选）
+        return () => {
+            img.onload = null;
+        };
+    }, [card]);
 
 
 
@@ -60,29 +95,49 @@ const GalleryFullImage = (
                     fontsize={fontsize}
                 />
 
-
-
-
                 <div
                     style={{
                         filter: showMeet ? 'blur(10px)' : 'none',
                         transition: 'filter 0.3s ease',
-                        backgroundSize: 'cover',
-                        backgroundImage: `url(${showPictureNumber === 0 ? card?.图片信息?.[0]?.srcset2 :
-                            showPictureNumber === 1 ? card?.图片信息?.[1]?.srcset2 : card?.图片信息?.[2]?.srcset2})`
                     }}
                     className="relative w-full h-full flex"
                 >
-                    {/*<LazyLoadImage*/}
-                    {/*    src={showPictureNumber === 0 ? card?.图片信息?.[0]?.srcset2 :*/}
-                    {/*        showPictureNumber === 1 ? card?.图片信息?.[1]?.srcset2 : card?.图片信息?.[2]?.srcset2}*/}
-                    {/*    placeholderSrc={showPictureNumber === 0 ? card?.图片信息?.[0].src :*/}
-                    {/*        showPictureNumber === 1 ? card?.图片信息?.[1]?.src : card?.图片信息?.[2]?.src}*/}
-                    {/*    effect="blur"*/}
-                    {/*    alt="Full View"*/}
-                    {/*    className="w-full h-full object-cover"*/}
-                    {/*    onClick={()=>setShowInformation(!showInformation)}*/}
-                    {/*/>*/}
+
+
+                    {/* 低清图：模糊背景 */}
+                    <div
+                        className="absolute w-full h-full transition-opacity duration-300"
+                        style={{
+                            backgroundImage: `url(${
+                                showPictureNumber === 0 ? card?.图片信息?.[0]?.src || card?.图片信息?.[0]?.srcset2
+                                    : showPictureNumber === 1 ? card?.图片信息?.[1]?.src || card?.图片信息?.[1]?.srcset2
+                                        : card?.图片信息?.[2]?.src || card?.图片信息?.[2]?.srcset2
+                            })`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                            filter: "blur(20px)",
+                            opacity: loaded ? 0 : 1,
+                        }}
+                    />
+
+                    {/* 高清图：加载完后显示并播放动画 */}
+                    {loaded && (
+                        <div
+                            // onClick={onClick}
+                            className="absolute w-full h-full animate-fadeZoomIn"
+                            style={{
+                                backgroundImage: `url(${
+                                    showPictureNumber === 0 ? card?.图片信息?.[0]?.srcset2 
+                                        : showPictureNumber === 1 ? card?.图片信息?.[1]?.srcset2 
+                                            : card?.图片信息?.[2]?.srcset2
+                                })`,
+                                backgroundSize: "cover",
+                                backgroundPosition: "center",
+                            }}
+                        />
+                    )}
+
+
 
 
                     {showInformation && (
@@ -131,7 +186,6 @@ const GalleryFullImage = (
                             <div className="absolute flex flex-row" style={{bottom: `${fontsize * 2.5}px`,left: `${fontsize * 3}px`}}>
                                 {attributes.map(attr => (
                                     <div key={attr} className="flex flex-col items-center" style={{marginRight: `${fontsize}px`,}}>
-                                        {/*<img src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${attr}.png`} className="w-[7vmin]"/>*/}
                                         <img
                                             src={`images/60px-${attr}.png`} style={{width: `${fontsize * 2}px`}}/>
                                         <label
@@ -176,23 +230,22 @@ const GalleryFullImage = (
                             >
                                 {/*初始、重逢、无色卡面*/}
                                 <div className="flex flex-row mt-[1vmin]">
-                                    <button style={getButtonStyle(0)} onClick={() => setShowPictureNumber(0)}>初始</button>
+                                    <button style={getButtonStyle(0)} onClick={() => onChangePictureNumber(0)}>初始</button>
 
                                     {card.图片信息.length > 1 && (
                                         <button style={getButtonStyle(1)}
-                                                onClick={() => setShowPictureNumber(1)}>重逢</button>
+                                                onClick={() => onChangePictureNumber(1)}>重逢</button>
                                     )}
 
                                     {card.图片信息.length === 3 && (
                                         <button style={getButtonStyle(2)}
-                                                onClick={() => setShowPictureNumber(2)}>无色</button>
+                                                onClick={() => onChangePictureNumber(2)}>无色</button>
                                     )}
                                 </div>
                             </div>
                         </div>
                     )}
                 </div>
-
 
             </div>
         )

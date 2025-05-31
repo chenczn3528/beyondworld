@@ -16,7 +16,7 @@ import {playClickSound} from "../utils/playClickSound.js";
 };
 
 const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
-    console.log(history)
+    // console.log(history)
 
   const style_long = {
     color: 'lightgray',

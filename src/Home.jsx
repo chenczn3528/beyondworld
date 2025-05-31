@@ -14,6 +14,7 @@ import DetailedImage from "./components/DetailedImage.jsx";
 import GalleryPage from "./components/GalleryPage.jsx";
 import useResponsiveFontSize from "./utils/useResponsiveFontSize.js";
 import {useHistoryDB} from "./hooks/useHistoryDB.js";
+import useCardImageIndex from "./hooks/useCardImageIndex.js";
 
 
 const Home = () => {
@@ -169,12 +170,22 @@ const Home = () => {
 
 
     // ------------------------------- 抽卡动画播放完成后的处理逻辑
+    const { getImageIndex, setImageIndex } = useCardImageIndex();
     const handleDrawCardsAnimationEnd = async () => {
         const finalResults = drawResultsRef.current;
         const finalPity = currentPityRef.current;
 
         setPityCount(finalPity);
         setCards(finalResults.map(r => r.card));
+
+        // 这里初始化图片索引
+        finalResults.forEach(({ card }) => {
+            const currentIndex = getImageIndex(card.卡名);
+            if (currentIndex === undefined || currentIndex === null) {
+                setImageIndex(card.卡名, 0);
+            }
+        });
+
 
         // 保存到 IndexedDB 中
         const newEntries = finalResults.map(r => ({
@@ -184,6 +195,7 @@ const Home = () => {
             获取途径: r.card.获取途径,
             timestamp: new Date().toISOString(),
         }));
+
         await appendHistory(newEntries); // 自动维护 100000 条限制
 
         setShowAnimationDrawCards(false);
@@ -667,9 +679,7 @@ const getRandomCard = (
                 setShowGallery={setShowGallery}
                 showGalleryFullImage={showGalleryFullImage}
                 setShowGalleryFullImage={setShowGalleryFullImage}
-                galleryCard={galleryCard}
                 setGalleryCard={setGalleryCard}
-                fontsize={fontsize}
             />
 
             {showDetailedImage && (

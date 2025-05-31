@@ -9,6 +9,7 @@ html, body {
   background-color: black;
   padding: 0;
   margin: 0;
+  zoom: 1 !important;
 }
 
 
@@ -138,7 +139,7 @@ button:focus-visible {
 }
 
 .animate-fadeZoomIn {
-  animation: fadeZoomIn 0.25s ease-in-out forwards;
+  animation: fadeZoomIn 0.5s ease-in-out forwards;
 }
 
 

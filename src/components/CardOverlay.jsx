@@ -86,7 +86,7 @@ const CardOverlay = ({
     showCardOverlay && (
       <div className="absolute w-full h-full" onClick={handleNextCard}>
         <CardFullImage
-            key={currentCardIndex}
+          key={currentCardIndex}
           card={card}
           isSecondImage={isCurrentFiveStar && isSecondImage}
           setIsSkipped={setIsSkipped}
