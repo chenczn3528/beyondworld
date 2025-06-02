@@ -299,11 +299,11 @@ const SettingsLayer = ({
                         try {
                             await navigator.clipboard.writeText("840305422");
                             setCopyState(1);
-                            // alert("复制成功!");
+                            alert("复制成功!");
                         } catch (err) {
                             console.error("复制失败:", err);
                             setCopyState(2);
-                            // alert("复制失败!");
+                            alert("复制失败！小红书号：840305422");
                         }
                     }}
                 >

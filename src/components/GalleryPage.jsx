@@ -251,7 +251,6 @@ const GalleryPage = ({
                     // const newBaseSize = Math.min(height, width) / 375;
                     const newBaseSize = width / 375;
                     setBaseSize(newBaseSize);
-                    console.log(`width: ${width}, height: ${height}, baseSize: ${newBaseSize}`);
                     return true;
                 }
             }

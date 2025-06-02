@@ -1,8 +1,8 @@
-import React from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import {playClickSound} from "../utils/playClickSound.js";
 
-const DetailedImage = ({ card, onClose, fontsize }) => {
+const DetailedImage = ({ card, onClose }) => {
 
     const rarityMap = {
         世界: 'images/world.png',
@@ -13,8 +13,45 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
 
     const attributes = ['思维', '魅力', '体魄', '感知', '灵巧'];
 
+    // ======================================= 获取容器尺寸（16:9下）
+    const [baseSize, setBaseSize] = useState(1);
+    const divRef = useRef(null); // 获取当前绑定的容器的尺寸
+
+    useEffect(() => {
+        const updateSize = () => {
+            if (divRef.current) {
+                const width = divRef.current.clientWidth;
+                const height = divRef.current.clientHeight;
+
+                if (height > 0) {
+                    const newBaseSize = width / 375;
+                    setBaseSize(newBaseSize);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // 初始化时轮询直到能获取有效高度
+        const tryInitSize = () => {
+            const success = updateSize();
+            if (!success) {
+                // 如果失败，延迟一帧继续尝试
+                requestAnimationFrame(tryInitSize);
+            }
+        };
+        tryInitSize(); // 启动初始化
+        window.addEventListener('resize', updateSize); // 响应窗口变化
+
+        return () => {window.removeEventListener('resize', updateSize);};
+    }, []);
+
+
+
+
     return (
         <div
+            ref={divRef}
             className="absolute w-full h-full z-10"
             // className="flex justify-center items-center"
             onClick={() => {
@@ -32,9 +69,9 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                     effect="blur"
                     className="absolute object-contain edge-blur-mask"
                     style={{
-                        top: `${fontsize * 8}px`,
-                        left: `${fontsize * 12}px`,
-                        width: `${fontsize * 28}px`
+                        top: `${baseSize * 40}px`,
+                        left: `${baseSize * 80}px`,
+                        width: `${baseSize * 140}px`
                     }}
                 />
                 {/* 角标图标：定位在主图右上角 */}
@@ -42,9 +79,9 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                     className="absolute"
                     src={rarityMap[card.稀有度]}
                     style={{
-                        top: `${fontsize * 7.2}px`,
-                        left: `${fontsize * 35.8}px`,
-                        width: `${fontsize * 4}px`
+                        top: `${baseSize * 35}px`,
+                        left: `${baseSize * 190}px`,
+                        width: `${baseSize * 30}px`
                     }}
                 />
 
@@ -54,9 +91,9 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                     effect="blur"
                     className="absolute object-contain edge-blur-mask"
                     style={{
-                        top: `${fontsize * 21}px`,
-                        left: `${fontsize * 5}px`,
-                        width: `${fontsize * 14}px`
+                        top: `${baseSize * 100}px`,
+                        left: `${baseSize * 40}px`,
+                        width: `${baseSize * 70}px`
                     }}
                 />
 
@@ -66,26 +103,26 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                     alt="重逢图标"
                     className="absolute"
                     style={{
-                        top: `${fontsize * 20.3}px`,
-                        left: `${fontsize * 16.5}px`,
-                        width: `${fontsize * 2.5}px`
+                        top: `${baseSize * 93}px`,
+                        left: `${baseSize * 90}px`,
+                        width: `${baseSize * 20}px`
                     }}
                 />
 
                 <div
                     className="absolute overflow-hidden"
                     style={{
-                        top: `${fontsize * 10}px`,
-                        left: `${fontsize * 42.5}px`,
-                        width: `${fontsize * 18}px`,
-                        height: `${fontsize * 16}px`,
+                        top: `${baseSize * 50}px`,
+                        left: `${baseSize * 240}px`,
+                        width: `${baseSize * 100}px`,
+                        height: `${baseSize * 80}px`,
                     }}
                 >
                     <label
                         style={{
                             color: 'lightgray',
                             fontWeight: 600,
-                            fontSize: `${fontsize * 1.4}px`,
+                            fontSize: `${baseSize * 10}px`,
                     }}
                         className="absolute"
                     >
@@ -94,17 +131,17 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
 
                     <label
                         style={{
-                            top: `${fontsize * 1.9}px`,
+                            top: `${baseSize * 12}px`,
                             color: 'white',
                             fontWeight: 800,
-                            fontSize: `${fontsize * 2}px`,
+                            fontSize: `${baseSize * 14}px`,
                         }}
                         className="absolute"
                     >
                         {card.卡名}
                     </label>
 
-                    <div className="absolute flex flex-row" style={{top: `${fontsize * 6}px`}}>
+                    <div className="absolute flex flex-row" style={{top: `${baseSize * 40}px`}}>
                         {attributes.map(attr => (
                             <div
                                 key={attr}
@@ -113,14 +150,14 @@ const DetailedImage = ({ card, onClose, fontsize }) => {
                                 <img
                                     src={`images/60px-${attr}.png`}
                                     className="mb-[0.5vmin]"
-                                    style={{width: `${fontsize * 2}px`}}
+                                    style={{width: `${baseSize * 12}px`}}
                                 />
 
                                 <label
                                     style={{
                                         color: card.属性 === attr ? 'gold' : 'white',
                                         fontWeight: 800,
-                                        fontSize: `${fontsize * 1}px`,
+                                        fontSize: `${baseSize * 8}px`,
                                     }}
                                 >
                                     {card[attr]}

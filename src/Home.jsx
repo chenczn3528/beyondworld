@@ -692,7 +692,6 @@ const getRandomCard = (
                 <DetailedImage
                     card={detailedImage}  // 确保传递 fullImage，而不是其他东西
                     onClose={() => setShowDetailedImage(false)}
-                    fontsize={fontsize}
                 />
             )}
 
