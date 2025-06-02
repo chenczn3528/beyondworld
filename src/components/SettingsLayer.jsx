@@ -178,6 +178,7 @@ const SettingsLayer = ({
                     {/*筛选卡池*/}
                     <button
                         style={{
+                            visibility: 'hidden',
                             marginLeft: '3vmin',
                             fontSize: `${fontsize}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
