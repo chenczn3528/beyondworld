@@ -259,7 +259,6 @@ const GalleryPage = ({
                                 {imageAttr && (
                                     <div>
                                         <img
-                                            // src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${imageAttr}.png`}
                                             src={`images/60px-${imageAttr}.png`}
                                             className="absolute"
                                             style={{
@@ -333,7 +332,6 @@ const GalleryPage = ({
                                 <label style={{fontSize: `${fontsize}px`}}>{displayCard?.主角}</label>
                                 <div className="flex flex-row gap-[1px]">
                                     <img
-                                        // src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${cards[currentCardIndex]?.属性}.png`}
                                         src={`images/60px-${displayCard?.属性}.png`}
                                         className="h-auto"
                                         style={{width: `${fontsize * 2}px`}}

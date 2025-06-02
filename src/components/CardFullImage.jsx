@@ -46,9 +46,8 @@ const CardFullImage = (
     }, [isSecondImage, card]);
 
 
-
     return (
-        <div className="relative w-full h-full flex z-100">
+        <div className="relative w-full h-full flex z-100" key={`${card.卡名}-${isSecondImage}`}>
             {/* 低清图：模糊背景 */}
             <div
                 className="absolute w-full h-full transition-opacity duration-300"

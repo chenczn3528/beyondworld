@@ -86,7 +86,8 @@ const Home = () => {
     const [onlySelectedRoleCard, setOnlySelectedRoleCard] = useLocalStorageState('bw_onlySelectedRoleCard', false);
     // 历史记录
     const { history, loading, appendHistory, clearHistory } = useHistoryDB();
-
+    // 图鉴记录卡面是初始还是重逢
+    const { getImageIndex, setImageIndex, clearImageIndexes } = useCardImageIndex();
 
 
     // 清除缓存数据
@@ -106,6 +107,7 @@ const Home = () => {
     const clearLocalData = () => {
         keysToClear.forEach(key => localStorage.removeItem(key));
         clearHistory();
+        clearImageIndexes();
         location.reload();
     };
 
@@ -158,6 +160,8 @@ const Home = () => {
 
     const fontsize = useResponsiveFontSize({scale: 0.9});
 
+    const [sortedCards, setSortedCards] = useState([]);
+
 
 
     // ========================================================  用于抽卡动画相关
@@ -170,7 +174,6 @@ const Home = () => {
 
 
     // ------------------------------- 抽卡动画播放完成后的处理逻辑
-    const { getImageIndex, setImageIndex } = useCardImageIndex();
     const handleDrawCardsAnimationEnd = async () => {
         const finalResults = drawResultsRef.current;
         const finalPity = currentPityRef.current;
@@ -679,7 +682,10 @@ const getRandomCard = (
                 setShowGallery={setShowGallery}
                 showGalleryFullImage={showGalleryFullImage}
                 setShowGalleryFullImage={setShowGalleryFullImage}
+                galleryCard={galleryCard}
                 setGalleryCard={setGalleryCard}
+                sortedCards={sortedCards}
+                setSortedCards={setSortedCards}
             />
 
             {showDetailedImage && (
@@ -747,6 +753,7 @@ const getRandomCard = (
                 showGallery={showGallery}
                 setShowGallery={setShowGallery}
                 fontsize={fontsize}
+                galleryHistory={galleryHistory}
             />
 
         </div>

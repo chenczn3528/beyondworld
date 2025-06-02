@@ -38,6 +38,7 @@ const SettingsLayer = ({
     showGallery,
     setShowGallery,
     fontsize,
+    galleryHistory,
 }) => {
 
 
@@ -151,7 +152,8 @@ const SettingsLayer = ({
                             zIndex: showDetailedImage ? 2 : 4
                         }}
                         onClick={() => {
-                            setShowGallery(true);
+                            if(galleryHistory.length === 0) alert("没有抽卡历史");
+                            else setShowGallery(true);
                             playClickSound();
                         }}
                     >
