@@ -4,6 +4,7 @@ import StarIcon from "../icons/StarIcon.jsx";
 import LeftIcon from "../icons/LeftIcon.jsx";
 import CardMeet from "./CardMeet.jsx";
 import useCardImageIndex from "../hooks/useCardImageIndex.js";
+import FadeImage from "./FadeImage.jsx";
 
 const GalleryFullImage = (
 {
@@ -57,31 +58,6 @@ const GalleryFullImage = (
     };
 
 
-    // 预加载小图，等大图加载完以后跳出来
-    const [loaded, setLoaded] = useState(false);
-
-    useEffect(() => {
-        const targetImage =
-            showPictureNumber === 0 ? card?.图片信息?.[0]?.srcset2
-                : showPictureNumber === 1 ? card?.图片信息?.[1]?.srcset2
-                    : card?.图片信息?.[2]?.srcset2;
-
-        if (!targetImage) return;
-
-        const img = new Image();
-        img.src = targetImage;
-        img.onload = () => {
-            setLoaded(true);
-        };
-
-        // 清理副作用（可选）
-        return () => {
-            img.onload = null;
-        };
-    }, [card]);
-
-
-
     return (
         showGalleryFullImage && (
             <div
@@ -101,43 +77,16 @@ const GalleryFullImage = (
                         transition: 'filter 0.3s ease',
                     }}
                     className="relative w-full h-full flex"
+                    onClick={() => setShowInformation(!showInformation)}
                 >
-
-
-                    {/* 低清图：模糊背景 */}
-                    <div
-                        className="absolute w-full h-full transition-opacity duration-300"
-                        style={{
-                            backgroundImage: `url(${
-                                showPictureNumber === 0 ? card?.图片信息?.[0]?.src || card?.图片信息?.[0]?.srcset2
-                                    : showPictureNumber === 1 ? card?.图片信息?.[1]?.src || card?.图片信息?.[1]?.srcset2
-                                        : card?.图片信息?.[2]?.src || card?.图片信息?.[2]?.srcset2
-                            })`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                            filter: "blur(20px)",
-                            opacity: loaded ? 0 : 1,
-                        }}
-                    />
-
-                    {/* 高清图：加载完后显示并播放动画 */}
-                    {loaded && (
-                        <div
-                            // onClick={onClick}
-                            className="absolute w-full h-full animate-fadeZoomIn"
-                            style={{
-                                backgroundImage: `url(${
-                                    showPictureNumber === 0 ? card?.图片信息?.[0]?.srcset2 
-                                        : showPictureNumber === 1 ? card?.图片信息?.[1]?.srcset2 
-                                            : card?.图片信息?.[2]?.srcset2
-                                })`,
-                                backgroundSize: "cover",
-                                backgroundPosition: "center",
-                            }}
+                    <div >
+                        <FadeImage
+                            cardSrc={showPictureNumber === 0 ? card?.图片信息?.[0]?.src :
+                                showPictureNumber === 1 ? card?.图片信息?.[1]?.src : card?.图片信息?.[2]?.src}
+                            cardSrcset={showPictureNumber === 0 ? card?.图片信息?.[0]?.srcset2 :
+                                showPictureNumber === 1 ? card?.图片信息?.[1]?.srcset2 : card?.图片信息?.[2]?.srcset2}
                         />
-                    )}
-
-
+                    </div>
 
 
                     {showInformation && (
@@ -204,7 +153,7 @@ const GalleryFullImage = (
 
                             {/*返回按钮*/}
                             <button className="absolute w-auto flex items-center justify-center"
-                                onClick={()=>setShowGalleryFullImage(false)}
+                                onClick={(e) => {e.stopPropagation();setShowGalleryFullImage(false)}}
                                 style={{
                                     background: 'transparent',
                                     border: 'none',
@@ -219,7 +168,7 @@ const GalleryFullImage = (
                             {/*相会*/}
                             <button className="absolute w-auto flex items-center justify-center"
                                 style={{...button_style, top: `${fontsize * 2}px`, right: `${fontsize * 3}px`,}}
-                                onClick={() => setShowMeet(true)}
+                                onClick={(e) => {e.stopPropagation();setShowMeet(true)}}
                             >相会</button>
 
 
@@ -230,16 +179,17 @@ const GalleryFullImage = (
                             >
                                 {/*初始、重逢、无色卡面*/}
                                 <div className="flex flex-row mt-[1vmin]">
-                                    <button style={getButtonStyle(0)} onClick={() => onChangePictureNumber(0)}>初始</button>
+                                    <button style={getButtonStyle(0)}
+                                            onClick={(e) => {e.stopPropagation();onChangePictureNumber(0)}}>初始</button>
 
                                     {card.图片信息.length > 1 && (
                                         <button style={getButtonStyle(1)}
-                                                onClick={() => onChangePictureNumber(1)}>重逢</button>
+                                                onClick={(e) => {e.stopPropagation();onChangePictureNumber(1)}}>重逢</button>
                                     )}
 
                                     {card.图片信息.length === 3 && (
                                         <button style={getButtonStyle(2)}
-                                                onClick={() => onChangePictureNumber(2)}>无色</button>
+                                                onClick={(e) => {e.stopPropagation();onChangePictureNumber(2)}}>无色</button>
                                     )}
                                 </div>
                             </div>

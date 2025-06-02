@@ -355,7 +355,7 @@ const GalleryPage = ({
                                 className="flex flex-col items-end justify-end"
                                 style={{color: "white", textShadow: '0 0 2px gray, 0 0 4px gray', fontWeight: 800}}
                             >
-                                <label style={{fontSize: `${baseSize * 5}px`}}>{displayCard?.主角}</label>
+                                <label style={{fontSize: `${baseSize * 5.5}px`}}>{displayCard?.主角}</label>
                                 <div className="flex flex-row gap-[1px]">
                                     <img
                                         src={`images/60px-${displayCard?.属性}.png`}

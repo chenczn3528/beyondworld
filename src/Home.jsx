@@ -137,7 +137,6 @@ const Home = () => {
 
     const displayResultsRef = useRef([]); // 跳过时展示的卡片
 
-    const [videoPlayed, setVideoPlayed] = useState(false);  // 出金动画播放状态
     const [lastFiveStarWasTarget, setLastFiveStarWasTarget] = useState(true); // 上一次五星是否是定向角色
 
 
@@ -254,7 +253,7 @@ const Home = () => {
     // ======================================================== 判断当前卡片是不是五星
     useEffect(() => {
         const card = drawResultsRef.current[currentCardIndex]?.card;
-        if (card?.star === '5星') {
+        if (card?.star === '世界') {
           setIsFiveStar(true); // 是五星卡片
         } else {
           setIsFiveStar(false); // 不是五星卡片，直接展示卡片
@@ -267,8 +266,7 @@ const Home = () => {
     // ------------------------------- 控制卡片展示或结算页展示
     useEffect(() => {
         const allResults = drawResultsRef.current || [];
-        const onlyFiveStars = allResults.filter(item => item.card?.稀有度 === '世界');
-
+        const onlyFiveStars = allResults.slice(currentCardIndex).filter(item => item.card?.稀有度 === '世界');
         if (
             allResults.length > 0 &&
             !hasShownSummary &&
@@ -284,9 +282,11 @@ const Home = () => {
                     setHasShownSummary(true);
                 } else {
                     // 跳过但有五星卡，只展示五星卡片
+                    // console.log("onlyFiveStars",currentCardIndex, onlyFiveStars)
                     displayResultsRef.current = onlyFiveStars;
                     setShowCardOverlay(true);
                     setShowSummary(false);
+                    setCurrentCardIndex(0);
                 }
             } else {
                 // 正常播放流程，展示全部卡片
@@ -300,7 +300,6 @@ const Home = () => {
 
     // ------------------------------- 每次点下一张卡时都先重置视频播放状态
     const handleNextCard = () => {
-        setVideoPlayed(false);
         if (showSummary) return;
         if (currentCardIndex < displayResultsRef.current.length - 1) {
             const nextIndex = currentCardIndex + 1;
@@ -315,6 +314,9 @@ const Home = () => {
         }
     };
 
+
+
+
     useEffect(()=>{
         drawResultsRef.current.forEach((item, index) => {
             console.log(`第 ${index + 1} 张卡:\t`, item.rarity, "\t", item.card.卡名);
@@ -322,8 +324,6 @@ const Home = () => {
     },[history.length])
 
 
-
-// console.log("selectedPools", selectedPools)
 const handleDraw = async (count) => {
   if (isDrawing || isAnimatingDrawCards) return;
 
@@ -650,12 +650,13 @@ const getRandomCard = (
                 showCardOverlay={showCardOverlay}
                 setShowCardOverlay={setShowCardOverlay}
                 currentCardIndex={currentCardIndex}
-                drawResultsRef={drawResultsRef}
+                // drawResultsRef={drawResultsRef}
+                drawResultsRef={displayResultsRef}
                 handleNextCard={handleNextCard}
                 isSkipped={isSkipped}
                 setIsSkipped={setIsSkipped}
                 currentIndex={currentCardIndex}
-                setCurrentIndex={setCurrentCardIndex}
+                setCurrentCardIndex={setCurrentCardIndex}
                 fontsize={fontsize}
             />
 
@@ -696,24 +697,24 @@ const getRandomCard = (
             )}
 
 
-            {/*/!*展示筛选卡片页*!/*/}
-            {/*<CardPoolFilter*/}
-            {/*    selectedRole={selectedRole}*/}
-            {/*    setSelectedRole={setSelectedRole}*/}
-            {/*    useSoftGuarantee={useSoftGuarantee}*/}
-            {/*    setUseSoftGuarantee={setUseSoftGuarantee}*/}
-            {/*    includeThreeStar={includeThreeStar}*/}
-            {/*    setIncludeThreeStar={setIncludeThreeStar}*/}
-            {/*    includeThreeStarM={includeThreeStarM}*/}
-            {/*    setIncludeThreeStarM={setIncludeThreeStarM}*/}
-            {/*    onlySelectedRoleCard={onlySelectedRoleCard}*/}
-            {/*    setOnlySelectedRoleCard={setOnlySelectedRoleCard}*/}
-            {/*    showCardPoolFilter={showCardPoolFilter}*/}
-            {/*    setShowCardPoolFilter={setShowCardPoolFilter}*/}
-            {/*    valuesList={valuesList}*/}
-            {/*    selectedPools={selectedPools}*/}
-            {/*    setSelectedPools={setSelectedPools}*/}
-            {/*/>*/}
+            {/*展示筛选卡片页*/}
+            <CardPoolFilter
+                selectedRole={selectedRole}
+                setSelectedRole={setSelectedRole}
+                useSoftGuarantee={useSoftGuarantee}
+                setUseSoftGuarantee={setUseSoftGuarantee}
+                includeThreeStar={includeThreeStar}
+                setIncludeThreeStar={setIncludeThreeStar}
+                includeThreeStarM={includeThreeStarM}
+                setIncludeThreeStarM={setIncludeThreeStarM}
+                onlySelectedRoleCard={onlySelectedRoleCard}
+                setOnlySelectedRoleCard={setOnlySelectedRoleCard}
+                showCardPoolFilter={showCardPoolFilter}
+                setShowCardPoolFilter={setShowCardPoolFilter}
+                valuesList={valuesList}
+                selectedPools={selectedPools}
+                setSelectedPools={setSelectedPools}
+            />
 
 
             {/* 控件层（中间层） */}

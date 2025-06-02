@@ -1,13 +1,13 @@
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import {useEffect, useState} from "react";
+import FadeImage from "./FadeImage.jsx";
 
 const CardFullImage = (
     {
         card,
         onClick,
-        setIsSkipped,
+        onSkip,
         setCurrentIndex,
-        isSecondImage = false,
         isShowCardResult = false,
         fontsize,
     }) => {
@@ -21,65 +21,53 @@ const CardFullImage = (
 
     const isFiveStar = card.稀有度 === '世界';
 
-
-    // 预加载小图，等大图加载完以后跳出来
-    const [loaded, setLoaded] = useState(false);
+    const [showSecondImage, setShowSecondImage] = useState(false);
+    const [isClickable, setIsClickable] = useState(false);
 
     useEffect(() => {
-        const targetImage =
-            isSecondImage
-                ? card?.图片信息?.[1]?.srcset2 || card?.图片信息?.[1]?.src
-                : card?.图片信息?.[0]?.srcset2 || card?.图片信息?.[0]?.src;
+        setShowSecondImage(false);
+        setIsClickable(false);
 
-        if (!targetImage) return;
+        if (isFiveStar) {
+            // 第一个阶段：显示第一张图 3 秒
+            const timer1 = setTimeout(() => {
+                setShowSecondImage(true);
+                // 第二阶段：再等 3 秒才能点击
+                const timer2 = setTimeout(() => {
+                    setIsClickable(true);
+                }, 3000);
+                return () => clearTimeout(timer2);
+            }, 3000);
 
-        const img = new Image();
-        img.src = targetImage;
-        img.onload = () => {
-            setLoaded(true);
-        };
-
-        // 清理副作用（可选）
-        return () => {
-            img.onload = null;
-        };
-    }, [isSecondImage, card]);
+            return () => clearTimeout(timer1);
+        } else {
+            // 非五星卡立即可点击
+            setIsClickable(true);
+        }
+    }, [card]);
 
 
     return (
-        <div className="relative w-full h-full flex z-100" key={`${card.卡名}-${isSecondImage}`}>
-            {/* 低清图：模糊背景 */}
-            <div
-                className="absolute w-full h-full transition-opacity duration-300"
-                style={{
-                    backgroundImage: `url(${
-                        isSecondImage
-                            ? card?.图片信息?.[1]?.src || card?.图片信息?.[1]?.srcset2
-                            : card?.图片信息?.[0]?.src || card?.图片信息?.[0]?.srcset2
-                    })`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    filter: "blur(20px)",
-                    opacity: loaded ? 0 : 1,
-                }}
-            />
-
-            {/* 高清图：加载完后显示并播放动画 */}
-            {loaded && (
-                <div
-                    onClick={onClick}
-                    className="absolute w-full h-full animate-fadeZoomIn"
-                    style={{
-                        backgroundImage: `url(${isSecondImage ? card?.图片信息?.[1]?.srcset2 : card?.图片信息?.[0]?.srcset2})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                    }}
+        <div className="relative w-full h-full flex z-100" key={`${card.卡名}`}>
+            <div style={{zIndex: 5}} onClick={() => {if(!isFiveStar && isClickable) onClick();}}>
+                <FadeImage
+                    cardSrc={card?.图片信息?.[0]?.src}
+                    cardSrcset={card?.图片信息?.[0]?.srcset2}
                 />
+            </div>
+            {isFiveStar && (
+                <div
+                    onClick={() => {if (isClickable) onClick();}}
+                    style={{zIndex: showSecondImage ? 10 : 0}}>
+                    <FadeImage
+                        cardSrc={card?.图片信息?.[1]?.src}
+                        cardSrcset={card?.图片信息?.[1]?.srcset2}
+                    />
+                </div>
             )}
 
-
             <img
-                className="absolute"
+                className="absolute z-25"
                 src={rarityMap[card.稀有度]}
                 style={{
                     height: `${fontsize * 5}px`,
@@ -89,7 +77,7 @@ const CardFullImage = (
             />
 
             <label
-                className="absolute"
+                className="absolute z-25"
                 style={{
                     color: 'white',
                     fontSize: `${fontsize * 1.5}px`,
@@ -103,7 +91,7 @@ const CardFullImage = (
             </label>
 
             <div
-                className="absolute flex items-center"
+                className="absolute flex items-center z-25"
                 style={{
                     left: `${fontsize * 7.5}px`,
                     bottom: `${fontsize * 4.5}px`,
@@ -132,7 +120,7 @@ const CardFullImage = (
 
             {!(isShowCardResult || isFiveStar) && (
                 <button
-                    className="absolute"
+                    className="absolute z-25"
                     style={{
                         backgroundColor: 'rgba(255,255,255,0.3)',
                         right: `${fontsize * 3}px`,
@@ -142,8 +130,8 @@ const CardFullImage = (
                         textShadow: '0 0 2px black, 0 0 4px black',
                     }}
                     onClick={() => {
-                        setIsSkipped(true);
                         setCurrentIndex(0);
+                        onSkip();
                     }}
                 >
                     跳过

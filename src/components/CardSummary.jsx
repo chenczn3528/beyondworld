@@ -68,7 +68,7 @@ const CardSummary = ({
 
   const grid = createEmptyGrid();
 
-  console.log("sortedCards", sortedCards)
+  // console.log("sortedCards", sortedCards)
 
   layoutPositions.forEach(([row, col], idx) => {
     const card = sortedCards[idx];
@@ -148,7 +148,6 @@ const CardSummary = ({
                               style={{background: "radial-gradient(circle, rgba(256,256,256,0.5) 0%, rgba(128,128,128,0) 60%)"}}
                           >
                             <img
-                                // src={`https://cdn.chenczn3528.dpdns.org/beyondworld/images/60px-${card.card.属性}.png`}
                                 src={`images/60px-${card.card.属性}.png`}
                                 style={{height: `${fontsize * 1.5}px`}}
                                 alt="属性图标"

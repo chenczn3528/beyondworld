@@ -178,7 +178,7 @@ const SettingsLayer = ({
                     {/*筛选卡池*/}
                     <button
                         style={{
-                            visibility: 'hidden',
+                            // visibility: 'hidden',
                             marginLeft: '3vmin',
                             fontSize: `${fontsize}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
@@ -228,7 +228,6 @@ const SettingsLayer = ({
                         <label className="text-shadow"
                                style={{fontSize: `${fontsize * 1.5}px`,}}> {70 - pityCount} </label>
                         <label className="text-shadow"> 次感召必出 </label>
-                        {/*<img src="https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png" style={{width: `${fontsize * 3}vmin`}}/>*/}
                         <img src="images/world.png" style={{width: `${fontsize * 3}px`}}/>
                         <label className="text-shadow">侧影</label>
                     </div>
@@ -258,7 +257,7 @@ const SettingsLayer = ({
                             textShadow: '0 0 10px gold'
                         }}
                     >
-                        {selectedRole === '随机' || !useSoftGuarantee ? (
+                        {(selectedRole.length === 1 && selectedRole[0] === "随机") || !useSoftGuarantee ? (
                             <>
                                 还剩 {70 - pityCount} 抽 必得世界卡
                             </>
