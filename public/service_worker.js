@@ -1,4 +1,5 @@
-const CACHE_NAME = 'beyondworld-cache-v1';
+// version: 20250603-v5
+const CACHE_NAME = 'beyondworld-cache-v2';
 const FILES_TO_CACHE = [
     '/beyondworld/videos/gold.mp4',
     '/beyondworld/videos/no_gold.mp4',
@@ -26,17 +27,36 @@ const FILES_TO_CACHE = [
 ];
 
 // 安装阶段：缓存资源，跳过等待
+// self.addEventListener('install', (event) => {
+//   self.skipWaiting();
+//   event.waitUntil(
+//     caches.open(CACHE_NAME)
+//       .then(cache => {
+//         console.log('[SW] Caching files:', FILES_TO_CACHE);
+//         return cache.addAll(FILES_TO_CACHE);
+//       })
+//       .catch(err => console.error('[SW] Cache failed:', err))
+//   );
+// });
+
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[SW] Caching files:', FILES_TO_CACHE);
-        return cache.addAll(FILES_TO_CACHE);
-      })
-      .catch(err => console.error('[SW] Cache failed:', err))
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+      for (const file of FILES_TO_CACHE) {
+        try {
+          await cache.add(file);
+          console.log(`[SW] Cached: ${file}`);
+        } catch (err) {
+          console.warn(`[SW] Failed to cache ${file}:`, err);
+        }
+      }
+    })()
   );
 });
+
+
 
 // 激活阶段：清除旧缓存，立即接管控制权
 self.addEventListener('activate', (event) => {

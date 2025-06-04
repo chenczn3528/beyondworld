@@ -58,8 +58,8 @@ const Home = () => {
     );
     const allPools = [...permanentPools, ...availablePools];
 
-
-
+    // 恢复selectedPools的初始状态
+    const [hasInitializedPools, setHasInitializedPools] = useState(false);
 
 
     // ======================================================== 数据存储与恢复
@@ -93,15 +93,15 @@ const Home = () => {
     // 清除缓存数据
     const keysToClear = [
         'bw_totalDrawCount',
+        'bw_selectedRole',
+        'bw_selectedPools',
         'bw_totalFiveStarCount',
         'bw_pityCount',
         'bw_useSoftGuarantee',
         'bw_softPityFailed',
-        'bw_selectedRole',
         'bw_includeThreeStar',
         'bw_includeThreeStarM',
         'bw_onlySelectedRoleCard',
-        'bw_selectedPools',
     ];
 
     const clearLocalData = () => {
@@ -282,7 +282,6 @@ const Home = () => {
                     setHasShownSummary(true);
                 } else {
                     // 跳过但有五星卡，只展示五星卡片
-                    // console.log("onlyFiveStars",currentCardIndex, onlyFiveStars)
                     displayResultsRef.current = onlyFiveStars;
                     setShowCardOverlay(true);
                     setShowSummary(false);
@@ -324,278 +323,206 @@ const Home = () => {
     },[history.length])
 
 
-const handleDraw = async (count) => {
-  if (isDrawing || isAnimatingDrawCards) return;
 
-  setIsDrawing(true);
-  setisAnimatingDrawCards(true);
+    // 抽卡逻辑
+    const handleDraw = async (count) => {
+      if (isDrawing || isAnimatingDrawCards) return;
 
-  const currentDrawId = Date.now();
-  drawSessionIdRef.current = currentDrawId;
+      setIsDrawing(true);
+      setisAnimatingDrawCards(true);
 
-  setShowSummary(false);
-  setShowCardOverlay(false);
-  setHasShownSummary(false);
-  setCurrentCardIndex(0);
-  setIsSkipped(false);
-  displayResultsRef.current = [];
-  drawResultsRef.current = [];
+      const currentDrawId = Date.now();
+      drawSessionIdRef.current = currentDrawId;
 
-  let drawResults = [];
-  let currentPity = pityCount;
-  let currentFourStarCounter = currentFourStarRef.current;
+      setShowSummary(false);
+      setShowCardOverlay(false);
+      setHasShownSummary(false);
+      setCurrentCardIndex(0);
+      setIsSkipped(false);
+      displayResultsRef.current = [];
+      drawResultsRef.current = [];
 
-  let localSoftPityFailed = softPityFailed;
+      let drawResults = [];
+      let currentPity = pityCount;
+      let currentFourStarCounter = currentFourStarRef.current;
+      let localSoftPityFailed = softPityFailed;
 
-  for (let i = 0; i < count; i++) {
-    let result;
+      for (let i = 0; i < count; i++) {
+        let result;
+        let rarity;
 
-    if (onlySelectedRoleCard && selectedRole.length === 1 && selectedRole[0] !== '随机') {
-      // 只抽当前角色卡，关闭大小保底
-      do {
-        result = getRandomCard(
-          currentPity,
-          currentFourStarCounter,
-          false,
-          selectedRole,
-          onlySelectedRoleCard,
-          includeThreeStar,
-          includeThreeStarM,
-          selectedPools,
-          cardData
-        );
-      } while (!includeThreeStar && result.rarity === '星');
+        const isAllRoles = selectedRole.includes('随机');
+        // const isSingleTarget = selectedRole.length === 1 && !isAllRoles;
+        const isSingleTarget = !isAllRoles;
 
-      if (result.rarity === '世界') {
-        currentPity = 0;
-        currentFourStarCounter = 0;
-      } else {
-        currentPity++;
-        currentFourStarCounter = result.rarity === '月' ? 0 : currentFourStarCounter + 1;
-      }
-    } else {
-      // 启用或关闭大小保底逻辑
-      const mustBeTarget = useSoftGuarantee && selectedRole.length === 1 && selectedRole[0] !== '随机' && localSoftPityFailed;
+        let forceGuaranteeMode = null;
 
-      do {
-        result = getRandomCard(
-          currentPity,
-          currentFourStarCounter,
-          mustBeTarget,
-          selectedRole,
-          onlySelectedRoleCard,
-          includeThreeStar,
-          includeThreeStarM,
-          selectedPools,
-          cardData
-        );
-      } while (!includeThreeStar && result.rarity === '星');
+        if (!onlySelectedRoleCard && useSoftGuarantee && isSingleTarget) {
+          forceGuaranteeMode = localSoftPityFailed ? 'hard' : 'soft';
+        }
 
-      if (result.rarity === '世界') {
-        currentPity = 0;
-        currentFourStarCounter = 0;
+        // 调用抽卡
+        do {
+          result = getRandomCard(
+            currentPity,
+            currentFourStarCounter,
+            selectedRole,
+            onlySelectedRoleCard,
+            includeThreeStar,
+            includeThreeStarM,
+            selectedPools,
+            cardData,
+            forceGuaranteeMode
+          );
+          rarity = result.rarity;
+        } while ((rarity === '星' && !includeThreeStar) || (rarity === '辰星' && !includeThreeStarM));
 
-        if (useSoftGuarantee && selectedRole.length === 1 && selectedRole[0] !== '随机') {
-          if (result.card?.character === selectedRole) {
-            localSoftPityFailed = false; // 命中选定角色
-          } else {
-            localSoftPityFailed = true;  // 小保底失败，开启大保底
+        // 更新保底状态
+        if (rarity === '世界') {
+          currentPity = 0;
+          currentFourStarCounter = 0;
+
+          if (!onlySelectedRoleCard && useSoftGuarantee && isSingleTarget) {
+            const limitedPools = selectedPools.filter(pool => pool !== "世界之间" && !pool.includes("累充"));
+            const gotTarget = result.card && selectedRole.includes(result.card.主角) && limitedPools.includes(result.card.获取途径);
+            localSoftPityFailed = !gotTarget;
           }
+        } else {
+          currentPity++;
+          currentFourStarCounter = rarity === '月' ? 0 : currentFourStarCounter + 1;
+        }
+
+        drawResults.push(result);
+        setTotalDrawCount(prev => prev + 1);
+        if (rarity === '世界') {
+          setTotalFiveStarCount(prev => prev + 1);
+        }
+      }
+
+      // 状态更新
+      setIsDrawing(false);
+      drawResultsRef.current = drawResults;
+      currentPityRef.current = currentPity;
+      currentFourStarRef.current = currentFourStarCounter;
+      setSoftPityFailed(localSoftPityFailed);
+      setHasFiveStarAnimation(drawResults.some(r => r.rarity === '世界'));
+      setShowAnimationDrawCards(true);
+      setDrawnCards(drawResults.map(r => r.card).filter(Boolean));
+    };
+
+
+
+    const getRandomCard = (
+      pity,
+      fourStarCounter,
+      selectedRole = ['随机'],
+      onlySelectedRoleCard = false,
+      includeThreeStar = true,
+      includeThreeStarM = true,
+      selectedPools = ['全部'],
+      cardData = [],
+      forceGuaranteeMode = null // 'soft' | 'hard' | null
+    ) => {
+      let rarity;
+      let pool = cardData;
+      const roll = Math.random() * 100;
+
+      const isAllPools = selectedPools.includes('全部');
+      const isAllRoles = selectedRole.includes('随机');
+      const limitedPools = selectedPools.filter(pool => pool !== "世界之间" && !pool.includes("累充"));
+      const permanentPools = selectedPools.filter(pool => pool == "世界之间" || pool.includes("累充"));
+
+      // 五星概率（动态）
+      let dynamicFiveStarRate = 2;
+      if (pity >= 60) {
+        dynamicFiveStarRate = 2 + (pity - 59) * 10;
+      }
+
+      const fourStarRate = 7;
+
+      // 判断稀有度
+      if (fourStarCounter >= 9) {
+        rarity = roll < dynamicFiveStarRate ? '世界' : '月';
+      } else if (roll < dynamicFiveStarRate) {
+        rarity = '世界';
+      } else if (roll < dynamicFiveStarRate + fourStarRate) {
+        rarity = '月';
+      } else {
+        // rarity = '星'; // 星或辰星统一为稀有度“星”
+          // 单独判断辰星/星星
+          const lowRoll = Math.random();
+          if (includeThreeStarM && !includeThreeStar) {
+            rarity = '辰星';
+          } else if (includeThreeStar && !includeThreeStarM) {
+            rarity = '星';
+          } else {
+            // 如果都选了，随机一个
+            rarity = lowRoll < 0.2 ? '辰星' : '星';
+          }
+      }
+
+      // 筛选卡池
+      if (rarity === '世界') {
+        if (forceGuaranteeMode === 'hard') {
+          // 大保底：限定池中选定角色
+          pool = cardData.filter(card =>
+            card.稀有度 === '世界' &&
+            limitedPools.includes(card.获取途径) &&
+            selectedRole.includes(card.主角)
+          );
+        } else if (forceGuaranteeMode === 'soft') {
+          // 小保底歪：常驻池任意 + 限定池中未选定角色
+          pool = cardData.filter(card =>
+            card.稀有度 === '世界' &&
+            (
+              permanentPools.includes(card.获取途径) ||
+              (limitedPools.includes(card.获取途径) && !selectedRole.includes(card.主角))
+            )
+          );
+        } else if (!isAllRoles) {
+            if (onlySelectedRoleCard) {
+              // 选了只抽定向角色卡（稀有度不限）
+              pool = cardData.filter(card =>
+                card.稀有度 === '世界' &&
+                selectedRole.includes(card.主角) &&
+                (isAllPools || selectedPools.includes(card.获取途径))
+              );
+            } else {
+              // 选了定向角色，没选只抽定向角色的卡，也没选大小保底
+              pool = cardData.filter(card =>
+                card.稀有度 === '世界' &&
+                selectedRole.includes(card.主角) &&
+                selectedPools.includes(card.获取途径)
+              );
+            }
+        } else {
+          // 正常五星抽卡（不指定角色）
+          pool = cardData.filter(card =>
+            card.稀有度 === '世界' &&
+            (isAllPools || selectedPools.includes(card.获取途径))
+          );
+        }
+      } else if (rarity === '月') {
+        pool = cardData.filter(card => card.稀有度 === '月');
+        if (onlySelectedRoleCard && !isAllRoles) {
+          pool = pool.filter(card => selectedRole.includes(card.主角));
         }
       } else {
-        currentPity++;
-        currentFourStarCounter = result.rarity === '月' ? 0 : currentFourStarCounter + 1;
+        // 星 / 辰星
+          if (onlySelectedRoleCard) {
+              pool = cardData.filter(card => (includeThreeStarM && card.稀有度 === "辰星")
+                  || (includeThreeStar && card.稀有度 === "星") && selectedRole.includes(card.主角));
+          } else {
+              pool = cardData.filter(card => (includeThreeStarM && card.稀有度 === "辰星")
+                  || (includeThreeStar && card.稀有度 === "星"));
+          }
       }
-    }
 
-    drawResults.push(result);
-    setTotalDrawCount(prev => prev + 1);
-    if (result.rarity === '世界') setTotalFiveStarCount(prev => prev + 1);
-  }
-
-  // 更新状态
-  setIsDrawing(false);
-  drawResultsRef.current = drawResults;
-  currentPityRef.current = currentPity;
-  currentFourStarRef.current = currentFourStarCounter;
-  setSoftPityFailed(localSoftPityFailed);
-  setHasFiveStarAnimation(drawResults.some(r => r.rarity === '世界'));
-  setShowAnimationDrawCards(true);
-  setDrawnCards(drawResults.map(r => r.card).filter(Boolean));
-};
-
-
-
-
-
-
-
-  // ========================================================
-  // 随机生成一张卡片，并根据保底计数器 (pity) 计算是否触发保底效果
-// const getRandomCard = (
-//   pity,
-//   fourStarCounter,
-//   mustBeTargetFiveStar = false,
-//   selectedRole = ['随机'],
-//   onlySelectedRoleCard = false,
-//   includeThreeStar = true
-// ) => {
-//   let rarity;
-//   let pool = [];
-//
-//   const roll = Math.random() * 100;
-//
-//   // ⭐⭐⭐⭐ 五星概率计算 ⭐⭐⭐⭐
-//   let dynamicFiveStarRate = 1;
-//   if (pity >= 60) {
-//     dynamicFiveStarRate = 1 + (pity - 59) * 10;
-//   }
-//
-//
-//   // ⭐⭐⭐⭐ 四星概率固定 ⭐⭐⭐⭐
-//   const fourStarRate = 7;
-//
-//   // ⭐⭐⭐⭐ 保底判断 ⭐⭐⭐⭐
-//   if (fourStarCounter >= 9) {
-//     rarity = roll < dynamicFiveStarRate ? '5' : '4';
-//   } else if (roll < dynamicFiveStarRate) {
-//     rarity = '5';
-//   } else if (roll < dynamicFiveStarRate + fourStarRate) {
-//     rarity = '4';
-//   } else {
-//     rarity = '3';
-//   }
-//
-//   let targetStar = '0';
-//   if(rarity === '5'){
-//       targetStar = '世界';
-//   } else if(rarity === '4'){
-//       targetStar = '月';
-//   } else {
-//       targetStar = '星';
-//   }
-//
-//   // ⭐⭐⭐⭐ 筛选卡池 ⭐⭐⭐⭐
-//   if (targetStar === '世界') {
-//     if (onlySelectedRoleCard && selectedRole.length === 1 && selectedRole[0] !== '随机') {
-//       pool = cardData.filter(card => card.主角 === selectedRole && card.稀有度 === '世界');
-//     } else if (mustBeTargetFiveStar && selectedRole.length === 1 && selectedRole[0] !== '随机') {
-//       pool = cardData.filter(card => card.主角 === selectedRole && card.稀有度 === '世界');
-//     } else {
-//       pool = cardData.filter(card => card.稀有度 === '世界');
-//     }
-//   } else {
-//     if (onlySelectedRoleCard && selectedRole.length === 1 && selectedRole[0] !== '随机') {
-//       pool = cardData.filter(card =>
-//         card.主角 === selectedRole &&
-//         card.稀有度 === targetStar &&
-//         (includeThreeStar || targetStar !== '星')
-//       );
-//     } else {
-//       pool = cardData.filter(card =>
-//         card.稀有度 === targetStar &&
-//         (includeThreeStar || targetStar !== '星')
-//       );
-//     }
-//   }
-//
-//   if (pool.length === 0) return { card: null, rarity };
-//   const chosen = pool[Math.floor(Math.random() * pool.length)];
-//   return { card: chosen, rarity };
-// };
-const getRandomCard = (
-  pity,
-  fourStarCounter,
-  mustBeTargetFiveStar = false,
-  selectedRole = ['随机'],
-  onlySelectedRoleCard = false,
-  includeThreeStar = true,
-  includeThreeStarM = true,
-  selectedPools = ['全部'],
-  cardData = []
-) => {
-
-  let rarity;
-  let pool = cardData;
-
-  const roll = Math.random() * 100;
-
-  const isAllPools = selectedPools.includes('全部');
-  const isAllRoles = selectedRole.includes('随机');
-
-  // 五星动态概率
-  let dynamicFiveStarRate = 2;
-  if (pity >= 60) {
-    dynamicFiveStarRate = 2 + (pity - 59) * 10;
-  }
-
-  const fourStarRate = 7;
-
-  // 判断稀有度
-  if (fourStarCounter >= 9) {
-    rarity = roll < dynamicFiveStarRate ? '世界' : '月';
-  } else if (roll < dynamicFiveStarRate) {
-    rarity = '世界';
-  } else if (roll < dynamicFiveStarRate + fourStarRate) {
-    rarity = '月';
-  } else {
-    rarity = '星'; // 星和辰星都归为三星卡处理
-  }
-
-  // 根据稀有度筛卡池
-  if (rarity === '世界') {
-    const isTargeted = mustBeTargetFiveStar && !isAllRoles;
-    const isSingleTarget = onlySelectedRoleCard && !isAllRoles;
-
-    if (isTargeted) {
-      const role = selectedRole[Math.floor(Math.random() * selectedRole.length)];
-      pool = pool.filter(card =>
-        card.稀有度 === '世界' &&
-        card.主角 === role &&
-        (isAllPools || selectedPools.some(p => card.获取途径.includes(p)))
-      );
-    } else if (isSingleTarget) {
-      pool = pool.filter(card =>
-        card.稀有度 === '世界' &&
-        selectedRole.includes(card.主角) &&
-        (isAllPools || selectedPools.some(p => card.获取途径.includes(p)))
-      );
-    } else {
-      pool = pool.filter(card =>
-        card.稀有度 === '世界' &&
-        (isAllPools || selectedPools.some(p => card.获取途径.includes(p)))
-      );
-    }
-  } else if (rarity === '月') {
-    pool = pool.filter(card =>
-      card.稀有度 === '月' &&
-      (isAllRoles || selectedRole.includes(card.主角)) &&
-      (isAllPools || selectedPools.some(p => card.获取途径.includes(p)))
-    );
-    if (onlySelectedRoleCard && !isAllRoles) {
-      pool = pool.filter(card => selectedRole.includes(card.主角));
-    }
-  } else {
-    // 三星处理，包含 星 / 辰星
-    pool = pool.filter(card => {
-      const isStar = card.稀有度 === '星';
-      const isMorningStar = card.稀有度 === '辰星';
-
-      if (!isStar && !isMorningStar) return false;
-      if ((!includeThreeStar && isStar) || (!includeThreeStarM && isMorningStar)) return false;
-      if (!isAllPools && !selectedPools.some(p => card.获取途径.includes(p))) return false;
-      if (onlySelectedRoleCard && !isAllRoles) return selectedRole.includes(card.主角);
-
-      return true;
-    });
-  }
-
-  // 从结果池中随机抽卡
-  if (pool.length === 0) return { card: null, rarity };
-  const chosen = pool[Math.floor(Math.random() * pool.length)];
-  return { card: chosen, rarity };
-};
-
+      // 抽卡
+      if (pool.length === 0) return { card: null, rarity };
+      const chosen = pool[Math.floor(Math.random() * pool.length)];
+      return { card: chosen, rarity };
+    };
 
 
 

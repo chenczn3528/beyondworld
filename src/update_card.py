@@ -16,6 +16,13 @@ soup = BeautifulSoup(response.text, 'html.parser')
 rows = soup.find_all('tr')
 cards = []
 
+
+def check_cards(card):
+    if card['获取途径'] == "【群星启明时】世界之间":
+        card['获取途径'] = "世界之间"
+    return card
+
+
 for index, row in enumerate(rows):
     if not row.has_attr('data-param1'):
         continue
@@ -39,7 +46,7 @@ for index, row in enumerate(rows):
     tds = row.find_all('td')
 
     if tds[-1] and "获取途径" in tds[-1].text:
-        card['获取途径'] = tds[-1].text.split("获取途径：")[-1].replace("\n", "").replace("【群星启明时】","")
+        card['获取途径'] = tds[-1].text.split("获取途径：")[-1].replace("\n", "")
 
     name_div = row.find('div', class_='cardname')
     if name_div:
@@ -96,6 +103,8 @@ for index, row in enumerate(rows):
 
         # 避免请求过快
         time.sleep(1.5)
+
+    card = check_cards(card)
 
     cards.append(card)
 

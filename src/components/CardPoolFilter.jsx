@@ -76,16 +76,8 @@ const CardPoolFilter = ({
 
 
     useEffect(() => {
-        console.log('当前选择的卡池:', selectedPools);
-    }, [selectedPools]);
-
-
-
-
-
-    useEffect(() => {
         const validPermanentPools =
-            selectedRole.length === 1 && selectedRole[0] === '随机'
+            selectedRole[0] === '随机'
                 ? permanentPools
                 : permanentPools.filter(pool =>
                     cardData.some(card =>
@@ -214,7 +206,7 @@ const CardPoolFilter = ({
                                 className="flex items-center mt-[0vmin] ml-[3vw] mr-[3vw]"
                                 style={{fontSize: "2vmin", color: "#aaa"}}
                             >
-                                保底规则说明：启用大小保底，若选择了限定池，小保底歪常驻池的随机角色或限定池的未定向角色，大保底必出限定池、定向角色的卡；关闭大小保底，若选择了限定池，小保底歪常驻池的定向角色，大保底必出限定池、定向角色的世界卡。
+                                保底规则说明：启用大小保底，若选择了限定池，小保底歪常驻池的随机角色或限定池的未定向角色，大保底必出限定池、定向角色的卡；关闭大小保底，则随机出常驻或限定池的定向角色。
                             </label>
 
                             {/* 是否仅抽指定角色卡 */}
