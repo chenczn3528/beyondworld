@@ -121,14 +121,14 @@ const CardPoolFilter = ({
     return (
         showCardPoolFilter && (
             <div
-                className="fixed inset-0 z-50 flex items-center justify-center w-full h-full"
+                className="absolute w-full h-full z-50 flex items-center justify-center"
                 onClick={() => {
                     playClickSound();
                     setShowCardPoolFilter(false);
                 }}
             >
                 <div
-                    className="relative flex flex-col w-[80vmin] h-[70vmin]"
+                    className="absolute flex flex-col w-[50%] h-[80%]"
                     onClick={(e) => {
                         playClickSound();
                         e.stopPropagation();
