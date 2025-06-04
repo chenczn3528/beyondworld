@@ -141,8 +141,12 @@ const CardPoolFilter = ({
                 >
                     <div className="relative flex flex-col h-full mt-[2vh] mb-[2vh]">
                         <label
-                            className="flex justify-center items-center mt-[1vmin] mb-[3vmin]"
+                            className="flex justify-center items-center mt-[1vmin]"
                             style={{ fontSize: "4vmin", fontWeight: "800" }}>筛选卡池</label>
+
+                        <label className="flex items-center mt-[1vmin] ml-[3vw] mr-[3vw] mb-[3vmin]"
+                                style={{fontSize: "2vmin", color: "#aaa"}}>
+                            大强没写具体的感召规则，因此这里沿用深空的规则，前60抽每次出世界侧影的概率为2%，60抽之后每一抽的概率在前一抽的基础上增加10%。</label>
 
                         <div className="mb-[8vmin] overflow-y-auto">
                             {/* 主角多选 */}
