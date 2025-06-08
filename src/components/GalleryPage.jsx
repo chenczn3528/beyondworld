@@ -65,8 +65,11 @@ const GalleryPage = ({
     const currentCardIndex = rawIndex + 1; // ✅ 不再 +1
 
     // 滑动定位
-    const SCROLL_T_MIN = -0.1;
+    const SCROLL_T_MIN = -0.2;
     const SCROLL_T_MAX = 1.1;
+
+
+
 
 
 
@@ -95,7 +98,7 @@ const GalleryPage = ({
 
     useEffect(() => {
         const realLength = sortedCards.length;
-        if (currentCardIndex < 0) {
+        if (currentCardIndex < -1) {
             setTimeout(() => scrollToIndex(0), 150);
         } else if (currentCardIndex >= realLength) {
             setTimeout(() => scrollToIndex(realLength - 1), 150);
@@ -106,8 +109,11 @@ const GalleryPage = ({
 
 
     const handleWheel = (e) => {
-        e.preventDefault();
-        const delta = e.deltaX > 0 ? -0.02 : 0.02;
+        // e.preventDefault();
+
+        // ✅ 修正滚动方向判断
+        const delta = e.deltaY > 0 ? 0.02 : -0.02;
+
         const newScroll = scrollT + delta * 0.1;
 
         // 防止超出限制区间
@@ -117,7 +123,8 @@ const GalleryPage = ({
         setScrollT(clipped);
 
         clearTimeout(timeoutRef.current);
-        const approxIndex = Math.round(Math.max(0, Math.min(1, clipped)) * (totalSlots - 1));
+        const approxIndex = Math.floor(Math.max(0, Math.min(1, clipped)) * (totalSlots - 1));
+
         const alignedIndex = approxIndex - paddingCount;
         timeoutRef.current = setTimeout(() => {
             scrollToIndex(alignedIndex);
@@ -126,9 +133,115 @@ const GalleryPage = ({
 
 
     useEffect(() => {
+      if (!showGallery) return; // 不显示时不绑定
+
+      const container = divRef.current;
+      if (!container) return;
+
+      const wheelHandler = (e) => {
+        e.preventDefault();
+        handleWheel(e);
+      };
+
+      container.addEventListener('wheel', wheelHandler, { passive: false });
+
+      return () => {
+        container.removeEventListener('wheel', wheelHandler);
+      };
+    }, [showGallery]);
+
+
+
+
+
+    useEffect(() => {
         scrollToIndex(0); // ✅ 初始加载时将第0号卡片放到参考位置（第3张）
     }, [showGallery]);
 
+
+
+
+
+    const touchStartRef = useRef(null);
+    const scrollTRef = useRef(0);
+    scrollTRef.current = scrollT;  // 确保引用最新scrollT
+    console.log(scrollT, currentCardIndex)
+
+    const getIsVertical = () => window.innerWidth <= 600;
+
+    const handleTouchStart = (e) => {
+      if (getIsVertical()) {
+        touchStartRef.current = e.touches[0].clientY;
+      } else {
+        touchStartRef.current = e.touches[0].clientX;
+      }
+    };
+
+const handleTouchMove = (e) => {
+  if (!touchStartRef.current) return;
+
+  const isVertical = window.innerWidth <= 600;
+  const currentPos = isVertical ? e.touches[0].clientY : e.touches[0].clientX;
+  const delta = touchStartRef.current - currentPos;
+
+  const scrollStep = 0.00005;
+  let newScroll = scrollTRef.current + delta * scrollStep;
+
+  if (newScroll < SCROLL_T_MIN) newScroll = SCROLL_T_MIN;
+  if (newScroll > SCROLL_T_MAX) newScroll = SCROLL_T_MAX;
+
+  if (scrollTRef.current !== newScroll) {
+    setScrollT(newScroll);
+  }
+
+  touchStartRef.current = currentPos;
+
+  // clearTimeout(timeoutRef.current);
+  //
+  // // 改成这里的定时器回调内重新计算索引，保证用的是最新scrollT
+  // timeoutRef.current = setTimeout(() => {
+  //   // 这里用最新的scrollTRef.current计算
+  //   const normalizedT = (scrollTRef.current - SCROLL_T_MIN) / (SCROLL_T_MAX - SCROLL_T_MIN);
+  //   const approxIndex = Math.round(normalizedT * (totalSlots - 1));
+  //   let alignedIndex = approxIndex - paddingCount;
+  //
+  //   // 限制索引范围
+  //   alignedIndex = Math.max(0, Math.min(sortedCards.length - 1, alignedIndex));
+  //
+  //   scrollToIndex(alignedIndex);
+  // }, 2000);
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     // ======================================= 获取当前展示的卡
+    const getDisplayCardIndex = () => {
+        if (currentCardIndex < 0) return 0;
+        if (currentCardIndex >= sortedCards.length) return sortedCards.length - 1;
+        return currentCardIndex;
+    };
+
+    const displayCard = sortedCards[getDisplayCardIndex()];
 
     // ==================== 设置点击进入大图的初始化
     useEffect(() => {
@@ -140,46 +253,6 @@ const GalleryPage = ({
             setGalleryCard(sortedCards[0]);
         }
     }, [sortedCards, galleryCard]);
-
-
-
-
-
-    const touchStartRef = useRef(null);
-
-    const handleTouchStart = (e) => {
-        touchStartRef.current = e.touches[0].clientX;
-    };
-
-    const handleTouchMove = (e) => {
-        if (!touchStartRef.current) return;
-        const deltaX = touchStartRef.current - e.touches[0].clientX;
-        const direction = deltaX > 0 ? 1 : -1;
-        const newScroll = scrollT + direction * 0.002;
-
-        // 防止超出限制区间
-        if ((newScroll < SCROLL_T_MIN && direction < 0) || (newScroll > SCROLL_T_MAX && direction > 0)) return;
-
-        const clipped = Math.max(SCROLL_T_MIN, Math.min(SCROLL_T_MAX, newScroll));
-        setScrollT(clipped);
-
-        clearTimeout(timeoutRef.current);
-        const approxIndex = Math.round(Math.max(0, Math.min(1, clipped)) * (totalSlots - 1));
-        const alignedIndex = approxIndex - paddingCount;
-        timeoutRef.current = setTimeout(() => {
-            scrollToIndex(alignedIndex);
-        }, 2000);
-    };
-
-
-     // ======================================= 获取当前展示的卡
-    const getDisplayCardIndex = () => {
-        if (currentCardIndex < 0) return 0;
-        if (currentCardIndex >= sortedCards.length) return sortedCards.length - 1;
-        return currentCardIndex;
-    };
-
-    const displayCard = sortedCards[getDisplayCardIndex()];
 
 
 
@@ -212,21 +285,6 @@ const GalleryPage = ({
         window.addEventListener('custom:imageIndexChanged', handler);
         return () => window.removeEventListener('custom:imageIndexChanged', handler);
     }, []);
-
-    // // ✅ 图片加载逻辑
-    // useEffect(() => {
-    //     const newTargetImage = getImageUrl(displayCard, imageIndex, 0);
-    //     if (!newTargetImage) return;
-    //
-    //     const img = new Image();
-    //     img.src = newTargetImage;
-    //     img.onload = () => {
-    //         setLoaded(true);
-    //     };
-    //     return () => {
-    //         img.onload = null;
-    //     };
-    // }, [displayCard, imageIndex]);
 
     const getImageUrl = (card, index, hd = 0) => {
         const info = card?.图片信息?.[index];
@@ -293,8 +351,6 @@ const GalleryPage = ({
                 ref={divRef}
                 className="relative w-full h-full z-20 border"
                 id="gallery-scroll-container"
-                // onWheel={() => console.log('✅ wheel works')}
-                onWheel={handleWheel}
                 onTouchMove={handleTouchMove}
                 onTouchStart={handleTouchStart}
                 style={{

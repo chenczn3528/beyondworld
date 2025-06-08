@@ -95,3 +95,10 @@ html, body, #root, .viewport {
 
 
 
+.card-track {
+  display: flex;
+  transition: transform 0.4s ease;
+}
+
+
+

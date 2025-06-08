@@ -105,9 +105,6 @@ const CardPoolFilter = ({
 
 
 
-    console.log(selectedPools)
-
-
   // 角色和星级筛选部分未改，保持不动
     const toggleCharacter = (char) => {
     if (selectedRole.includes("随机")) {
