@@ -355,7 +355,7 @@ useEffect(() => {
         showGallery && (
             <div
                 ref={divRef}
-                className="relative w-full h-full z-20 border"
+                className="relative w-full h-full z-20"
                 id="gallery-scroll-container"
                 onTouchMove={handleTouchMove}
                 onTouchStart={handleTouchStart}

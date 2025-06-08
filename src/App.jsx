@@ -152,7 +152,7 @@ function App() {
     return (
         <div className="viewport content">
             <div className="wrapper" ref={wrapperRef}>
-                <div className="game relative border" ref={gameRef}>
+                <div className="game relative" ref={gameRef}>
                     <Home />
                 </div>
             </div>
