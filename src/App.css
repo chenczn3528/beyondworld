@@ -42,6 +42,23 @@ html, body, #root, .viewport {
 }
 
 
+/* App.css */
+html, body {
+  overflow: hidden;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  touch-action: none;
+}
+
+.content {
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+
+
 
 
 /* 可以放在你的全局 CSS 或 component CSS module 中 */

@@ -162,20 +162,20 @@ const GalleryPage = ({
 
 
 
-    const touchStartRef = useRef(null);
-    const scrollTRef = useRef(0);
-    scrollTRef.current = scrollT;  // 确保引用最新scrollT
-    console.log(scrollT, currentCardIndex)
 
-    const getIsVertical = () => window.innerWidth <= 600;
+const touchStartRef = useRef(null);
+const initialTouchRef = useRef(null); // 用来记录 touchstart 时的原始位置
+const scrollTRef = useRef(0);
+scrollTRef.current = scrollT;
 
-    const handleTouchStart = (e) => {
-      if (getIsVertical()) {
-        touchStartRef.current = e.touches[0].clientY;
-      } else {
-        touchStartRef.current = e.touches[0].clientX;
-      }
-    };
+const handleTouchStart = (e) => {
+  const isVertical = window.innerWidth <= 600;
+  const startPos = isVertical ? e.touches[0].clientY : e.touches[0].clientX;
+
+  touchStartRef.current = startPos;
+  initialTouchRef.current = startPos; // 用来和 touchend 对比判断方向
+};
+
 
 const handleTouchMove = (e) => {
   if (!touchStartRef.current) return;
@@ -195,36 +195,42 @@ const handleTouchMove = (e) => {
   }
 
   touchStartRef.current = currentPos;
-
-  // clearTimeout(timeoutRef.current);
-  //
-  // // 改成这里的定时器回调内重新计算索引，保证用的是最新scrollT
-  // timeoutRef.current = setTimeout(() => {
-  //   // 这里用最新的scrollTRef.current计算
-  //   const normalizedT = (scrollTRef.current - SCROLL_T_MIN) / (SCROLL_T_MAX - SCROLL_T_MIN);
-  //   const approxIndex = Math.round(normalizedT * (totalSlots - 1));
-  //   let alignedIndex = approxIndex - paddingCount;
-  //
-  //   // 限制索引范围
-  //   alignedIndex = Math.max(0, Math.min(sortedCards.length - 1, alignedIndex));
-  //
-  //   scrollToIndex(alignedIndex);
-  // }, 2000);
 };
 
 
+const handleTouchEnd = (e) => {
+  const isVertical = window.innerWidth <= 600;
+  const endPos = isVertical ? e.changedTouches[0].clientY : e.changedTouches[0].clientX;
+  const delta = endPos - initialTouchRef.current;
 
+  const threshold = 30; // 滑动阈值，避免误触
+  let targetIndex = currentCardIndex;
 
+  if (delta > threshold) {
+    targetIndex = currentCardIndex - 1; // 右滑
+  } else if (delta < -threshold) {
+    targetIndex = currentCardIndex + 1; // 左滑
+  }
 
+  // 限制范围
+  targetIndex = Math.max(0, Math.min(sortedCards.length - 1, targetIndex));
+  scrollToIndex(targetIndex);
+};
 
+useEffect(() => {
+    const container = divRef.current;
+      if (!container) return;
 
+  container.addEventListener('touchstart', handleTouchStart, { passive: true });
+  container.addEventListener('touchmove', handleTouchMove, { passive: false });
+  container.addEventListener('touchend', handleTouchEnd, { passive: true });
 
-
-
-
-
-
-
+  return () => {
+    container.removeEventListener('touchstart', handleTouchStart);
+    container.removeEventListener('touchmove', handleTouchMove);
+    container.removeEventListener('touchend', handleTouchEnd);
+  };
+}, [currentCardIndex]);
 
 
 
