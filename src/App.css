@@ -57,6 +57,12 @@ html, body {
   -webkit-overflow-scrolling: touch;
 }
 
+.scrollable-content {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  height: 100%;
+  width: 100%;
+}
 
 
 

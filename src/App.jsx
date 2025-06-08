@@ -150,10 +150,12 @@ function App() {
 
 
     return (
-        <div className="viewport content">
+        <div className="viewport">
             <div className="wrapper" ref={wrapperRef}>
                 <div className="game relative" ref={gameRef}>
-                    <Home />
+                    <div className="scrollable-content">
+                        <Home/>
+                    </div>
                 </div>
             </div>
         </div>
