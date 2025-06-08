@@ -19,7 +19,9 @@ const CardPoolFilter = ({
     valuesList,
     selectedPools,
     setSelectedPools,
+    poolsLoaded,
 }) => {
+
 
 
     const characters = valuesList["主角"] || [];
@@ -28,67 +30,82 @@ const CardPoolFilter = ({
 
     const [currentAvailablePools, setCurrentAvailablePools] = useState(availablePools);
 
-  // 选择角色后池子变化
+    // ✅ 初始化时根据 selectedPools 过滤出 limited 池
+    const [selectedLimitedPools, setSelectedLimitedPools] = useState(() => {
+      return selectedPools.filter(p => availablePools.includes(p));
+    });
+
+    // ✅ 等 poolsLoaded 后再同步一次（只第一次）
     useEffect(() => {
-        if (selectedRole.length === 1 && selectedRole[0] === '随机') {
-            setCurrentAvailablePools(availablePools);
-            setSelectedLimitedPools((prev) =>
-              availablePools.filter(pool => prev.includes(pool))
-            );
-        } else {
-            let temp_pools = Object.keys(
-                getDynamicAttributeCounts(
-                    cardData.filter(
-                      card => selectedRole.includes(card.主角) && card.稀有度 === '世界'
-                    )
-                ).countByAttributes.获取途径
-            );
-            temp_pools = temp_pools.filter(
-                (item) => item !== "世界之间" && !item.includes("累充")
-            );
-                setCurrentAvailablePools(temp_pools);
-                setSelectedLimitedPools((prev) =>
-                    temp_pools.filter(pool => prev.includes(pool))
-            );
-        }
-    }, [selectedRole]);
+      if (!poolsLoaded) return;
+      setSelectedLimitedPools(
+        selectedPools.filter(p => currentAvailablePools.includes(p))
+      );
+    }, [poolsLoaded]);
 
+    // ✅ 选择角色后池子变化
+    useEffect(() => {
+      if (!poolsLoaded) return;
 
+      if (selectedRole.length === 1 && selectedRole[0] === '随机') {
+        setCurrentAvailablePools(availablePools);
+        setSelectedLimitedPools(prev =>
+          availablePools.filter(pool => prev.includes(pool))
+        );
+      } else {
+        let temp_pools = Object.keys(
+          getDynamicAttributeCounts(
+            cardData.filter(
+              card => selectedRole.includes(card.主角) && card.稀有度 === '世界'
+            )
+          ).countByAttributes.获取途径
+        );
+        temp_pools = temp_pools.filter(
+          (item) => item !== "世界之间" && !item.includes("累充")
+        );
+        setCurrentAvailablePools(temp_pools);
+        setSelectedLimitedPools(prev =>
+          temp_pools.filter(pool => prev.includes(pool))
+        );
+      }
+    }, [selectedRole, poolsLoaded]);
 
-    const [selectedLimitedPools, setSelectedLimitedPools] = useState(currentAvailablePools);
-
+    // ✅ 是否全选
     const isAllLimitedSelected = currentAvailablePools.every((pool) =>
-        selectedLimitedPools.includes(pool)
+      selectedLimitedPools.includes(pool)
     );
 
-
-
+    // ✅ 切换选中池
     const toggleLimitedPool = (pool) => {
-        setSelectedLimitedPools(prev => {
-            const newSelected = prev.includes(pool)
-                ? prev.filter(p => p !== pool)
-                : [...prev, pool];
-            return Array.from(new Set(newSelected));
-        });
+      setSelectedLimitedPools(prev => {
+        const newSelected = prev.includes(pool)
+          ? prev.filter(p => p !== pool)
+          : [...prev, pool];
+        return Array.from(new Set(newSelected));
+      });
     };
 
-
-
-
+    // ✅ 将 selectedLimitedPools + permanentPools 合并写入父级 selectedPools
     useEffect(() => {
-        const validPermanentPools =
-            selectedRole[0] === '随机'
-                ? permanentPools
-                : permanentPools.filter(pool =>
-                    cardData.some(card =>
-                        selectedRole.includes(card.主角)
-                        && card.稀有度 === '世界'
-                        && card.获取途径 === pool
-                    )
-                );
+      if (!poolsLoaded) return;
 
-        setSelectedPools([...selectedLimitedPools, ...validPermanentPools]);
-    }, [selectedLimitedPools, selectedRole, permanentPools, cardData]);
+      const validPermanentPools =
+        selectedRole[0] === '随机'
+          ? permanentPools
+          : permanentPools.filter(pool =>
+              cardData.some(card =>
+                selectedRole.includes(card.主角)
+                && card.稀有度 === '世界'
+                && card.获取途径 === pool
+              )
+            );
+
+      setSelectedPools([...selectedLimitedPools, ...validPermanentPools]);
+    }, [selectedLimitedPools, selectedRole, permanentPools, cardData, poolsLoaded]);
+
+
+
+    console.log(selectedPools)
 
 
   // 角色和星级筛选部分未改，保持不动
@@ -210,7 +227,7 @@ const CardPoolFilter = ({
                                 className="flex items-center mt-[0vmin] ml-[3vw] mr-[3vw]"
                                 style={{fontSize: "2vmin", color: "#aaa"}}
                             >
-                                保底规则说明：启用大小保底，若选择了限定池，小保底歪常驻池的随机角色或限定池的未定向角色，大保底必出限定池、定向角色的卡；关闭大小保底，则随机出常驻或限定池的定向角色。
+                                保底规则说明：启用大小保底，若选择了限定池，小保底歪常驻池的随机角色或限定池的未定向角色，大保底必出限定池、定向角色的卡；关闭大小保底，则出限定池的定向角色。
                             </label>
 
                             {/* 是否仅抽指定角色卡 */}

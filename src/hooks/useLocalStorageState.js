@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 
 export default function useLocalStorageState(key, defaultValue) {
+  const [loading, setLoading] = useState(true);
   const [state, setState] = useState(() => {
     const saved = localStorage.getItem(key);
     try {
@@ -12,8 +13,15 @@ export default function useLocalStorageState(key, defaultValue) {
   });
 
   useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(state));
-  }, [key, state]);
+    // 模拟异步加载完成（其实是同步执行的，但这能确保加载完毕再标记）
+    setLoading(false);
+  }, []);
 
-  return [state, setState];
+  useEffect(() => {
+    if (!loading) {
+      localStorage.setItem(key, JSON.stringify(state));
+    }
+  }, [key, state, loading]);
+
+  return [state, setState, loading];
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import LeftIcon from "../icons/LeftIcon.jsx";
 import useCardImageIndex from "../hooks/useCardImageIndex.js";
+import FadeImage from "./FadeImage.jsx";
 
 const GalleryPage = ({
     cards,
@@ -106,7 +107,7 @@ const GalleryPage = ({
 
     const handleWheel = (e) => {
         e.preventDefault();
-        const delta = e.deltaY > 0 ? 0.02 : -0.02;
+        const delta = e.deltaX > 0 ? -0.02 : 0.02;
         const newScroll = scrollT + delta * 0.1;
 
         // 防止超出限制区间
@@ -147,13 +148,13 @@ const GalleryPage = ({
     const touchStartRef = useRef(null);
 
     const handleTouchStart = (e) => {
-        touchStartRef.current = e.touches[0].clientY;
+        touchStartRef.current = e.touches[0].clientX;
     };
 
     const handleTouchMove = (e) => {
         if (!touchStartRef.current) return;
-        const deltaY = touchStartRef.current - e.touches[0].clientY;
-        const direction = deltaY > 0 ? 1 : -1;
+        const deltaX = touchStartRef.current - e.touches[0].clientX;
+        const direction = deltaX > 0 ? 1 : -1;
         const newScroll = scrollT + direction * 0.002;
 
         // 防止超出限制区间
@@ -182,12 +183,10 @@ const GalleryPage = ({
 
 
 
-    // ======================================= 预加载小图，等大图加载完以后跳出来
     // ======================================= 从大图详情退回小图的时候重新加载图片
     const { getImageIndex, indexMap } = useCardImageIndex();
 
     const [imageIndexes, setImageIndexes] = useState({});
-    const [loaded, setLoaded] = useState(false);
 
     // ✅ 每当 sortedCards 或 indexMap 改变，重新同步 imageIndexes
     useEffect(() => {
@@ -214,20 +213,20 @@ const GalleryPage = ({
         return () => window.removeEventListener('custom:imageIndexChanged', handler);
     }, []);
 
-    // ✅ 图片加载逻辑
-    useEffect(() => {
-        const newTargetImage = getImageUrl(displayCard, imageIndex, 0);
-        if (!newTargetImage) return;
-
-        const img = new Image();
-        img.src = newTargetImage;
-        img.onload = () => {
-            setLoaded(true);
-        };
-        return () => {
-            img.onload = null;
-        };
-    }, [displayCard, imageIndex]);
+    // // ✅ 图片加载逻辑
+    // useEffect(() => {
+    //     const newTargetImage = getImageUrl(displayCard, imageIndex, 0);
+    //     if (!newTargetImage) return;
+    //
+    //     const img = new Image();
+    //     img.src = newTargetImage;
+    //     img.onload = () => {
+    //         setLoaded(true);
+    //     };
+    //     return () => {
+    //         img.onload = null;
+    //     };
+    // }, [displayCard, imageIndex]);
 
     const getImageUrl = (card, index, hd = 0) => {
         const info = card?.图片信息?.[index];
@@ -322,30 +321,15 @@ const GalleryPage = ({
                     <LeftIcon size={baseSize * 16} color="white"/>
                 </button>
 
+
+
+
                 {/*大图*/}
                 <div key={`${displayCard?.卡名}-${imageIndex}`} className="absolute w-full h-full">
-                    {/* 模糊背景 */}
-                    <div
-                        className="absolute w-full h-full transition-opacity duration-300"
-                        style={{
-                            backgroundImage: `url(${getImageUrl(displayCard, imageIndex, 1)})`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                            filter: "blur(20px)",
-                            opacity: loaded ? 0 : 1,
-                        }}
+                    <FadeImage
+                        cardSrc={getImageUrl(displayCard, imageIndex, 1)}
+                        cardSrcset={getImageUrl(displayCard, imageIndex, 0)}
                     />
-                    {/* 高清背景 */}
-                    {loaded && (
-                        <div
-                            className="absolute w-full h-full animate-fadeZoomIn"
-                            style={{
-                                backgroundImage: `url(${getImageUrl(displayCard, imageIndex, 0)})`,
-                                backgroundSize: "cover",
-                                backgroundPosition: "center",
-                            }}
-                        />
-                    )}
 
                     {/*大图标注*/}
                     <div className="absolute flex flex-row items-center z-10"

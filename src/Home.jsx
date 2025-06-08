@@ -58,8 +58,6 @@ const Home = () => {
     );
     const allPools = [...permanentPools, ...availablePools];
 
-    // 恢复selectedPools的初始状态
-    const [hasInitializedPools, setHasInitializedPools] = useState(false);
 
 
     // ======================================================== 数据存储与恢复
@@ -68,7 +66,7 @@ const Home = () => {
     // 选择的角色
     const [selectedRole, setSelectedRole] = useLocalStorageState('bw_selectedRole', ['随机']);
     // 选择的池子
-    const [selectedPools, setSelectedPools] = useLocalStorageState("bw_selectedPools", allPools);
+    const [selectedPools, setSelectedPools, poolsLoading] = useLocalStorageState("bw_selectedPools", allPools);
     // 总出金数
     const [totalFiveStarCount, setTotalFiveStarCount] = useLocalStorageState('bw_totalFiveStarCount', 0);
     // 下次出金还需要多少
@@ -88,6 +86,8 @@ const Home = () => {
     const { history, loading, appendHistory, clearHistory } = useHistoryDB();
     // 图鉴记录卡面是初始还是重逢
     const { getImageIndex, setImageIndex, clearImageIndexes } = useCardImageIndex();
+
+
 
 
     // 清除缓存数据
@@ -266,7 +266,7 @@ const Home = () => {
     // ------------------------------- 控制卡片展示或结算页展示
     useEffect(() => {
         const allResults = drawResultsRef.current || [];
-        const onlyFiveStars = allResults.slice(currentCardIndex).filter(item => item.card?.稀有度 === '世界');
+
         if (
             allResults.length > 0 &&
             !hasShownSummary &&
@@ -275,34 +275,32 @@ const Home = () => {
             !showAnimationDrawCards
         ) {
             if (isSkipped) {
-                if (onlyFiveStars.length === 0) {
-                    // 跳过且没有五星卡，直接展示结算
+                // 跳过时只展示 displayResultsRef 里的卡
+                if (displayResultsRef.current.length === 0) {
                     setShowCardOverlay(false);
                     setShowSummary(true);
                     setHasShownSummary(true);
                 } else {
-                    // 跳过但有五星卡，只展示五星卡片
-                    displayResultsRef.current = onlyFiveStars;
+                    setCurrentCardIndex(0);
                     setShowCardOverlay(true);
                     setShowSummary(false);
-                    setCurrentCardIndex(0);
                 }
             } else {
-                // 正常播放流程，展示全部卡片
                 displayResultsRef.current = allResults;
                 setCurrentCardIndex(0);
                 setShowCardOverlay(true);
                 setShowSummary(false);
             }
         }
-    }, [isSkipped, showAnimationDrawCards, isDrawing, isAnimatingDrawCards, hasShownSummary,]);
+    }, [isSkipped, showAnimationDrawCards, isDrawing, isAnimatingDrawCards, hasShownSummary]);
+
+
 
     // ------------------------------- 每次点下一张卡时都先重置视频播放状态
     const handleNextCard = () => {
         if (showSummary) return;
         if (currentCardIndex < displayResultsRef.current.length - 1) {
-            const nextIndex = currentCardIndex + 1;
-            setCurrentCardIndex(nextIndex);
+            setCurrentCardIndex(currentCardIndex + 1);
         } else {
             setShowCardOverlay(false);
             setSummaryCards(drawnCards);
@@ -310,9 +308,67 @@ const Home = () => {
                 setShowSummary(true);
                 setHasShownSummary(true);
             }
+            // ✅ Reset skip flag only here
+            if (isSkipped) setIsSkipped(false);
         }
     };
 
+    const handleSkip = () => {
+        const allResults = drawResultsRef.current || [];
+        const remainingResults = allResults.slice(currentCardIndex); // ✅ 当前之后的卡
+
+        // 提取剩下未展示卡中的五星
+        const fiveStarCards = remainingResults
+            .map(item => item.card)
+            .filter(card => card?.稀有度 === '世界');
+
+        // 加上当前这张卡（如果是五星）作为第一张
+        const currentCard = allResults[currentCardIndex]?.card;
+        if (currentCard?.稀有度 === '世界') {
+            fiveStarCards.unshift(currentCard);
+        }
+
+        // 去重：用“名称 + 编号”作为唯一 key
+        const seen = new Set();
+        const uniqueFiveStars = [];
+        for (const card of fiveStarCards) {
+            const key = `${card?.卡名 || ''}-${card?.主角 || ''}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniqueFiveStars.push({ card }); // 保持结构一致
+            }
+        }
+
+        if (uniqueFiveStars.length === 0) {
+            // 没有五星卡，直接结算
+            setShowCardOverlay(false);
+            setShowSummary(true);
+            setHasShownSummary(true);
+            setIsSkipped(false);
+            setCurrentCardIndex(0);
+            displayResultsRef.current = [];
+        } else {
+            // 展示唯一的五星卡（未展示过 + 当前卡）
+            displayResultsRef.current = uniqueFiveStars;
+            setCurrentCardIndex(0);
+            setShowCardOverlay(true);
+            setShowSummary(false);
+            setHasShownSummary(false);
+            setIsSkipped(true);
+        }
+    };
+
+
+    useEffect(() => {
+        if (isSkipped && currentCardIndex >= displayResultsRef.current.length) {
+            setShowCardOverlay(false);
+            setIsSkipped(false);
+            setCurrentCardIndex(0);
+            // 展示结算
+            setShowSummary(true);
+            setHasShownSummary(true);
+        }
+    }, [isSkipped, currentCardIndex]);
 
 
 
@@ -489,18 +545,33 @@ const Home = () => {
               );
             } else {
               // 选了定向角色，没选只抽定向角色的卡，也没选大小保底
-              pool = cardData.filter(card =>
-                card.稀有度 === '世界' &&
-                selectedRole.includes(card.主角) &&
-                selectedPools.includes(card.获取途径)
-              );
+                if(limitedPools.length > 0){
+                    pool = cardData.filter(card =>
+                        card.稀有度 === '世界' &&
+                        selectedRole.includes(card.主角) &&
+                        limitedPools.includes(card.获取途径)
+                    );
+                } else {
+                    pool = cardData.filter(card =>
+                        card.稀有度 === '世界' &&
+                        selectedRole.includes(card.主角) &&
+                        selectedPools.includes(card.获取途径)
+                      );
+                }
             }
         } else {
           // 正常五星抽卡（不指定角色）
-          pool = cardData.filter(card =>
-            card.稀有度 === '世界' &&
-            (isAllPools || selectedPools.includes(card.获取途径))
-          );
+            if(limitedPools.length > 0){
+                pool = cardData.filter(card =>
+                    card.稀有度 === '世界' &&
+                    (limitedPools.includes(card.获取途径))
+                );
+            } else {
+                pool = cardData.filter(card =>
+                    card.稀有度 === '世界' &&
+                    (selectedPools.includes(card.获取途径))
+                );
+            }
         }
       } else if (rarity === '月') {
         pool = cardData.filter(card => card.稀有度 === '月');
@@ -547,7 +618,7 @@ const Home = () => {
                     drawSessionIdRef.current = 0; // 重置流程 ID，防止后续重复触发
                 }}
                 className="absolute top-0 left-0 w-full h-full object-cover z-0">
-                <source src="videos/background.mp4" type="video/mp4"/>
+                <source src="videos/background1.mp4" type="video/mp4"/>
             </video>
 
 
@@ -575,16 +646,12 @@ const Home = () => {
             {/*抽卡展示卡片*/}
             <CardOverlay
                 showCardOverlay={showCardOverlay}
-                setShowCardOverlay={setShowCardOverlay}
                 currentCardIndex={currentCardIndex}
-                // drawResultsRef={drawResultsRef}
+                setCurrentCardIndex={setCurrentCardIndex}
                 drawResultsRef={displayResultsRef}
                 handleNextCard={handleNextCard}
-                isSkipped={isSkipped}
-                setIsSkipped={setIsSkipped}
-                currentIndex={currentCardIndex}
-                setCurrentCardIndex={setCurrentCardIndex}
                 fontsize={fontsize}
+                handleSkip={handleSkip}
             />
 
             {/*展示历史记录*/}
@@ -641,6 +708,7 @@ const Home = () => {
                 valuesList={valuesList}
                 selectedPools={selectedPools}
                 setSelectedPools={setSelectedPools}
+                poolsLoaded={!poolsLoading}
             />
 
 
