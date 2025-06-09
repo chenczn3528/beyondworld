@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import Carousel from "./Carousel";
 import cardData from "../assets/cards.json";
 import {playClickSound} from "../utils/playClickSound.js";
@@ -7,39 +7,64 @@ const SettingsLayer = ({
     totalDrawCount,
     totalFiveStarCount,
     selectedRole,
-    setSelectedRole,
-    onlySelectedRoleCard,
-    setonlySelectedRoleCard,
-    roles,
-    includeThreeStar,
-    setIncludeThreeStar,
     useSoftGuarantee,
-    setUseSoftGuarantee,
     pityCount,
     softPityFailed,
-    isDrawing,
-    isAnimatingDrawCards,
     handleDraw,
-    showHistory,
     setShowHistory,
     setHasShownSummary,
     setShowSummary,
     clearLocalData,
     toggleMusic,
     isMusicPlaying,
-    showProbability,
-    setShowProbability,
     handleStartDraw,
     setShowCardPoolFilter,
     showDetailedImage,
     setShowDetailedImage,
-    detailedImage,
     setDetailedImage,
-    showGallery,
     setShowGallery,
     fontsize,
     galleryHistory,
 }) => {
+
+
+
+    // ======================================= 获取容器尺寸（16:9下）
+    const [baseSize, setBaseSize] = useState(1);
+    const divRef = useRef(null); // 获取当前绑定的容器的尺寸
+
+    useEffect(() => {
+        const updateSize = () => {
+            if (divRef.current) {
+                const width = divRef.current.clientWidth;
+                const height = divRef.current.clientHeight;
+
+                if (height > 0) {
+                    const newBaseSize = width / 375;
+                    setBaseSize(newBaseSize);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // 初始化时轮询直到能获取有效高度
+        const tryInitSize = () => {
+            const success = updateSize();
+            if (!success) {
+                // 如果失败，延迟一帧继续尝试
+                requestAnimationFrame(tryInitSize);
+            }
+        };
+        tryInitSize(); // 启动初始化
+        window.addEventListener('resize', updateSize); // 响应窗口变化
+
+        return () => {window.removeEventListener('resize', updateSize);};
+    }, []);
+
+
+
+
 
 
 
@@ -68,6 +93,7 @@ const SettingsLayer = ({
 
     return (
         <div
+            ref={divRef}
             className="absolute w-full h-full"
             style={{filter: showDetailedImage ? 'blur(10px)' : 'none', transition: 'filter 0.3s ease'}}
         >
@@ -77,10 +103,10 @@ const SettingsLayer = ({
             <div
                 className="absolute flex justify-center"
                 style={{
-                    top: `${fontsize * 6}px`,
-                    bottom: `${fontsize * 6}px`,
-                    left: `${fontsize * 6}px`,
-                    right: `${fontsize * 6}px`,
+                    top: `${baseSize * 12}px`,
+                    bottom: `${baseSize * 12}px`,
+                    left: `${baseSize * 12}px`,
+                    right: `${baseSize * 12}px`,
             }}
             >
                 <Carousel
@@ -89,7 +115,7 @@ const SettingsLayer = ({
                     setShowDetailedImage={setShowDetailedImage}
                     // detailedImage={detailedImage}
                     setDetailedImage={setDetailedImage}
-                    fontsize={fontsize}
+                    fontsize={baseSize * 7}
                 />
             </div>
 
@@ -97,10 +123,10 @@ const SettingsLayer = ({
             {/*抽卡按钮*/}
             <div
                 className="absolute flex justify-center gap-[4vmin]"
-                style={{zIndex: showDetailedImage ? 2 : 4, bottom: `${fontsize * 3}px`, left: `${fontsize * 2}px`, right: `${fontsize * 2}px`}}>
+                style={{zIndex: showDetailedImage ? 2 : 4, bottom: `${baseSize * 12}px`, left: `${baseSize * 12}px`, right: `${fontsize * 2}px`}}>
                 <button
                     style={{
-                        fontSize: `${fontsize}px`,
+                        fontSize: `${baseSize * 7}px`,
                         backgroundColor: 'rgba(122,138,166,0.8)',
                         boxShadow: '0 0 10px #111214, 0 0 20px #111214',
                         color: 'white',
@@ -118,7 +144,7 @@ const SettingsLayer = ({
 
                 <button
                     style={{
-                        fontSize: `${fontsize}px`,
+                        fontSize: `${baseSize * 7}px`,
                         backgroundColor: 'rgba(239,218,160,0.8)', // 或者用 Tailwind 的 bg-yellow-400
                         boxShadow: '0 0 10px gold, 0 0 20px gold',
                         color: 'white',
@@ -140,13 +166,13 @@ const SettingsLayer = ({
             {/*最上层按钮和文字*/}
             <div
                 className="absolute flex flex-row justify-between"
-                style={{top: `${fontsize * 2}px`, left: `${fontsize * 2}px`, right: `${fontsize * 2}px`}}
+                style={{top: `${baseSize * 12}px`, left: `${baseSize * 12}px`, right: `${baseSize * 12}px`}}
             >
                 {/*左侧按钮*/}
                 <div className="flex items-start justify-start gap-[1vmin]">
                     <button
                         style={{
-                            fontSize: `${fontsize}px`,
+                            fontSize: `${baseSize * 7}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -162,7 +188,7 @@ const SettingsLayer = ({
 
                     <button
                         style={{
-                            fontSize: `${fontsize}px`,
+                            fontSize: `${baseSize * 7}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -179,8 +205,8 @@ const SettingsLayer = ({
                     <button
                         style={{
                             // visibility: 'hidden',
-                            marginLeft: '3vmin',
-                            fontSize: `${fontsize}px`,
+                            marginLeft: '2vmin',
+                            fontSize: `${baseSize * 7}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -197,8 +223,8 @@ const SettingsLayer = ({
 
                     <button
                         style={{
-                            marginLeft: '6vmin',
-                            fontSize: `${fontsize}px`,
+                            marginLeft: '4vmin',
+                            fontSize: `${baseSize * 7}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -214,7 +240,7 @@ const SettingsLayer = ({
                     <div
                         className="flex items-center justify-end text-white font-extrabold"
                         style={{
-                            fontSize: `${fontsize}px`,
+                            fontSize: `${baseSize * 7}px`,
                             color: 'white',
                             textShadow: `
                                 0 0 10px gold,
@@ -226,9 +252,9 @@ const SettingsLayer = ({
                         }}
                     >
                         <label className="text-shadow"
-                               style={{fontSize: `${fontsize * 1.5}px`,}}> {70 - pityCount} </label>
+                               style={{fontSize: `${baseSize * 10}px`,}}> {70 - pityCount} </label>
                         <label className="text-shadow"> 次感召必出 </label>
-                        <img src="images/world.png" style={{width: `${fontsize * 3}px`}}/>
+                        <img src="images/world.png" style={{width: `${baseSize * 20}px`}}/>
                         <label className="text-shadow">侧影</label>
                     </div>
 
@@ -236,7 +262,7 @@ const SettingsLayer = ({
                     <div
                         className="flex items-center justify-end gap-[1.5vmin]"
                         style={{
-                            fontSize: `${fontsize * 0.8}px`,
+                            fontSize: `${baseSize * 6}px`,
                             color: 'white',
                             textShadow: '0 0 10px gold'
                         }}
@@ -252,7 +278,7 @@ const SettingsLayer = ({
                     <div
                         className="flex items-center justify-end"
                         style={{
-                            fontSize: `${fontsize * 0.8}px`,
+                            fontSize: `${baseSize * 6}px`,
                             color: 'white',
                             textShadow: '0 0 10px gold'
                         }}
@@ -275,11 +301,11 @@ const SettingsLayer = ({
             </div>
 
             {/*左下反馈*/}
-            <div className="absolute flex flex-col" style={{left: `${fontsize * 2}px`, bottom: `${fontsize * 2}px`}}>
+            <div className="absolute flex flex-col" style={{left: `${baseSize * 12}px`, bottom: `${baseSize * 12}px`}}>
                 <label
                     className="mb-[2vmin]"
                     style={{
-                        fontSize: `${fontsize}px`,
+                        fontSize: `${baseSize * 7}px`,
                         color: 'white',
                         textShadow: '0 0 10px gold'
                     }}
@@ -288,7 +314,7 @@ const SettingsLayer = ({
                 </label>
                 <button
                     style={{
-                        fontSize: `${fontsize}px`,
+                        fontSize: `${baseSize * 7}px`,
                         backgroundColor: 'rgba(255,255,255,0.2)',
                         boxShadow: '0 0 10px #111214, 0 0 20px #111214',
                         color: 'white',
@@ -312,11 +338,12 @@ const SettingsLayer = ({
             </div>
 
 
-            <div className="absolute flex flex-col items-end" style={{right: `${fontsize * 2}px`, bottom: `${fontsize * 2}px`, fontSize: fontsize}}>
+            <div className="absolute flex flex-col items-end" style={{right: `${baseSize * 12}px`, bottom: `${baseSize * 12}px`, fontSize: baseSize * 7}}>
                 <label style={{color: 'red', fontWeight: 800}}>重要提示：</label>
                 <label>手机请竖屏，平板请横屏</label>
                 <label>频繁旋转手机或平板可能会卡住</label>
                 <label>关掉重开或刷新可解决</label>
+                <label style={{color: "yellow"}}>旋转屏幕后最好刷新一下</label>
             </div>
         </div>
     );

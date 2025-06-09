@@ -490,7 +490,7 @@ const Home = () => {
 
       // 五星概率（动态）
       let dynamicFiveStarRate = 2;
-      if (pity >= 60) {
+      if (pity > 60) {
         dynamicFiveStarRate = 2 + (pity - 59) * 10;
       }
 
@@ -594,6 +594,7 @@ const Home = () => {
       const chosen = pool[Math.floor(Math.random() * pool.length)];
       return { card: chosen, rarity };
     };
+
 
 
 
@@ -717,35 +718,21 @@ const Home = () => {
                 totalDrawCount={totalDrawCount}
                 totalFiveStarCount={totalFiveStarCount}
                 selectedRole={selectedRole}
-                setSelectedRole={setSelectedRole}
-                onlySelectedRoleCard={onlySelectedRoleCard}
-                setonlySelectedRoleCard={setOnlySelectedRoleCard}
-                roles={roles}
-                includeThreeStar={includeThreeStar}
-                setIncludeThreeStar={setIncludeThreeStar}
                 useSoftGuarantee={useSoftGuarantee}
-                setUseSoftGuarantee={setUseSoftGuarantee}
                 pityCount={pityCount}
                 softPityFailed={softPityFailed}
-                isDrawing={isDrawing}
-                isAnimatingDrawCards={isAnimatingDrawCards}
                 handleDraw={handleDraw}
-                showHistory={showHistory}
                 setShowHistory={setShowHistory}
                 setHasShownSummary={setHasShownSummary}
                 setShowSummary={setShowSummary}
                 clearLocalData={clearLocalData}
                 // toggleMusic={toggleMusic}
                 // isMusicPlaying={isMusicPlaying}
-                showProbability={showProbability}
-                setShowProbability={setShowProbability}
                 handleStartDraw={handleStartDraw} // 抽卡动画处理
                 setShowCardPoolFilter={setShowCardPoolFilter}
                 showDetailedImage={showDetailedImage}
                 setShowDetailedImage={setShowDetailedImage}
-                detailedImage={detailedImage}
                 setDetailedImage={setDetailedImage}
-                showGallery={showGallery}
                 setShowGallery={setShowGallery}
                 fontsize={fontsize}
                 galleryHistory={galleryHistory}
@@ -753,6 +740,7 @@ const Home = () => {
 
         </div>
     );
-};
+    }
+;
 
 export default Home;

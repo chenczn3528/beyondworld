@@ -104,51 +104,6 @@ function App() {
 
 
 
-
-    // 不许滚动（iOS）
-    // useEffect(() => {
-    //   let startY = 0;
-    //
-    //   const touchStart = (e) => {
-    //     startY = e.touches[0].clientY;
-    //   };
-    //
-    //   const touchMove = (e) => {
-    //     const el = e.target;
-    //
-    //     // 找到最近的可滚动父元素
-    //     let scrollable = el.closest('.content');
-    //     if (!scrollable) {
-    //       e.preventDefault();  // 没找到滚动区域阻止滚动
-    //       return;
-    //     }
-    //
-    //     const scrollTop = scrollable.scrollTop;
-    //     const scrollHeight = scrollable.scrollHeight;
-    //     const offsetHeight = scrollable.offsetHeight;
-    //     const currentY = e.touches[0].clientY;
-    //     const deltaY = currentY - startY;
-    //
-    //     if (
-    //       (scrollTop === 0 && deltaY > 0) ||  // 到顶部继续往下拉
-    //       (scrollTop + offsetHeight >= scrollHeight && deltaY < 0)  // 到底部继续往上拉
-    //     ) {
-    //       e.preventDefault();  // 阻止穿透导致的外层页面滑动
-    //     }
-    //   };
-    //
-    //   document.addEventListener('touchstart', touchStart, { passive: false });
-    //   document.addEventListener('touchmove', touchMove, { passive: false });
-    //
-    //   return () => {
-    //     document.removeEventListener('touchstart', touchStart);
-    //     document.removeEventListener('touchmove', touchMove);
-    //   };
-    // }, []);
-
-
-
-
     return (
         <div className="viewport">
             <div className="wrapper" ref={wrapperRef}>
