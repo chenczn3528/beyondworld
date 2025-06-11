@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef, useMemo} from 'react';
-import cardData from './assets/cards.json';
+import cardData from './assets/cards1.json';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import useLocalStorageState from "./hooks/useLocalStorageState.js";
 import SettingsLayer from "./components/SettingsLayer.jsx";
@@ -79,7 +79,8 @@ const Home = () => {
     const [includeThreeStar, setIncludeThreeStar] = useLocalStorageState('bw_includeThreeStar', true);
     // 是否包括辰星卡
     const [includeThreeStarM, setIncludeThreeStarM] = useLocalStorageState('bw_includeThreeStar', true);
-
+    // 是否包括崩坍和累充
+    const [includeMoneyCard, setIncludeMoneyCard] = useLocalStorageState("bw_includeMoneyCard", true);
     // 是否只抽当前角色的卡
     const [onlySelectedRoleCard, setOnlySelectedRoleCard] = useLocalStorageState('bw_onlySelectedRoleCard', false);
     // 历史记录
@@ -101,6 +102,7 @@ const Home = () => {
         'bw_softPityFailed',
         'bw_includeThreeStar',
         'bw_includeThreeStarM',
+        'bw_includeMoneyCard',
         'bw_onlySelectedRoleCard',
     ];
 
@@ -611,12 +613,20 @@ const Home = () => {
       } else {
         // 星 / 辰星
           if (onlySelectedRoleCard) {
-              pool = cardData.filter(card => (includeThreeStarM && card.稀有度 === "辰星")
-                  || (includeThreeStar && card.稀有度 === "星") && selectedRole.includes(card.主角));
+              pool = cardData.filter(card => ((includeThreeStarM && card.稀有度 === "辰星")
+                  || (includeThreeStar && card.稀有度 === "星")) && selectedRole.includes(card.主角));
           } else {
               pool = cardData.filter(card => (includeThreeStarM && card.稀有度 === "辰星")
                   || (includeThreeStar && card.稀有度 === "星"));
           }
+      }
+
+      if(!includeMoneyCard){
+          const excludedKeywords = ["崩坍", "累充", "活动", "奇遇瞬间"];
+          pool = pool.filter(card =>
+              !excludedKeywords.some(keyword => card.获取途径.includes(keyword))
+          );
+
       }
 
       // 抽卡
@@ -732,6 +742,8 @@ const Home = () => {
                 setIncludeThreeStar={setIncludeThreeStar}
                 includeThreeStarM={includeThreeStarM}
                 setIncludeThreeStarM={setIncludeThreeStarM}
+                includeMoneyCard={includeMoneyCard}
+                setIncludeMoneyCard={setIncludeMoneyCard}
                 onlySelectedRoleCard={onlySelectedRoleCard}
                 setOnlySelectedRoleCard={setOnlySelectedRoleCard}
                 showCardPoolFilter={showCardPoolFilter}

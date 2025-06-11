@@ -12,6 +12,8 @@ const CardPoolFilter = ({
     setIncludeThreeStar,
     includeThreeStarM,
     setIncludeThreeStarM,
+    includeMoneyCard,
+    setIncludeMoneyCard,
     onlySelectedRoleCard,
     setOnlySelectedRoleCard,
     showCardPoolFilter,
@@ -201,11 +203,18 @@ const CardPoolFilter = ({
                                     onChange={(e) => setIncludeThreeStarM(e.target.checked)}
                                 />
 
-                                <label className="flex items-center mr-[1vmin] ml-[5vmin]">包含星卡</label>
+                                <label className="flex items-center mr-[1vmin] ml-[3vmin]">包含星卡</label>
                                 <input
                                     type="checkbox"
                                     checked={includeThreeStar}
                                     onChange={(e) => setIncludeThreeStar(e.target.checked)}
+                                />
+
+                                <label className="flex items-center mr-[1vmin] ml-[3vmin]">包含崩坍累充</label>
+                                <input
+                                    type="checkbox"
+                                    checked={includeMoneyCard}
+                                    onChange={(e) => setIncludeMoneyCard(e.target.checked)}
                                 />
                             </div>
 
@@ -263,7 +272,7 @@ const CardPoolFilter = ({
                                     />
                                 </div>
 
-                                <label style={{fontSize: "2vmin", color: "#aaa"}}>（不勾选则仅有常驻+累充世界卡）</label>
+                                <label style={{fontSize: "2vmin", color: "#aaa"}}>（不勾选则仅有常驻{includeMoneyCard ? "+累充" : "" }世界卡）</label>
                                 <label style={{fontSize: "2vmin"}}>
                                     <span style={{color: "white", fontWeight: 800}}>已选卡池：</span>
                                     <span style={{color: "#efd6a0"}}>
@@ -271,8 +280,9 @@ const CardPoolFilter = ({
                                             selectedPools.length === permanentPools.length + currentAvailablePools.length
                                                 ? '全部'
                                                 : selectedLimitedPools.length === 0
-                                                    ? '常驻+累充'
-                                                    : '常驻+累充，' + selectedLimitedPools.map(pool => pool.replace('世界之间', '')).join('，')
+                                                    ? includeMoneyCard ? '常驻+累充' : "常驻"
+                                                    : includeMoneyCard ? '常驻+累充，' + selectedLimitedPools.map(pool => pool.replace('世界之间', '')).join('，') :
+                                                        '常驻，' + selectedLimitedPools.map(pool => pool.replace('世界之间', '')).join('，')
                                         }
                                     </span>
                                 </label>

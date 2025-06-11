@@ -341,12 +341,14 @@ const SettingsLayer = ({
             </div>
 
 
-            <div className="absolute flex flex-col items-end" style={{right: `${baseSize * 12}px`, bottom: `${baseSize * 12}px`, fontSize: baseSize * 7}}>
+            <div className="absolute flex flex-col items-end"
+                 style={{right: `${baseSize * 12}px`, bottom: `${baseSize * 12}px`, fontSize: baseSize * 7}}>
                 <label style={{color: 'red', fontWeight: 800}}>重要提示：</label>
                 <label>手机请竖屏，平板请横屏</label>
                 <label>频繁旋转手机或平板可能会卡住</label>
                 <label>关掉重开或刷新可解决</label>
                 <label style={{color: "yellow"}}>旋转屏幕后最好刷新一下</label>
+                <label>数据来源：世界之外WIKI</label>
             </div>
         </div>
     );
