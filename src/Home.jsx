@@ -440,8 +440,14 @@ const Home = () => {
 
           if (!onlySelectedRoleCard && useSoftGuarantee && isSingleTarget) {
             const limitedPools = selectedPools.filter(pool => pool !== "世界之间" && !pool.includes("累充"));
-            const gotTarget = result.card && selectedRole.includes(result.card.主角) && limitedPools.includes(result.card.获取途径);
-            localSoftPityFailed = !gotTarget;
+            if(limitedPools.length > 0){
+                const gotTarget = result.card && selectedRole.includes(result.card.主角) && limitedPools.includes(result.card.获取途径);
+                localSoftPityFailed = !gotTarget;
+            } else {
+                const gotTarget = result.card && selectedRole.includes(result.card.主角) && permanentPools.includes(result.card.获取途径);
+                localSoftPityFailed = !gotTarget;
+            }
+
           }
         } else {
           currentPity++;
@@ -520,23 +526,43 @@ const Home = () => {
       // 筛选卡池
       if (rarity === '世界') {
         if (forceGuaranteeMode === 'hard') {
+            console.log(1)
           // 大保底：限定池中选定角色
-          pool = cardData.filter(card =>
-            card.稀有度 === '世界' &&
-            limitedPools.includes(card.获取途径) &&
-            selectedRole.includes(card.主角)
-          );
+            if(limitedPools.length > 0){
+                console.log(11)
+                pool = cardData.filter(card =>
+                    card.稀有度 === '世界' &&
+                    limitedPools.includes(card.获取途径) &&
+                    selectedRole.includes(card.主角)
+                );
+            } else {
+                console.log(12)
+                pool = cardData.filter(card =>
+                    card.稀有度 === '世界' &&
+                    selectedPools.includes(card.获取途径) &&
+                    selectedRole.includes(card.主角)
+                );
+            }
         } else if (forceGuaranteeMode === 'soft') {
+            console.log(2)
           // 小保底歪：常驻池任意 + 限定池中未选定角色
-          pool = cardData.filter(card =>
-            card.稀有度 === '世界' &&
-            (
-              permanentPools.includes(card.获取途径) ||
-              (limitedPools.includes(card.获取途径) && !selectedRole.includes(card.主角))
-            )
-          );
+            if(limitedPools.length > 0){
+                pool = cardData.filter(card =>
+                    card.稀有度 === '世界' &&
+                    (
+                      permanentPools.includes(card.获取途径) ||
+                      (limitedPools.includes(card.获取途径) && !selectedRole.includes(card.主角))
+                    )
+                );
+            } else {
+                pool = cardData.filter(card =>
+                    card.稀有度 === '世界' &&
+                    permanentPools.includes(card.获取途径) && !selectedRole.includes(card.主角)
+                );
+            }
         } else if (!isAllRoles) {
             if (onlySelectedRoleCard) {
+                console.log(3)
               // 选了只抽定向角色卡（稀有度不限）
               pool = cardData.filter(card =>
                 card.稀有度 === '世界' &&
@@ -546,12 +572,14 @@ const Home = () => {
             } else {
               // 选了定向角色，没选只抽定向角色的卡，也没选大小保底
                 if(limitedPools.length > 0){
+                    console.log(4)
                     pool = cardData.filter(card =>
                         card.稀有度 === '世界' &&
                         selectedRole.includes(card.主角) &&
                         limitedPools.includes(card.获取途径)
                     );
                 } else {
+                    console.log(5)
                     pool = cardData.filter(card =>
                         card.稀有度 === '世界' &&
                         selectedRole.includes(card.主角) &&
@@ -562,11 +590,13 @@ const Home = () => {
         } else {
           // 正常五星抽卡（不指定角色）
             if(limitedPools.length > 0){
+                console.log(6)
                 pool = cardData.filter(card =>
                     card.稀有度 === '世界' &&
                     (limitedPools.includes(card.获取途径))
                 );
             } else {
+                console.log(7)
                 pool = cardData.filter(card =>
                     card.稀有度 === '世界' &&
                     (selectedPools.includes(card.获取途径))

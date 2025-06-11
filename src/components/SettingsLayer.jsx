@@ -302,6 +302,8 @@ const SettingsLayer = ({
 
             {/*左下反馈*/}
             <div className="absolute flex flex-col" style={{left: `${baseSize * 12}px`, bottom: `${baseSize * 12}px`}}>
+                <label style={{color: "yellow", fontSize: baseSize * 7}}>可以的话 希望宝宝们去我主页</label>
+                <label style={{color: "yellow", fontSize: baseSize * 7}}>投票看看想要哪种背景音乐❤</label>
                 <label
                     className="mb-[2vmin]"
                     style={{
@@ -318,6 +320,7 @@ const SettingsLayer = ({
                         backgroundColor: 'rgba(255,255,255,0.2)',
                         boxShadow: '0 0 10px #111214, 0 0 20px #111214',
                         color: 'white',
+                        width: `${baseSize * 60}px`,
                         textShadow: '0 0 5px gray'
                     }}
                     onClick={async () => {
@@ -333,7 +336,7 @@ const SettingsLayer = ({
                         }
                     }}
                 >
-                    {copyState === 0 ? "复制小红书号" : copyState === 1 ? "复制成功" : "复制失败" }
+                    {copyState === 0 ? "复制小红书号" : copyState === 1 ? "复制成功" : "复制失败"}
                 </button>
             </div>
 
