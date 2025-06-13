@@ -15,6 +15,7 @@ import GalleryPage from "./components/GalleryPage.jsx";
 import useResponsiveFontSize from "./utils/useResponsiveFontSize.js";
 import {useHistoryDB} from "./hooks/useHistoryDB.js";
 import useCardImageIndex from "./hooks/useCardImageIndex.js";
+import FilterCard from "./components/FilterCard.jsx";
 
 
 const Home = () => {
@@ -159,9 +160,14 @@ const Home = () => {
     const [showGalleryFullImage, setShowGalleryFullImage] = useState(false); // 图鉴图片的内容设置
     const [galleryCard, setGalleryCard] = useState(null);
 
+    const [showFilterCard, setShowFilterCard] = useState(false);  // 是否显示选图鉴展示的小界面
+    const [showFilterPage, setShowFilterPage] = useState(false);  // 是否显示选图鉴展示的大界面
+
     const fontsize = useResponsiveFontSize({scale: 0.9});
 
     const [sortedCards, setSortedCards] = useState([]);
+
+    const [gallerySelectedRole, setGallerySelectedRole] = useState(4);
 
 
 
@@ -612,7 +618,7 @@ const Home = () => {
         }
       } else {
         // 星 / 辰星
-          if (onlySelectedRoleCard) {
+          if (onlySelectedRoleCard && selectedRole[0] !== "随机") {
               pool = cardData.filter(card => ((includeThreeStarM && card.稀有度 === "辰星")
                   || (includeThreeStar && card.稀有度 === "星")) && selectedRole.includes(card.主角));
           } else {
@@ -710,18 +716,33 @@ const Home = () => {
                 fontsize={fontsize}
             />
 
+            {showFilterCard && (
+                <FilterCard
+                    onClose={setShowFilterCard}
+                    selectedRole={gallerySelectedRole}
+                    setSelectedRole={setGallerySelectedRole}
+                />
+            )}
+
+
 
             {/*展示图鉴中的图片*/}
             <GalleryPage
                 cards={galleryHistory}
                 showGallery={showGallery}
                 setShowGallery={setShowGallery}
+                showFilterCard={showFilterCard}
+                setShowFilterCard={setShowFilterCard}
+                showFilterPage={showFilterPage}
+                setShowFilterPage={setShowFilterPage}
                 showGalleryFullImage={showGalleryFullImage}
                 setShowGalleryFullImage={setShowGalleryFullImage}
                 galleryCard={galleryCard}
                 setGalleryCard={setGalleryCard}
                 sortedCards={sortedCards}
                 setSortedCards={setSortedCards}
+                selectedRole={gallerySelectedRole}
+                setSelectedRole={setGallerySelectedRole}
             />
 
             {showDetailedImage && (

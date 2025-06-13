@@ -9,16 +9,24 @@ const GalleryPage = ({
     setShowGallery,
     showGalleryFullImage,
     setShowGalleryFullImage,
+    showFilterPage,
+    setShowFilterPage,
+    showFilterCard,
+    setShowFilterCard,
     sortedCards,
     setSortedCards,
     galleryCard,
     setGalleryCard,
+    selectedRole,
+    setSelectedRole
 }) => {
 
     // =======================图鉴排序
     // 稀有度排序映射
     const rarityOrder = {'世界': 4, '月': 3, '辰星': 2, '星': 1};
     const roleOrder = {'顾时夜':4, '易遇':3, '柏源':2, '夏萧因':1};
+
+    const roleMap = {0: '顾时夜', 1: '易遇', 3: '夏萧因', 2: '柏源', 4: '全部'};
 
     // 排序函数
     const sortCards = (cards) => {
@@ -41,9 +49,16 @@ const GalleryPage = ({
     };
 
     useEffect(() => {
-        const sorted = sortCards(cards || []);
+        let tmpCards = [];
+        if(selectedRole === 4){
+            tmpCards = cards;
+        } else {
+            tmpCards = cards.filter(card => card.主角 === roleMap[selectedRole]);
+        }
+        const sorted = sortCards(tmpCards || []);
         setSortedCards(sorted);
-    }, [cards]);
+        scrollToIndex(0);
+    }, [cards, selectedRole]);
 
 
 
@@ -133,21 +148,21 @@ const GalleryPage = ({
 
 
     useEffect(() => {
-      if (!showGallery) return; // 不显示时不绑定
+        if (!showGallery) return; // 不显示时不绑定
 
-      const container = divRef.current;
-      if (!container) return;
+        const container = divRef.current;
+        if (!container) return;
 
-      const wheelHandler = (e) => {
-        e.preventDefault();
-        handleWheel(e);
-      };
+        const wheelHandler = (e) => {
+            e.preventDefault();
+            handleWheel(e);
+        };
 
-      container.addEventListener('wheel', wheelHandler, { passive: false });
+        container.addEventListener('wheel', wheelHandler, { passive: false });
 
-      return () => {
-        container.removeEventListener('wheel', wheelHandler);
-      };
+        return () => {
+            container.removeEventListener('wheel', wheelHandler);
+        };
     }, [showGallery]);
 
 
@@ -163,75 +178,73 @@ const GalleryPage = ({
 
 
 
-const touchStartRef = useRef(null);
-const initialTouchRef = useRef(null); // 用来记录 touchstart 时的原始位置
-const scrollTRef = useRef(0);
-scrollTRef.current = scrollT;
+    const touchStartRef = useRef(null);
+    const initialTouchRef = useRef(null); // 用来记录 touchstart 时的原始位置
+    const scrollTRef = useRef(0);
+    scrollTRef.current = scrollT;
 
-const handleTouchStart = (e) => {
-  const isVertical = window.innerWidth <= 600;
-  const startPos = isVertical ? e.touches[0].clientY : e.touches[0].clientX;
+    const handleTouchStart = (e) => {
+        const isVertical = window.innerWidth <= 600;
+        const startPos = isVertical ? e.touches[0].clientY : e.touches[0].clientX;
 
-  touchStartRef.current = startPos;
-  initialTouchRef.current = startPos; // 用来和 touchend 对比判断方向
-};
-
-
-const handleTouchMove = (e) => {
-  if (!touchStartRef.current) return;
-
-  const isVertical = window.innerWidth <= 600;
-  const currentPos = isVertical ? e.touches[0].clientY : e.touches[0].clientX;
-  const delta = touchStartRef.current - currentPos;
-
-  const scrollStep = 0.00005;
-  let newScroll = scrollTRef.current + delta * scrollStep;
-
-  if (newScroll < SCROLL_T_MIN) newScroll = SCROLL_T_MIN;
-  if (newScroll > SCROLL_T_MAX) newScroll = SCROLL_T_MAX;
-
-  if (scrollTRef.current !== newScroll) {
-    setScrollT(newScroll);
-  }
-
-  touchStartRef.current = currentPos;
-};
+        touchStartRef.current = startPos;
+        initialTouchRef.current = startPos; // 用来和 touchend 对比判断方向
+    };
 
 
-const handleTouchEnd = (e) => {
-  const isVertical = window.innerWidth <= 600;
-  const endPos = isVertical ? e.changedTouches[0].clientY : e.changedTouches[0].clientX;
-  const delta = endPos - initialTouchRef.current;
+    const handleTouchMove = (e) => {
+        if (!touchStartRef.current) return;
 
-  const threshold = 30; // 滑动阈值，避免误触
-  let targetIndex = currentCardIndex;
+        const isVertical = window.innerWidth <= 600;
+        const currentPos = isVertical ? e.touches[0].clientY : e.touches[0].clientX;
+        const delta = touchStartRef.current - currentPos;
 
-  if (delta > threshold) {
-    targetIndex = currentCardIndex - 1; // 右滑
-  } else if (delta < -threshold) {
-    targetIndex = currentCardIndex + 1; // 左滑
-  }
+        const scrollStep = 0.00005;
+        let newScroll = scrollTRef.current + delta * scrollStep;
 
-  // 限制范围
-  targetIndex = Math.max(0, Math.min(sortedCards.length - 1, targetIndex));
-  scrollToIndex(targetIndex);
-};
+        if (newScroll < SCROLL_T_MIN) newScroll = SCROLL_T_MIN;
+        if (newScroll > SCROLL_T_MAX) newScroll = SCROLL_T_MAX;
 
-useEffect(() => {
-    const container = divRef.current;
-      if (!container) return;
+        if (scrollTRef.current !== newScroll) {
+            setScrollT(newScroll);
+        }
+        touchStartRef.current = currentPos;
+    };
 
-  container.addEventListener('touchstart', handleTouchStart, { passive: true });
-  container.addEventListener('touchmove', handleTouchMove, { passive: false });
-  container.addEventListener('touchend', handleTouchEnd, { passive: true });
 
-  return () => {
-    container.removeEventListener('touchstart', handleTouchStart);
-    container.removeEventListener('touchmove', handleTouchMove);
-    container.removeEventListener('touchend', handleTouchEnd);
-  };
-}, [currentCardIndex]);
+    const handleTouchEnd = (e) => {
+        const isVertical = window.innerWidth <= 600;
+        const endPos = isVertical ? e.changedTouches[0].clientY : e.changedTouches[0].clientX;
+        const delta = endPos - initialTouchRef.current;
 
+        const threshold = 30; // 滑动阈值，避免误触
+        let targetIndex = currentCardIndex;
+
+        if (delta > threshold) {
+            targetIndex = currentCardIndex - 1; // 右滑
+        } else if (delta < -threshold) {
+            targetIndex = currentCardIndex + 1; // 左滑
+        }
+
+        // 限制范围
+        targetIndex = Math.max(0, Math.min(sortedCards.length - 1, targetIndex));
+        scrollToIndex(targetIndex);
+    };
+
+    useEffect(() => {
+        const container = divRef.current;
+            if (!container) return;
+
+        container.addEventListener('touchstart', handleTouchStart, { passive: true });
+        container.addEventListener('touchmove', handleTouchMove, { passive: false });
+        container.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+        return () => {
+            container.removeEventListener('touchstart', handleTouchStart);
+            container.removeEventListener('touchmove', handleTouchMove);
+            container.removeEventListener('touchend', handleTouchEnd);
+        };
+    }, [currentCardIndex]);
 
 
 
@@ -240,7 +253,8 @@ useEffect(() => {
 
 
 
-     // ======================================= 获取当前展示的卡
+
+    // ======================================= 获取当前展示的卡
     const getDisplayCardIndex = () => {
         if (currentCardIndex < 0) return 0;
         if (currentCardIndex >= sortedCards.length) return sortedCards.length - 1;
@@ -384,7 +398,28 @@ useEffect(() => {
                 </button>
 
 
-
+                <div
+                    className="absolute w-[35%] h-full z-10 no-click"
+                    onClick={(e)=>{e.stopPropagation(); console.log("click")}}
+                >
+                    <button
+                        className="absolute z-[500]"
+                        style={{
+                            marginLeft: '2vmin',
+                            fontSize: `${baseSize * 6}px`,
+                            width: `${baseSize * 40}px`,
+                            bottom: `${baseSize * 12}px`,
+                            left: `${baseSize * 12}px`,
+                            backgroundColor: 'rgba(255,255,255,0.2)',
+                            color: 'white',
+                        }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setShowFilterCard(true);
+                        }}
+                    >{roleMap[selectedRole]}
+                    </button>
+                </div>
 
                 {/*大图*/}
                 <div key={`${displayCard?.卡名}-${imageIndex}`} className="absolute w-full h-full">
