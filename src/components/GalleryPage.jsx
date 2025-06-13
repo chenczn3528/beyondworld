@@ -400,7 +400,7 @@ const GalleryPage = ({
 
                 <div
                     className="absolute w-[35%] h-full z-10 no-click"
-                    onClick={(e)=>{e.stopPropagation(); console.log("click")}}
+                    onClick={(e)=>{e.stopPropagation()}}
                 >
                     <button
                         className="absolute z-[500]"
@@ -423,37 +423,43 @@ const GalleryPage = ({
 
                 {/*大图*/}
                 <div key={`${displayCard?.卡名}-${imageIndex}`} className="absolute w-full h-full">
-                    <FadeImage
-                        cardSrc={getImageUrl(displayCard, imageIndex, 1)}
-                        cardSrcset={getImageUrl(displayCard, imageIndex, 0)}
-                    />
+                    {displayCard && (
+                        <div className="absolute w-full h-full">
+                            <FadeImage
+                                cardSrc={getImageUrl(displayCard, imageIndex, 1)}
+                                cardSrcset={getImageUrl(displayCard, imageIndex, 0)}
+                            />
 
-                    {/*大图标注*/}
-                    <div className="absolute flex flex-row items-center z-10"
-                         style={{top: `${baseSize * 6}px`, right: `${baseSize * 6}px`}}>
-                        <div className="flex flex-row">
-                            <div
-                                className="flex flex-col items-end justify-end"
-                                style={{color: "white", textShadow: '0 0 2px gray, 0 0 4px gray', fontWeight: 800}}
-                            >
-                                <label style={{fontSize: `${baseSize * 5.5}px`}}>{displayCard?.主角}</label>
-                                <div className="flex flex-row gap-[1px]">
-                                    <img
-                                        src={`images/60px-${displayCard?.属性}.png`}
-                                        className="h-auto"
-                                        style={{width: `${baseSize * 10}px`, height: `${baseSize * 10}px`}}
-                                    />
-                                    <label
-                                        style={{fontSize: `${baseSize * 8}px`}}>{displayCard?.卡名}</label>
+
+                            {/*大图标注*/}
+                            <div className="absolute flex flex-row items-center z-10"
+                                 style={{top: `${baseSize * 6}px`, right: `${baseSize * 6}px`}}>
+                                <div className="flex flex-row">
+                                    <div
+                                        className="flex flex-col items-end justify-end"
+                                        style={{color: "white", textShadow: '0 0 2px gray, 0 0 4px gray', fontWeight: 800}}
+                                    >
+                                        <label style={{fontSize: `${baseSize * 5.5}px`}}>{displayCard?.主角}</label>
+                                        <div className="flex flex-row gap-[1px]">
+                                            <img
+                                                src={`images/60px-${displayCard?.属性}.png`}
+                                                className="h-auto"
+                                                style={{width: `${baseSize * 10}px`, height: `${baseSize * 10}px`}}
+                                            />
+                                            <label
+                                                style={{fontSize: `${baseSize * 8}px`}}>{displayCard?.卡名}</label>
+                                        </div>
+
+                                    </div>
                                 </div>
-
+                                <img
+                                    src={rarityMap[displayCard?.稀有度]}
+                                    style={{height: `${baseSize * 28}px`}}
+                                />
                             </div>
                         </div>
-                        <img
-                            src={rarityMap[displayCard?.稀有度]}
-                            style={{height: `${baseSize * 28}px`}}
-                        />
-                    </div>
+                    )}
+
                 </div>
 
 

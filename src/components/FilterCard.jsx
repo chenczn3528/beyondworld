@@ -18,11 +18,38 @@ const FilterCard = ({ onClose, selectedRole, setSelectedRole }) => {
     choices.push({"图片信息":[{"srcset": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGUlEQVR42mNgGAWjgP///xkYGBgAADEMAQEGAP8GC04EtW8gAAAAAElFTkSuQmCC"}]})
 
 
+    const timerRef = useRef(null); // 放在组件最外层
+
+    const handleClick = (e, i) => {
+        e.stopPropagation();
+        playClickSound();
+        setSelectedRole(i);
+
+        // 清除已有定时器
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+        }
+
+        // 启动新的定时器
+        timerRef.current = setTimeout(() => {
+            setState(prev => !prev);
+            timerRef.current = setTimeout(() => {
+                onClose();
+                timerRef.current = null; // 清理引用
+            }, 1000);
+        }, 2000);
+    };
+
+
+
+
     // const [selectedRole, setSelectedRole] = useState(0);
 
     // ======================================= 获取容器尺寸（16:9下）
     const [baseSize, setBaseSize] = useState(1);
     const divRef = useRef(null); // 获取当前绑定的容器的尺寸
+
+    const [state, setState] = useState(true);
 
     useEffect(() => {
         const updateSize = () => {
@@ -57,7 +84,7 @@ const FilterCard = ({ onClose, selectedRole, setSelectedRole }) => {
     return (
         <div
             ref={divRef}
-            className="absolute w-full h-full z-200 flex items-center"
+            className={`absolute w-full h-full z-200 flex items-center ${state ? "fade-in" : "fade-out"}`}
             onClick={() => {
                 playClickSound();
                 onClose();
@@ -72,7 +99,7 @@ const FilterCard = ({ onClose, selectedRole, setSelectedRole }) => {
             />
 
             <div
-                className="absolute w-[25%] h-[60%] slide-in-container flex flex-col justify-center items-center gap-[2vmin]"
+                className="absolute w-[25%] h-[60%] slide-in-container flex flex-col justify-center gap-[2vmin]"
                 onClick={(e) => e.stopPropagation()}
                 style={{
                     // background: "rgba(23, 25, 33, 0.6)", // 有背景才能产生阴影
@@ -82,17 +109,13 @@ const FilterCard = ({ onClose, selectedRole, setSelectedRole }) => {
                     return (
                         <div
                             key={i}
-                            className="edge-blur-mask"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                playClickSound();
-                                setSelectedRole(i);
-                                onClose();
-                            }}
+                            onClick={(e) => handleClick(e, i)}
                             style={{
+                                marginLeft: i === selectedRole ? `${baseSize * 20}px` : `${baseSize * 10}px`,
                                 width: `${baseSize * 60}px`,
                                 height: `${baseSize * 16}px`,
-                                overflow: "hidden"
+                                overflow: "hidden",
+                                boxShadow: i === selectedRole ? '0 -10px 20px rgba(133,144,172, 0.9), 0 10px 20px rgba(133,144,172, 0.9)' : "none",
                             }}
                         >
                             {i < 4 && (
