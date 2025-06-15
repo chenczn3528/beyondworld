@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState} from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import StarIcon from "../icons/StarIcon.jsx";
 import LeftIcon from "../icons/LeftIcon.jsx";
@@ -8,6 +8,7 @@ import FadeImage from "./FadeImage.jsx";
 
 const GalleryFullImage = (
 {
+    baseSize,
     card,
     showGalleryFullImage,
     setShowGalleryFullImage,
@@ -162,7 +163,7 @@ const GalleryFullImage = (
                                     left: `${fontsize}px`,
                                 }}
                             >
-                                <LeftIcon size={fontsize * 2} color="white"/>
+                                <LeftIcon size={baseSize * 24} color="white"/>
                             </button>
 
                             {/*相会*/}

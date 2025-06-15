@@ -1,9 +1,10 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Carousel from "./Carousel";
 import cardData from "../assets/cards.json";
 import {playClickSound} from "../utils/playClickSound.js";
 
 const SettingsLayer = ({
+    baseSize,
     totalDrawCount,
     totalFiveStarCount,
     selectedRole,
@@ -27,50 +28,6 @@ const SettingsLayer = ({
     galleryHistory,
 }) => {
 
-
-
-    // ======================================= 获取容器尺寸（16:9下）
-    const [baseSize, setBaseSize] = useState(1);
-    const divRef = useRef(null); // 获取当前绑定的容器的尺寸
-
-    useEffect(() => {
-        const updateSize = () => {
-            if (divRef.current) {
-                const width = divRef.current.clientWidth;
-                const height = divRef.current.clientHeight;
-
-                if (height > 0) {
-                    const newBaseSize = width / 375;
-                    setBaseSize(newBaseSize);
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        // 初始化时轮询直到能获取有效高度
-        const tryInitSize = () => {
-            const success = updateSize();
-            if (!success) {
-                // 如果失败，延迟一帧继续尝试
-                requestAnimationFrame(tryInitSize);
-            }
-        };
-        tryInitSize(); // 启动初始化
-        window.addEventListener('resize', updateSize); // 响应窗口变化
-
-        return () => {window.removeEventListener('resize', updateSize);};
-    }, []);
-
-
-
-
-
-
-
-
-
-
     const filtered_cardData = cardData.filter(card => card.稀有度 === '世界');
 
 
@@ -93,7 +50,6 @@ const SettingsLayer = ({
 
     return (
         <div
-            ref={divRef}
             className="absolute w-full h-full"
             style={{filter: showDetailedImage ? 'blur(10px)' : 'none', transition: 'filter 0.3s ease'}}
         >

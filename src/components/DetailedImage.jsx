@@ -1,8 +1,7 @@
-import React, {useEffect, useRef, useState} from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import {playClickSound} from "../utils/playClickSound.js";
 
-const DetailedImage = ({ card, onClose }) => {
+const DetailedImage = ({ card, onClose, baseSize }) => {
 
     const rarityMap = {
         世界: 'images/world.png',
@@ -13,47 +12,13 @@ const DetailedImage = ({ card, onClose }) => {
 
     const attributes = ['思维', '魅力', '体魄', '感知', '灵巧'];
 
-    // ======================================= 获取容器尺寸（16:9下）
-    const [baseSize, setBaseSize] = useState(1);
-    const divRef = useRef(null); // 获取当前绑定的容器的尺寸
-
-    useEffect(() => {
-        const updateSize = () => {
-            if (divRef.current) {
-                const width = divRef.current.clientWidth;
-                const height = divRef.current.clientHeight;
-
-                if (height > 0) {
-                    const newBaseSize = width / 375;
-                    setBaseSize(newBaseSize);
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        // 初始化时轮询直到能获取有效高度
-        const tryInitSize = () => {
-            const success = updateSize();
-            if (!success) {
-                // 如果失败，延迟一帧继续尝试
-                requestAnimationFrame(tryInitSize);
-            }
-        };
-        tryInitSize(); // 启动初始化
-        window.addEventListener('resize', updateSize); // 响应窗口变化
-
-        return () => {window.removeEventListener('resize', updateSize);};
-    }, []);
 
 
 
 
     return (
         <div
-            ref={divRef}
             className="absolute w-full h-full z-10"
-            // className="flex justify-center items-center"
             onClick={() => {
                 playClickSound();
                 onClose();

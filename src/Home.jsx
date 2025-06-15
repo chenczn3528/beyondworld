@@ -16,6 +16,7 @@ import useResponsiveFontSize from "./utils/useResponsiveFontSize.js";
 import {useHistoryDB} from "./hooks/useHistoryDB.js";
 import useCardImageIndex from "./hooks/useCardImageIndex.js";
 import FilterCard from "./components/FilterCard.jsx";
+import FilterPage from "./components/FilterPage.jsx";
 
 
 const Home = () => {
@@ -168,6 +169,12 @@ const Home = () => {
     const [sortedCards, setSortedCards] = useState([]);
 
     const [gallerySelectedRole, setGallerySelectedRole] = useState(4);
+
+    const [orderChoice, setOrderChoice] = useState(0); // 设置图鉴的排序顺序
+    const [rarityChoice, setRarityChoice] = useState("全部");
+    const [worldChoice, setWorldChoice] = useState("全部");
+    const [typeChoice, setTypeChoice] = useState("全部");
+    const [showRarityChoiceView, setShowRarityChoiceView] = useState(false); // 设置选择属性的时候出现的选项页面
 
 
 
@@ -645,10 +652,47 @@ const Home = () => {
 
 
 
+    // ======================================= 获取容器尺寸（16:9下）
+    const [baseSize, setBaseSize] = useState(1);
+    const divRef = useRef(null); // 获取当前绑定的容器的尺寸
+
+    useEffect(() => {
+        const updateSize = () => {
+            if (divRef.current) {
+                const width = divRef.current.clientWidth;
+                const height = divRef.current.clientHeight;
+
+                if (height > 0) {
+                    const newBaseSize = width / 375;
+                    setBaseSize(newBaseSize);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // 初始化时轮询直到能获取有效高度
+        const tryInitSize = () => {
+            const success = updateSize();
+            if (!success) {
+                // 如果失败，延迟一帧继续尝试
+                requestAnimationFrame(tryInitSize);
+            }
+        };
+        tryInitSize(); // 启动初始化
+        window.addEventListener('resize', updateSize); // 响应窗口变化
+
+        return () => {window.removeEventListener('resize', updateSize);};
+    }, []);
+
+
+
+
+
     // ========================================================
     // 返回数据时显示的页面
     return (
-        <div className="w-full h-full relative overflow-hidden" style={{backgroundColor: 'black'}}>
+        <div className="w-full h-full relative overflow-hidden" style={{backgroundColor: 'black'}} ref={divRef}>
 
             {/* 视频层（最底层） */}
             <video
@@ -710,6 +754,7 @@ const Home = () => {
             />
 
             <GalleryFullImage
+                baseSize={baseSize}
                 card={galleryCard}
                 showGalleryFullImage={showGalleryFullImage}
                 setShowGalleryFullImage={setShowGalleryFullImage}
@@ -718,9 +763,30 @@ const Home = () => {
 
             {showFilterCard && (
                 <FilterCard
+                    baseSize={baseSize}
                     onClose={setShowFilterCard}
                     selectedRole={gallerySelectedRole}
                     setSelectedRole={setGallerySelectedRole}
+                />
+            )}
+
+            {showFilterPage && (
+                <FilterPage
+                    baseSize={baseSize}
+                    onClose={setShowFilterPage}
+                    onCloseHome={() => {setShowFilterPage(false);setShowGallery(false);}}
+                    selectedRole={gallerySelectedRole}
+                    setSelectedRole={setGallerySelectedRole}
+                    orderChoice={orderChoice}
+                    setOrderChoice={setOrderChoice}
+                    rarityChoice={rarityChoice}
+                    setRarityChoice={setRarityChoice}
+                    worldChoice={worldChoice}
+                    setWorldChoice={setWorldChoice}
+                    typeChoice={typeChoice}
+                    setTypeChoice={setTypeChoice}
+                    showRarityChoiceView={showRarityChoiceView}
+                    setShowRarityChoiceView={setShowRarityChoiceView}
                 />
             )}
 
@@ -728,6 +794,7 @@ const Home = () => {
 
             {/*展示图鉴中的图片*/}
             <GalleryPage
+                baseSize={baseSize}
                 cards={galleryHistory}
                 showGallery={showGallery}
                 setShowGallery={setShowGallery}
@@ -743,10 +810,15 @@ const Home = () => {
                 setSortedCards={setSortedCards}
                 selectedRole={gallerySelectedRole}
                 setSelectedRole={setGallerySelectedRole}
+                orderChoice={orderChoice}
+                setOrderChoice={setOrderChoice}
+                showRarityChoiceView={showRarityChoiceView}
+                setShowRarityChoiceView={setShowRarityChoiceView}
             />
 
             {showDetailedImage && (
                 <DetailedImage
+                    baseSize={baseSize}
                     card={detailedImage}  // 确保传递 fullImage，而不是其他东西
                     onClose={() => setShowDetailedImage(false)}
                 />
@@ -755,6 +827,7 @@ const Home = () => {
 
             {/*展示筛选卡片页*/}
             <CardPoolFilter
+                baseSize={baseSize}
                 selectedRole={selectedRole}
                 setSelectedRole={setSelectedRole}
                 useSoftGuarantee={useSoftGuarantee}
@@ -778,6 +851,7 @@ const Home = () => {
 
             {/* 控件层（中间层） */}
             <SettingsLayer
+                baseSize={baseSize}
                 totalDrawCount={totalDrawCount}
                 totalFiveStarCount={totalFiveStarCount}
                 selectedRole={selectedRole}

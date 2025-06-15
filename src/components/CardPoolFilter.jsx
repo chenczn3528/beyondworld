@@ -4,6 +4,7 @@ import {getAvailablePools, getDynamicAttributeCounts} from "../utils/cardDataUti
 import cardData from "../assets/cards.json";
 
 const CardPoolFilter = ({
+    baseSize,
     selectedRole,
     setSelectedRole,
     useSoftGuarantee,
@@ -151,19 +152,19 @@ const CardPoolFilter = ({
                     }}
                     style={{
                         backgroundColor: "#2a2d39",
-                        fontSize: "3vmin",
+                        fontSize: `${baseSize * 7}px`,
                         color: "white",
                     }}
                 >
                     <div className="relative flex flex-col h-full mt-[2vh] mb-[2vh]">
                         <label
                             className="flex justify-center items-center mt-[1vmin] mb-[3vmin]"
-                            style={{ fontSize: "4vmin", fontWeight: "800" }}>筛选卡池</label>
+                            style={{ fontSize: `${baseSize * 10}px`, fontWeight: "800" }}>筛选卡池</label>
 
-                        <div className="mb-[8vmin] overflow-y-auto">
+                        <div className={`mb-[8vmin] overflow-y-auto`}>
 
                             <label className="flex items-center mt-[1vmin] ml-[3vw] mr-[3vw] mb-[1vmin]"
-                                   style={{fontSize: "2vmin", color: "#aaa"}}>
+                                   style={{fontSize: `${baseSize * 5.5}px`, color: "#aaa"}}>
                                 大强没写具体的感召规则，因此这里沿用深空的规则，前60抽每次出世界侧影的概率为2%，60抽之后每一抽的概率在前一抽的基础上增加10%。</label>
 
 
@@ -179,7 +180,7 @@ const CardPoolFilter = ({
                                                 key={char}
                                                 onClick={() => toggleCharacter(char)}
                                                 style={{
-                                                    fontSize: "2.5vmin",
+                                                    fontSize: `${baseSize * 7}px`,
                                                     backgroundColor: isSelected ? "rgba(239,218,160,0.8)" : "transparent",
                                                     color: isSelected ? "#111" : "#aaa",
                                                     boxShadow: isSelected
@@ -233,7 +234,7 @@ const CardPoolFilter = ({
 
                             <label
                                 className="flex items-center mt-[0vmin] ml-[3vw] mr-[3vw]"
-                                style={{fontSize: "2vmin", color: "#aaa"}}
+                                style={{fontSize: `${baseSize * 5.5}px`, color: "#aaa"}}
                             >
                                 保底规则说明：启用大小保底，若选择了限定池，小保底歪常驻池的随机角色或限定池的未定向角色，大保底必出限定池、定向角色的卡；关闭大小保底，则出限定池的定向角色。
                             </label>
@@ -272,8 +273,8 @@ const CardPoolFilter = ({
                                     />
                                 </div>
 
-                                <label style={{fontSize: "2vmin", color: "#aaa"}}>（不勾选则仅有常驻{includeMoneyCard ? "+累充" : "" }世界卡）</label>
-                                <label style={{fontSize: "2vmin"}}>
+                                <label style={{fontSize: `${baseSize * 5.5}px`, color: "#aaa"}}>（不勾选则仅有常驻{includeMoneyCard ? "+累充" : "" }世界卡）</label>
+                                <label style={{fontSize: `${baseSize * 5.5}px`}}>
                                     <span style={{color: "white", fontWeight: 800}}>已选卡池：</span>
                                     <span style={{color: "#efd6a0"}}>
                                         {
@@ -300,7 +301,7 @@ const CardPoolFilter = ({
                                                 backgroundColor: isSelected ? "rgba(239,218,160,0.8)" : "transparent",
                                                 color: isSelected ? "#111" : "#aaa",
                                                 boxShadow: isSelected ? "0 0 5px gold, 0 0 10px gold" : "0 0 5px #111214, 0 0 10px #111214",
-                                                fontSize: "2.5vmin",
+                                                fontSize: `${baseSize * 6.5}px`,
                                             }}
                                         >
                                             {pool}

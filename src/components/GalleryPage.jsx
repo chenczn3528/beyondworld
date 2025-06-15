@@ -2,8 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import LeftIcon from "../icons/LeftIcon.jsx";
 import useCardImageIndex from "../hooks/useCardImageIndex.js";
 import FadeImage from "./FadeImage.jsx";
+import {Filter} from "lucide-react";
+import FilterIcon from "../icons/FilterIcon.jsx";
+import {playClickSound} from "../utils/playClickSound.js";
 
 const GalleryPage = ({
+    baseSize,
     cards,
     showGallery,
     setShowGallery,
@@ -18,7 +22,11 @@ const GalleryPage = ({
     galleryCard,
     setGalleryCard,
     selectedRole,
-    setSelectedRole
+    setSelectedRole,
+    orderChoice,
+    setOrderChoice,
+    showRarityChoiceView,
+    setShowRarityChoiceView,
 }) => {
 
     // =======================图鉴排序
@@ -27,6 +35,9 @@ const GalleryPage = ({
     const roleOrder = {'顾时夜':4, '易遇':3, '柏源':2, '夏萧因':1};
 
     const roleMap = {0: '顾时夜', 1: '易遇', 3: '夏萧因', 2: '柏源', 4: '全部'};
+    const rarityOrderMap = {0: '稀有度', 1: '全部', 2: '思维', 3: '魅力', 4: '体魄', 5: '感知', 6: '灵巧'};
+
+
 
     // 排序函数
     const sortCards = (cards) => {
@@ -59,9 +70,6 @@ const GalleryPage = ({
         setSortedCards(sorted);
         scrollToIndex(0);
     }, [cards, selectedRole]);
-
-
-
 
 
 
@@ -231,6 +239,8 @@ const GalleryPage = ({
         scrollToIndex(targetIndex);
     };
 
+
+    const divRef = useRef(null); // 获取当前绑定的容器的尺寸
     useEffect(() => {
         const container = divRef.current;
             if (!container) return;
@@ -314,39 +324,8 @@ const GalleryPage = ({
 
 
 
-    // ======================================= 获取容器尺寸（16:9下）
-    const [baseSize, setBaseSize] = useState(1);
-    const divRef = useRef(null); // 获取当前绑定的容器的尺寸
 
-    useEffect(() => {
-        const updateSize = () => {
-            if (divRef.current) {
-                const width = divRef.current.clientWidth;
-                const height = divRef.current.clientHeight;
 
-                if (height > 0) {
-                    // const newBaseSize = Math.min(height, width) / 375;
-                    const newBaseSize = width / 375;
-                    setBaseSize(newBaseSize);
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        // 初始化时轮询直到能获取有效高度
-        const tryInitSize = () => {
-            const success = updateSize();
-            if (!success) {
-                // 如果失败，延迟一帧继续尝试
-                requestAnimationFrame(tryInitSize);
-            }
-        };
-        tryInitSize(); // 启动初始化
-        window.addEventListener('resize', updateSize); // 响应窗口变化
-
-        return () => {window.removeEventListener('resize', updateSize);};
-    }, []);
 
     const defaultWhiteImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGUlEQVR42mNgGAWjgP///xkYGBgAADEMAQEGAP8GC04EtW8gAAAAAElFTkSuQmCC";
     const startX = 30;
@@ -377,7 +356,10 @@ const GalleryPage = ({
                     background: "white",
                     overflow: "hidden",
                 }}
-                onClick={() => {setShowGalleryFullImage(!showGalleryFullImage);}}
+                onClick={() => {
+                    playClickSound();
+                    setShowGalleryFullImage(!showGalleryFullImage);
+                }}
             >
 
                 {/*返回按钮*/}
@@ -394,14 +376,17 @@ const GalleryPage = ({
                             left: `${baseSize * 6}px`,
                         }}
                 >
-                    <LeftIcon size={baseSize * 16} color="white"/>
+                    <LeftIcon size={baseSize * 24} color="white"/>
                 </button>
 
 
                 <div
                     className="absolute w-[35%] h-full z-10 no-click"
-                    onClick={(e)=>{e.stopPropagation()}}
+                    onClick={(e) => {
+                        e.stopPropagation()
+                    }}
                 >
+                    {/*选角色*/}
                     <button
                         className="absolute z-[500]"
                         style={{
@@ -415,11 +400,55 @@ const GalleryPage = ({
                         }}
                         onClick={(e) => {
                             e.stopPropagation();
+                            playClickSound();
                             setShowFilterCard(true);
                         }}
-                    >{roleMap[selectedRole]}
+                    >
+                        {roleMap[selectedRole]}
+                    </button>
+
+                    {/*选排序*/}
+                    <button
+                        className="absolute z-[500]"
+                        style={{
+                            visibility: 'hidden',
+                            marginLeft: '2vmin',
+                            fontSize: `${baseSize * 6}px`,
+                            width: `${baseSize * 40}px`,
+                            bottom: `${baseSize * 32}px`,
+                            left: `${baseSize * 12}px`,
+                            backgroundColor: 'rgba(255,255,255,0.2)',
+                            color: 'white',
+                        }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            playClickSound();
+                            setShowRarityChoiceView(true);
+                        }}
+                    >
+                        {rarityOrderMap[orderChoice]}
+                    </button>
+
+                    {/*选更具体的筛选*/}
+                    <button className="absolute z-[500] w-auto flex items-center justify-center"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                playClickSound();
+                                setShowFilterPage(true);
+                            }}
+                            style={{
+                                visibility: 'hidden',
+                                background: 'transparent',
+                                border: 'none',
+                                padding: 10,
+                                bottom: `${baseSize * 10}px`,
+                                left: `${baseSize * 56}px`,
+                            }}
+                    >
+                        <FilterIcon size={baseSize * 10} color="white"/>
                     </button>
                 </div>
+
 
                 {/*大图*/}
                 <div key={`${displayCard?.卡名}-${imageIndex}`} className="absolute w-full h-full">
@@ -437,7 +466,12 @@ const GalleryPage = ({
                                 <div className="flex flex-row">
                                     <div
                                         className="flex flex-col items-end justify-end"
-                                        style={{color: "white", textShadow: '0 0 2px gray, 0 0 4px gray', fontWeight: 800}}
+                                        style={{
+                                            color: "white",
+                                            textShadow: `0 0 ${baseSize * 2}px gray, 0 0 ${baseSize * 2}px gray`,
+                                            fontWeight: 800,
+                                            width: `${baseSize * 80}px`
+                                        }}
                                     >
                                         <label style={{fontSize: `${baseSize * 5.5}px`}}>{displayCard?.主角}</label>
                                         <div className="flex flex-row gap-[1px]">
@@ -461,7 +495,6 @@ const GalleryPage = ({
                     )}
 
                 </div>
-
 
 
                 {/*阴影*/}
@@ -497,7 +530,7 @@ const GalleryPage = ({
                                         width: `${baseSize * 500 * scale}px`,
                                         borderRadius: "0%", // 可选，加上更像扩散雾
                                         background: "rgba(0,0,0,0.01)", // 有背景才能产生阴影
-                                        boxShadow: "0 0 100px 100px rgba(23, 25, 33, 0.4)",
+                                        boxShadow: `0 0 ${baseSize * 60}px ${baseSize * 60}px rgba(23, 25, 33, 0.4)`,
                                         pointerEvents: "none",
                                         transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
                                         zIndex: 0,
@@ -510,7 +543,7 @@ const GalleryPage = ({
                 </div>
 
                 {/*小图*/}
-                <div className="relative w-full h-full" >
+                <div className="relative w-full h-full">
 
                     {Array.from({length: totalSlots}).map((_, i) => {
                         const centerIndex = scrollT * (totalSlots - 1); // 当前视觉焦点的位置（非整数）
@@ -589,7 +622,7 @@ const GalleryPage = ({
                                             style={{
                                                 fontSize: `${baseSize * 5 * scale}px`,
                                                 color: 'white',
-                                                textShadow: '0 0 1px gray, 0 0 2px gray',
+                                                textShadow: `0 0 ${baseSize}px gray, 0 0 ${baseSize * 2}px gray`,
                                                 transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
                                                 zIndex: totalSlots - i,
                                                 left: `${(x + 2) * baseSize}px`,

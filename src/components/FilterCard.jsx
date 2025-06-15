@@ -1,8 +1,8 @@
 import {playClickSound} from "../utils/playClickSound.js";
 import cardData from '../assets/cards1.json';
-import React, {useEffect, useRef, useState} from "react";
+import React, { useRef, useState} from "react";
 
-const FilterCard = ({ onClose, selectedRole, setSelectedRole }) => {
+const FilterCard = ({ baseSize, onClose, selectedRole, setSelectedRole }) => {
 
 
     const choices = cardData.filter(
@@ -40,50 +40,12 @@ const FilterCard = ({ onClose, selectedRole, setSelectedRole }) => {
         }, 2000);
     };
 
-
-
-
-    // const [selectedRole, setSelectedRole] = useState(0);
-
-    // ======================================= 获取容器尺寸（16:9下）
-    const [baseSize, setBaseSize] = useState(1);
-    const divRef = useRef(null); // 获取当前绑定的容器的尺寸
-
     const [state, setState] = useState(true);
 
-    useEffect(() => {
-        const updateSize = () => {
-            if (divRef.current) {
-                const width = divRef.current.clientWidth;
-                const height = divRef.current.clientHeight;
-
-                if (height > 0) {
-                    const newBaseSize = width / 375;
-                    setBaseSize(newBaseSize);
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        // 初始化时轮询直到能获取有效高度
-        const tryInitSize = () => {
-            const success = updateSize();
-            if (!success) {
-                // 如果失败，延迟一帧继续尝试
-                requestAnimationFrame(tryInitSize);
-            }
-        };
-        tryInitSize(); // 启动初始化
-        window.addEventListener('resize', updateSize); // 响应窗口变化
-
-        return () => {window.removeEventListener('resize', updateSize);};
-    }, []);
 
 
     return (
         <div
-            ref={divRef}
             className={`absolute w-full h-full z-200 flex items-center ${state ? "fade-in" : "fade-out"}`}
             onClick={() => {
                 playClickSound();
@@ -115,7 +77,7 @@ const FilterCard = ({ onClose, selectedRole, setSelectedRole }) => {
                                 width: `${baseSize * 60}px`,
                                 height: `${baseSize * 16}px`,
                                 overflow: "hidden",
-                                boxShadow: i === selectedRole ? '0 -10px 20px rgba(133,144,172, 0.9), 0 10px 20px rgba(133,144,172, 0.9)' : "none",
+                                boxShadow: i === selectedRole ? `0 -${baseSize * 5}px ${baseSize * 10}px rgba(133,144,172, 0.9), 0 ${baseSize * 5}px ${baseSize * 10}px rgba(133,144,172, 0.9)` : "none",
                             }}
                         >
                             {i < 4 && (
