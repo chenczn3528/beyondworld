@@ -5,6 +5,8 @@ import FadeImage from "./FadeImage.jsx";
 import {Filter} from "lucide-react";
 import FilterIcon from "../icons/FilterIcon.jsx";
 import {playClickSound} from "../utils/playClickSound.js";
+import FilterRoleCard from "./FilterRoleCard.jsx";
+import GalleryTypeSelectPage from "./GalleryTypeSelectPage.jsx";
 
 const GalleryPage = ({
     baseSize,
@@ -15,8 +17,6 @@ const GalleryPage = ({
     setShowGalleryFullImage,
     showFilterPage,
     setShowFilterPage,
-    showFilterCard,
-    setShowFilterCard,
     sortedCards,
     setSortedCards,
     galleryCard,
@@ -25,23 +25,38 @@ const GalleryPage = ({
     setSelectedRole,
     orderChoice,
     setOrderChoice,
-    showRarityChoiceView,
-    setShowRarityChoiceView,
 }) => {
 
     // =======================图鉴排序
     // 稀有度排序映射
     const rarityOrder = {'世界': 4, '月': 3, '辰星': 2, '星': 1};
     const roleOrder = {'顾时夜':4, '易遇':3, '柏源':2, '夏萧因':1};
+    const sourceOrder = {'累充' :4, '商店': 3, '活动': 2, '感召':1}
 
     const roleMap = {0: '顾时夜', 1: '易遇', 3: '夏萧因', 2: '柏源', 4: '全部'};
-    const rarityOrderMap = {0: '稀有度', 1: '全部', 2: '思维', 3: '魅力', 4: '体魄', 5: '感知', 6: '灵巧'};
+    const rarityOrderMap = ['稀有度', '全部', '思维', '魅力', '体魄', '感知', '灵巧'];
 
+    const sumFields = rarityOrderMap.slice(2);
+
+    const [showFilterCard, setShowFilterCard] = useState(false);
 
 
     // 排序函数
     const sortCards = (cards) => {
         return [...cards].sort((a, b) => {
+
+            if(orderChoice !== 0){
+                let primary = 0;
+                if(orderChoice === 1){
+                    const sumA = sumFields.reduce((sum, field) => sum + Number(a[field] || 0), 0);
+                    const sumB = sumFields.reduce((sum, field) => sum + Number(b[field] || 0), 0);
+                    primary = sumB - sumA;
+                } else{
+                    primary = Number(b[rarityOrderMap[orderChoice]] || 0) - Number(a[rarityOrderMap[orderChoice]] || 0);
+                }
+                if (primary !== 0) return primary;
+            }
+
             // 1. 稀有度（降序）
             const rarityDiff = (rarityOrder[b.稀有度] || 0) - (rarityOrder[a.稀有度] || 0);
             if (rarityDiff !== 0) return rarityDiff;
@@ -53,6 +68,9 @@ const GalleryPage = ({
             // 3. 限定池优先（限定 < 常驻）
             const poolDiff = (a.板块 === '限定' ? -1 : 1) - (b.板块 === '限定' ? -1 : 1);
             if (poolDiff !== 0) return poolDiff;
+
+            const sourceDiff = (sourceOrder[b.来源] || 0) - (sourceOrder[b.来源] || 0);
+            if (sourceDiff !== 0) return sourceDiff;
 
             // 4. 卡片名（升序）
             return (a.卡名 || "").localeCompare(b.卡名 || "");
@@ -68,10 +86,9 @@ const GalleryPage = ({
         }
         const sorted = sortCards(tmpCards || []);
         setSortedCards(sorted);
+
         scrollToIndex(0);
-    }, [cards, selectedRole]);
-
-
+    }, [cards, selectedRole, orderChoice]);
 
 
     const [scrollT, setScrollT] = useState(0);
@@ -324,9 +341,6 @@ const GalleryPage = ({
 
 
 
-
-
-
     const defaultWhiteImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGUlEQVR42mNgGAWjgP///xkYGBgAADEMAQEGAP8GC04EtW8gAAAAAElFTkSuQmCC";
     const startX = 30;
     const startY = -5;
@@ -342,6 +356,12 @@ const GalleryPage = ({
         辰星: 'images/star1.png',
         星: 'images/star2.png',
     };
+
+    const [showOrderChoiceView, setShowOrderChoiceView] = useState(false);
+    const position = [
+        {bottom:`${baseSize * 50}px`, left: `${baseSize * 16}px`},
+        {bottom:`${baseSize * 50}px`, left: `${baseSize * 58}px`}
+    ]
 
 
     return (
@@ -362,8 +382,9 @@ const GalleryPage = ({
                 }}
             >
 
+
                 {/*返回按钮*/}
-                <button className="absolute z-[500] w-auto flex items-center justify-center"
+                <button className="absolute z-[200] w-auto flex items-center justify-center"
                         onClick={(e) => {
                             e.stopPropagation();
                             setShowGallery(false);
@@ -380,6 +401,28 @@ const GalleryPage = ({
                 </button>
 
 
+                {showFilterCard && (
+                    <FilterRoleCard
+                        baseSize={baseSize}
+                        onClose={setShowFilterCard}
+                        selectedRole={selectedRole}
+                        setSelectedRole={setSelectedRole}
+                        showShadow={true}
+                    />
+                )}
+
+
+                {showOrderChoiceView && (
+                    <GalleryTypeSelectPage
+                        baseSize={baseSize}
+                        onClose={setShowOrderChoiceView}
+                        position={position}
+                        orderChoice={orderChoice}
+                        setOrderChoice={setOrderChoice}
+                    />
+                )}
+
+
                 <div
                     className="absolute w-[35%] h-full z-10 no-click"
                     onClick={(e) => {
@@ -390,7 +433,7 @@ const GalleryPage = ({
                     <button
                         className="absolute z-[500]"
                         style={{
-                            marginLeft: '2vmin',
+                            marginLeft: `${baseSize * 6}px`,
                             fontSize: `${baseSize * 6}px`,
                             width: `${baseSize * 40}px`,
                             bottom: `${baseSize * 12}px`,
@@ -407,12 +450,16 @@ const GalleryPage = ({
                         {roleMap[selectedRole]}
                     </button>
 
+
+
+
+
                     {/*选排序*/}
                     <button
                         className="absolute z-[500]"
                         style={{
-                            visibility: 'hidden',
-                            marginLeft: '2vmin',
+                            // visibility: 'hidden',
+                            marginLeft: `${baseSize * 6}px`,
                             fontSize: `${baseSize * 6}px`,
                             width: `${baseSize * 40}px`,
                             bottom: `${baseSize * 32}px`,
@@ -423,10 +470,10 @@ const GalleryPage = ({
                         onClick={(e) => {
                             e.stopPropagation();
                             playClickSound();
-                            setShowRarityChoiceView(true);
+                            setShowOrderChoiceView(true);
                         }}
                     >
-                        {rarityOrderMap[orderChoice]}
+                        {orderChoice === 1 ? "属性数值" : rarityOrderMap[orderChoice]}
                     </button>
 
                     {/*选更具体的筛选*/}
@@ -437,12 +484,12 @@ const GalleryPage = ({
                                 setShowFilterPage(true);
                             }}
                             style={{
-                                visibility: 'hidden',
+                                // visibility: 'hidden',
                                 background: 'transparent',
+                                padding: `${baseSize * 2}px`,
                                 border: 'none',
-                                padding: 10,
-                                bottom: `${baseSize * 10}px`,
-                                left: `${baseSize * 56}px`,
+                                bottom: `${baseSize * 12}px`,
+                                left: `${baseSize * 60}px`,
                             }}
                     >
                         <FilterIcon size={baseSize * 10} color="white"/>

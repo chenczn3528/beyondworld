@@ -81,7 +81,7 @@ const CardSummary = ({
     <div className="absolute w-full h-full flex items-center justify-center">
       {/*底部图片（绝对定位） */}
       <img
-        src="images/background.png"
+        src="images/bg_main2.jpg"
         alt="底部装饰"
         className="absolute z-30 w-full h-full"
       />

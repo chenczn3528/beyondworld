@@ -2,7 +2,7 @@ import {playClickSound} from "../utils/playClickSound.js";
 import cardData from '../assets/cards1.json';
 import React, { useRef, useState} from "react";
 
-const FilterCard = ({ baseSize, onClose, selectedRole, setSelectedRole }) => {
+const FilterRoleCard = ({ baseSize, onClose, selectedRole, setSelectedRole, position, showShadow, oritationLeft=false }) => {
 
 
     const choices = cardData.filter(
@@ -25,19 +25,21 @@ const FilterCard = ({ baseSize, onClose, selectedRole, setSelectedRole }) => {
         playClickSound();
         setSelectedRole(i);
 
-        // 清除已有定时器
-        if (timerRef.current) {
-            clearTimeout(timerRef.current);
-        }
+        if(!oritationLeft){
+                // 清除已有定时器
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+            }
 
-        // 启动新的定时器
-        timerRef.current = setTimeout(() => {
-            setState(prev => !prev);
+            // 启动新的定时器
             timerRef.current = setTimeout(() => {
-                onClose();
-                timerRef.current = null; // 清理引用
-            }, 1000);
-        }, 2000);
+                setState(prev => !prev);
+                timerRef.current = setTimeout(() => {
+                    onClose();
+                    timerRef.current = null; // 清理引用
+                }, 1000);
+            }, 2000);
+        }
     };
 
     const [state, setState] = useState(true);
@@ -46,24 +48,30 @@ const FilterCard = ({ baseSize, onClose, selectedRole, setSelectedRole }) => {
 
     return (
         <div
-            className={`absolute w-full h-full z-200 flex items-center ${state ? "fade-in" : "fade-out"}`}
-            onClick={() => {
-                playClickSound();
+            className={`absolute w-full h-full z-300 flex items-center ${state ? "fade-in" : "fade-out"}`}
+            onClick={(e) => {
+                e.stopPropagation();
                 onClose();
+                playClickSound();
             }}
         >
-            <div
-                className="w-[0vmin] h-full slide-in-container"
-                style={{
-                    background: "rgba(0,0,0,0.01)", // 有背景才能产生阴影
-                    boxShadow: `0 0 ${baseSize * 20}px ${baseSize * 100}px rgba(57, 67, 75, 0.95)`,
-                }}
-            />
+            {showShadow && (
+                <div
+                    className="w-[0vmin] h-full slide-in-container"
+                    style={{
+                        background: "rgb(69,78,106)", // 有背景才能产生阴影
+                        // boxShadow: `0 0 ${baseSize * 20}px ${baseSize * 100}px rgba(57, 67, 75, 0.95)`,
+                        boxShadow: `0 0 ${baseSize * 40}px ${baseSize * 110}px #02040Acc`,
+                    }}
+                />
+            )}
+
 
             <div
                 className="absolute w-[25%] h-[60%] slide-in-container flex flex-col justify-center gap-[2vmin]"
                 onClick={(e) => e.stopPropagation()}
                 style={{
+                    ...position,
                     // background: "rgba(23, 25, 33, 0.6)", // 有背景才能产生阴影
                 }}
             >
@@ -71,9 +79,13 @@ const FilterCard = ({ baseSize, onClose, selectedRole, setSelectedRole }) => {
                     return (
                         <div
                             key={i}
-                            onClick={(e) => handleClick(e, i)}
+                            className="border"
+                            onClick={(e) => {
+                                handleClick(e, i)
+                            }}
                             style={{
-                                marginLeft: i === selectedRole ? `${baseSize * 20}px` : `${baseSize * 10}px`,
+                                marginLeft: oritationLeft ? (i === selectedRole ? `${baseSize * 10}px` : `${baseSize * 20}px`)
+                                    : (i === selectedRole ? `${baseSize * 20}px` : `${baseSize * 10}px`),
                                 width: `${baseSize * 60}px`,
                                 height: `${baseSize * 16}px`,
                                 overflow: "hidden",
@@ -100,7 +112,7 @@ const FilterCard = ({ baseSize, onClose, selectedRole, setSelectedRole }) => {
                                 <div
                                     className="w-full h-full flex items-center justify-center"
                                     style={{
-                                        backgroundColor: "rgba(255,255,255,0.2)",
+                                        // backgroundColor: "transparent",
                                         color: 'white',
                                         fontSize: `${baseSize * 7}px`,
                                         fontWeight: 600
@@ -120,4 +132,4 @@ const FilterCard = ({ baseSize, onClose, selectedRole, setSelectedRole }) => {
     );
 }
 
-export default FilterCard;
+export default FilterRoleCard;

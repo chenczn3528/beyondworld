@@ -15,8 +15,9 @@ import GalleryPage from "./components/GalleryPage.jsx";
 import useResponsiveFontSize from "./utils/useResponsiveFontSize.js";
 import {useHistoryDB} from "./hooks/useHistoryDB.js";
 import useCardImageIndex from "./hooks/useCardImageIndex.js";
-import FilterCard from "./components/FilterCard.jsx";
+import FilterRoleCard from "./components/FilterRoleCard.jsx";
 import FilterPage from "./components/FilterPage.jsx";
+import GalleryTypeSelectPage from "./components/GalleryTypeSelectPage.jsx";
 
 
 const Home = () => {
@@ -90,6 +91,21 @@ const Home = () => {
     // 图鉴记录卡面是初始还是重逢
     const { getImageIndex, setImageIndex, clearImageIndexes } = useCardImageIndex();
 
+    const [gallerySelectedRole, setGallerySelectedRole] = useLocalStorageState("bw_gallerySelectedRole", 4);
+    // const [gallerySelectedRole, setGallerySelectedRole] = useState(4);
+
+    const [orderChoice, setOrderChoice] = useLocalStorageState("bw_orderChoice", 0);
+    // const [orderChoice, setOrderChoice] = useState(0); // 设置图鉴的排序顺序
+
+    const [rarityChoice, setRarityChoice] = useLocalStorageState("bw_rarityChoice", ["全部"]);
+    // const [rarityChoice, setRarityChoice] = useState("全部");
+
+    const [worldChoice, setWorldChoice] = useLocalStorageState("bw_worldChoice", ["全部"]);
+    // const [worldChoice, setWorldChoice] = useState("全部");
+
+    const [typeChoice, setTypeChoice] = useLocalStorageState("bw_typeChoice", ["全部"]);
+    // const [typeChoice, setTypeChoice] = useState("全部");
+
 
 
 
@@ -106,6 +122,11 @@ const Home = () => {
         'bw_includeThreeStarM',
         'bw_includeMoneyCard',
         'bw_onlySelectedRoleCard',
+        'bw_gallerySelectedRole', // 在图鉴里选择了哪个角色
+        'bw_orderChoice',
+        'bw_rarityChoice',
+        'bw_worldChoice',
+        'bw_typeChoice',
     ];
 
     const clearLocalData = () => {
@@ -161,20 +182,33 @@ const Home = () => {
     const [showGalleryFullImage, setShowGalleryFullImage] = useState(false); // 图鉴图片的内容设置
     const [galleryCard, setGalleryCard] = useState(null);
 
-    const [showFilterCard, setShowFilterCard] = useState(false);  // 是否显示选图鉴展示的小界面
+
     const [showFilterPage, setShowFilterPage] = useState(false);  // 是否显示选图鉴展示的大界面
 
     const fontsize = useResponsiveFontSize({scale: 0.9});
 
     const [sortedCards, setSortedCards] = useState([]);
 
-    const [gallerySelectedRole, setGallerySelectedRole] = useState(4);
 
-    const [orderChoice, setOrderChoice] = useState(0); // 设置图鉴的排序顺序
-    const [rarityChoice, setRarityChoice] = useState("全部");
-    const [worldChoice, setWorldChoice] = useState("全部");
-    const [typeChoice, setTypeChoice] = useState("全部");
-    const [showRarityChoiceView, setShowRarityChoiceView] = useState(false); // 设置选择属性的时候出现的选项页面
+    // const [showOrderChoiceView, setShowOrderChoiceView] = useState(false); // 设置选择属性的时候出现的选项页面
+    // const [orderChoicePosition, setOrderChoicePosition] = useState([{top: 0, left: 0}, {top: 0, left: 0}]);
+
+
+    // 属性取值统计
+    // const countFieldValues = (cards, field) => {
+    //   const countMap = {};
+    //
+    //   cards.forEach(card => {
+    //     const value = card[field];
+    //     if (value != null) {
+    //       countMap[value] = (countMap[value] || 0) + 1;
+    //     }
+    //   });
+    //
+    //   return countMap;
+    // };
+    // console.log(countFieldValues(cardData, "来源"))
+
 
 
 
@@ -761,14 +795,7 @@ const Home = () => {
                 fontsize={fontsize}
             />
 
-            {showFilterCard && (
-                <FilterCard
-                    baseSize={baseSize}
-                    onClose={setShowFilterCard}
-                    selectedRole={gallerySelectedRole}
-                    setSelectedRole={setGallerySelectedRole}
-                />
-            )}
+
 
             {showFilterPage && (
                 <FilterPage
@@ -785,11 +812,8 @@ const Home = () => {
                     setWorldChoice={setWorldChoice}
                     typeChoice={typeChoice}
                     setTypeChoice={setTypeChoice}
-                    showRarityChoiceView={showRarityChoiceView}
-                    setShowRarityChoiceView={setShowRarityChoiceView}
                 />
             )}
-
 
 
             {/*展示图鉴中的图片*/}
@@ -798,8 +822,6 @@ const Home = () => {
                 cards={galleryHistory}
                 showGallery={showGallery}
                 setShowGallery={setShowGallery}
-                showFilterCard={showFilterCard}
-                setShowFilterCard={setShowFilterCard}
                 showFilterPage={showFilterPage}
                 setShowFilterPage={setShowFilterPage}
                 showGalleryFullImage={showGalleryFullImage}
@@ -812,8 +834,6 @@ const Home = () => {
                 setSelectedRole={setGallerySelectedRole}
                 orderChoice={orderChoice}
                 setOrderChoice={setOrderChoice}
-                showRarityChoiceView={showRarityChoiceView}
-                setShowRarityChoiceView={setShowRarityChoiceView}
             />
 
             {showDetailedImage && (
