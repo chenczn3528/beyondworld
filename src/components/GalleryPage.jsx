@@ -293,13 +293,13 @@ const GalleryPage = ({
     // ==================== 设置点击进入大图的初始化
     useEffect(() => {
         setGalleryCard(sortedCards[currentCardIndex] ? sortedCards[currentCardIndex] : sortedCards[0]);
-    }, [scrollT]);
+    }, [scrollT, orderChoice, selectedRole, sortedCards]);
 
     useEffect(() => {
         if (sortedCards.length > 0 && !galleryCard) {
             setGalleryCard(sortedCards[0]);
         }
-    }, [sortedCards, galleryCard]);
+    }, [sortedCards, galleryCard, orderChoice, selectedRole]);
 
 
 
@@ -315,7 +315,7 @@ const GalleryPage = ({
             init[card.卡名] = indexMap[card.卡名] ?? 0;
         });
         setImageIndexes(init);
-    }, [sortedCards, indexMap]);
+    }, [sortedCards, indexMap, orderChoice, selectedRole]);
 
     // ✅ 当前显示卡的大图 index
     const imageIndex = imageIndexes[displayCard?.卡名] ?? 0;
@@ -484,7 +484,7 @@ const GalleryPage = ({
                                 setShowFilterPage(true);
                             }}
                             style={{
-                                // visibility: 'hidden',
+                                visibility: 'hidden',
                                 background: 'transparent',
                                 padding: `${baseSize * 2}px`,
                                 border: 'none',

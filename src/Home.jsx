@@ -18,6 +18,8 @@ import useCardImageIndex from "./hooks/useCardImageIndex.js";
 import FilterRoleCard from "./components/FilterRoleCard.jsx";
 import FilterPage from "./components/FilterPage.jsx";
 import GalleryTypeSelectPage from "./components/GalleryTypeSelectPage.jsx";
+import LeftIcon from "./icons/LeftIcon.jsx";
+import MusicIcon from "./icons/MusicIcon.jsx";
 
 
 const Home = () => {
@@ -95,16 +97,12 @@ const Home = () => {
     // const [gallerySelectedRole, setGallerySelectedRole] = useState(4);
 
     const [orderChoice, setOrderChoice] = useLocalStorageState("bw_orderChoice", 0);
-    // const [orderChoice, setOrderChoice] = useState(0); // 设置图鉴的排序顺序
 
     const [rarityChoice, setRarityChoice] = useLocalStorageState("bw_rarityChoice", ["全部"]);
-    // const [rarityChoice, setRarityChoice] = useState("全部");
 
     const [worldChoice, setWorldChoice] = useLocalStorageState("bw_worldChoice", ["全部"]);
-    // const [worldChoice, setWorldChoice] = useState("全部");
 
     const [typeChoice, setTypeChoice] = useLocalStorageState("bw_typeChoice", ["全部"]);
-    // const [typeChoice, setTypeChoice] = useState("全部");
 
 
 
@@ -189,9 +187,7 @@ const Home = () => {
 
     const [sortedCards, setSortedCards] = useState([]);
 
-
-    // const [showOrderChoiceView, setShowOrderChoiceView] = useState(false); // 设置选择属性的时候出现的选项页面
-    // const [orderChoicePosition, setOrderChoicePosition] = useState([{top: 0, left: 0}, {top: 0, left: 0}]);
+    const [showMusicPage, setShowMusicPage] = useState(false);
 
 
     // 属性取值统计
@@ -745,6 +741,25 @@ const Home = () => {
                 className="absolute top-0 left-0 w-full h-full object-cover z-0">
                 <source src="videos/background1.mp4" type="video/mp4"/>
             </video>
+
+
+            {/*音乐按钮*/}
+            <button className="absolute w-auto flex items-center justify-center"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setShowMusicPage(false);
+                    }}
+                    style={{
+                        visibility: 'hidden',
+                        background: '#ffffff05',
+                        border: 'none',
+                        padding: 0,
+                        bottom: `${baseSize * 13}px`,
+                        left: `${baseSize * 76}px`,
+                    }}
+            >
+                <MusicIcon size={baseSize * 16} color="white"/>
+            </button>
 
 
             {/* 抽卡动画层 */}
