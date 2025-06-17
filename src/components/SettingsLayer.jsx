@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import Carousel from "./Carousel";
 import cardData from "../assets/cards.json";
 import {playClickSound} from "../utils/playClickSound.js";
+import MusicIcon from "../icons/MusicIcon.jsx";
 
 const SettingsLayer = ({
     baseSize,
@@ -26,6 +27,8 @@ const SettingsLayer = ({
     setShowGallery,
     fontsize,
     galleryHistory,
+    showMusicPageZIndex,
+    setShowMusicPageZIndex,
 }) => {
 
     const filtered_cardData = cardData.filter(card => card.稀有度 === '世界');
@@ -295,6 +298,25 @@ const SettingsLayer = ({
                     {copyState === 0 ? "复制小红书号" : copyState === 1 ? "复制成功" : "复制失败"}
                 </button>
             </div>
+
+
+            {/*音乐按钮*/}
+            <button className="absolute z-20"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMusicPageZIndex(200);
+                }}
+                style={{
+                    // visibility: 'hidden',
+                    background: '#ffffff05',
+                    border: 'none',
+                    padding: 0,
+                    bottom: `${baseSize * 13}px`,
+                    left: `${baseSize * 76}px`,
+                }}
+            >
+                <MusicIcon size={baseSize * 16} color="white"/>
+            </button>
 
 
             <div className="absolute flex flex-col items-end"

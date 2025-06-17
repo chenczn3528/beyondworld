@@ -1,5 +1,6 @@
 import React, {useEffect, useState, useRef, useMemo} from 'react';
 import cardData from './assets/cards1.json';
+import songsList from './assets/songs_list.json'
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import useLocalStorageState from "./hooks/useLocalStorageState.js";
 import SettingsLayer from "./components/SettingsLayer.jsx";
@@ -20,6 +21,7 @@ import FilterPage from "./components/FilterPage.jsx";
 import GalleryTypeSelectPage from "./components/GalleryTypeSelectPage.jsx";
 import LeftIcon from "./icons/LeftIcon.jsx";
 import MusicIcon from "./icons/MusicIcon.jsx";
+import MusicPage from "./components/MusicPage.jsx";
 
 
 const Home = () => {
@@ -104,7 +106,7 @@ const Home = () => {
 
     const [typeChoice, setTypeChoice] = useLocalStorageState("bw_typeChoice", ["全部"]);
 
-
+    const [musicID, setMusicID] = useLocalStorageState("bw_musicID", songsList[0]["id"].slice(0,10))
 
 
     // 清除缓存数据
@@ -125,6 +127,7 @@ const Home = () => {
         'bw_rarityChoice',
         'bw_worldChoice',
         'bw_typeChoice',
+        'bw_musicID',
     ];
 
     const clearLocalData = () => {
@@ -187,7 +190,7 @@ const Home = () => {
 
     const [sortedCards, setSortedCards] = useState([]);
 
-    const [showMusicPage, setShowMusicPage] = useState(false);
+    const [showMusicPageZIndex, setShowMusicPageZIndex] = useState(-1);
 
 
     // 属性取值统计
@@ -743,25 +746,6 @@ const Home = () => {
             </video>
 
 
-            {/*音乐按钮*/}
-            <button className="absolute w-auto flex items-center justify-center"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setShowMusicPage(false);
-                    }}
-                    style={{
-                        visibility: 'hidden',
-                        background: '#ffffff05',
-                        border: 'none',
-                        padding: 0,
-                        bottom: `${baseSize * 13}px`,
-                        left: `${baseSize * 76}px`,
-                    }}
-            >
-                <MusicIcon size={baseSize * 16} color="white"/>
-            </button>
-
-
             {/* 抽卡动画层 */}
             {showAnimationDrawCards && (
                 <DrawAnimationCards
@@ -810,6 +794,14 @@ const Home = () => {
                 fontsize={fontsize}
             />
 
+            <MusicPage
+                baseSize={baseSize}
+                songsList={songsList}
+                showMusicPageZIndex={showMusicPageZIndex}
+                setShowMusicPageZIndex={setShowMusicPageZIndex}
+                musicID={musicID}
+                setMusicID={setMusicID}
+            />
 
 
             {showFilterPage && (
@@ -908,6 +900,8 @@ const Home = () => {
                 setShowGallery={setShowGallery}
                 fontsize={fontsize}
                 galleryHistory={galleryHistory}
+                showMusicPageZIndex={showMusicPageZIndex}
+                setShowMusicPageZIndex={setShowMusicPageZIndex}
             />
 
         </div>
