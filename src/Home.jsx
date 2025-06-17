@@ -16,11 +16,7 @@ import GalleryPage from "./components/GalleryPage.jsx";
 import useResponsiveFontSize from "./utils/useResponsiveFontSize.js";
 import {useHistoryDB} from "./hooks/useHistoryDB.js";
 import useCardImageIndex from "./hooks/useCardImageIndex.js";
-import FilterRoleCard from "./components/FilterRoleCard.jsx";
 import FilterPage from "./components/FilterPage.jsx";
-import GalleryTypeSelectPage from "./components/GalleryTypeSelectPage.jsx";
-import LeftIcon from "./icons/LeftIcon.jsx";
-import MusicIcon from "./icons/MusicIcon.jsx";
 import MusicPage from "./components/MusicPage.jsx";
 
 
