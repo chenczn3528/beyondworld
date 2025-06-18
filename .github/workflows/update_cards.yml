@@ -1,4 +1,4 @@
-name: Update Songs JSON
+name: Update Cards JSON
 
 on:
   schedule:
