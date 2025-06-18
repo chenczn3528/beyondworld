@@ -1,41 +1,47 @@
 import json
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 import time
 
 songs_json_path = "src/assets/songs.json"
 songs_list_path = "src/assets/songs_list.json"
 
+
+
 def create_driver():
-    options = Options()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    options.binary_location = '/usr/bin/chromium-browser'
-    service = Service('/usr/bin/chromedriver')
-    return webdriver.Chrome(service=service, options=options)
+    chrome_options = Options()
+    chrome_options.add_argument("--headless=new")  # new 模式比原始 headless 稳定
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--window-size=1920,1080")
+
+    return webdriver.Chrome(options=chrome_options)
+
 
 def get_albums(driver, artist_id):
     artist_url = f"https://music.163.com/#/artist/album?id={artist_id}&limit=1000"
 
-    # 获取浏览器版本
-    browser_version = driver.capabilities['browserVersion']
-    print("Chrome 浏览器版本:", browser_version)
+    driver.set_page_load_timeout(30)  # 最多等 30 秒加载页面
+    try:
+        driver.get(artist_url)
+    except Exception as e:
+        print("页面加载失败:", e, flush=True)
+        return []
 
-    # 获取 chromedriver 版本（不一定所有版本都支持）
-    chromedriver_version = driver.capabilities.get('chrome', {}).get('chromedriverVersion', '').split(' ')[0]
-    print("chromedriver 版本:", chromedriver_version)
+    try:
+        WebDriverWait(driver, 20).until(EC.frame_to_be_available_and_switch_to_it((By.ID, "g_iframe")))
+    except Exception as e:
+        print("iframe 加载失败:", e, flush=True)
+        return []
 
-
-    driver.get(artist_url)
-
-    time.sleep(3)   # 等待页面加载，确保 iframe 内容渲染完毕
-
-    # 切换到 iframe
-    driver.switch_to.frame("g_iframe")
-    time.sleep(2)
+    # # 切换到 iframe
+    # driver.switch_to.frame("g_iframe")
+    # time.sleep(2)
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
 
@@ -106,9 +112,9 @@ if __name__ == "__main__":
     try:
         final_results = {}
         albums = get_albums(driver, "59888486")
-        print(f"共找到 {len(albums)} 张专辑：")
+        print(f"共找到 {len(albums)} 张专辑：", flush=True)
         for album_id, album_title in albums:
-            print(f"\n{album_id} : {album_title}")
+            print(f"\n{album_id} : {album_title}", flush=True)
             songs = get_songs(driver, album_id, album_title)
             final_results[album_id] = {
                 "name": album_title,
