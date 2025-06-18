@@ -1,7 +1,5 @@
 import json
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
 import time
 
@@ -10,25 +8,10 @@ import time
 songs_json_path = "src/assets/songs.json"
 songs_list_path = "src/assets/songs_list.json"
 
-
-
-def create_driver():
-    options = Options()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    options.binary_location = '/usr/bin/chromium-browser'
-
-    service = Service('/usr/bin/chromedriver')
-
-    return webdriver.Chrome(service=service, options=options)
-
-
-
 def get_albums(id):
     artist_url = f"https://music.163.com/#/artist/album?id={id}&limit=1000"
 
-    driver = create_driver()
+    driver = webdriver.Chrome()
     driver.get(artist_url)
 
     time.sleep(3)   # 等待页面加载，确保 iframe 内容渲染完毕
@@ -68,7 +51,7 @@ def get_albums(id):
 def get_songs(id, album):
     album_url = f"https://music.163.com/#/album?id={id}&limit=1000"
 
-    driver = create_driver()
+    driver = webdriver.Chrome()
     driver.get(album_url)
 
     time.sleep(3)  # 等待页面加载，确保 iframe 内容渲染完毕
