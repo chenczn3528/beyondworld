@@ -7,6 +7,8 @@ import FilterIcon from "../icons/FilterIcon.jsx";
 import {playClickSound} from "../utils/playClickSound.js";
 import FilterRoleCard from "./FilterRoleCard.jsx";
 import GalleryTypeSelectPage from "./GalleryTypeSelectPage.jsx";
+import {sortCards} from "../utils/cardSort.js";
+import LockIcon from "../icons/LockIcon.jsx";
 
 const GalleryPage = ({
     baseSize,
@@ -27,68 +29,32 @@ const GalleryPage = ({
     setOrderChoice,
 }) => {
 
-    // =======================图鉴排序
-    // 稀有度排序映射
-    const rarityOrder = {'世界': 4, '月': 3, '辰星': 2, '星': 1};
-    const roleOrder = {'顾时夜':4, '易遇':3, '柏源':2, '夏萧因':1};
-    const sourceOrder = {'累充' :4, '商店': 3, '活动': 2, '感召':1}
-
     const roleMap = {0: '顾时夜', 1: '易遇', 3: '夏萧因', 2: '柏源', 4: '全部'};
-    const rarityOrderMap = ['稀有度', '全部', '思维', '魅力', '体魄', '感知', '灵巧'];
-
-    const sumFields = rarityOrderMap.slice(2);
+    const rarityOrderMap = ['稀有度', '主属性数值', '全部', '思维', '魅力', '体魄', '感知', '灵巧'];
 
     const [showFilterCard, setShowFilterCard] = useState(false);
 
 
-    // 排序函数
-    const sortCards = (cards) => {
-        return [...cards].sort((a, b) => {
 
-            if(orderChoice !== 0){
-                let primary = 0;
-                if(orderChoice === 1){
-                    const sumA = sumFields.reduce((sum, field) => sum + Number(a[field] || 0), 0);
-                    const sumB = sumFields.reduce((sum, field) => sum + Number(b[field] || 0), 0);
-                    primary = sumB - sumA;
-                } else{
-                    primary = Number(b[rarityOrderMap[orderChoice]] || 0) - Number(a[rarityOrderMap[orderChoice]] || 0);
-                }
-                if (primary !== 0) return primary;
-            }
-
-            // 1. 稀有度（降序）
-            const rarityDiff = (rarityOrder[b.稀有度] || 0) - (rarityOrder[a.稀有度] || 0);
-            if (rarityDiff !== 0) return rarityDiff;
-
-            // 2. 角色名（升序）
-            const roleDiff = (roleOrder[b.主角] || 0) - (roleOrder[a.主角] || 0);
-            if (roleDiff !== 0) return roleDiff;
-
-            // 3. 限定池优先（限定 < 常驻）
-            const poolDiff = (a.板块 === '限定' ? -1 : 1) - (b.板块 === '限定' ? -1 : 1);
-            if (poolDiff !== 0) return poolDiff;
-
-            const sourceDiff = (sourceOrder[b.来源] || 0) - (sourceOrder[b.来源] || 0);
-            if (sourceDiff !== 0) return sourceDiff;
-
-            // 4. 卡片名（升序）
-            return (a.卡名 || "").localeCompare(b.卡名 || "");
-        });
-    };
-
+    const [finalCards, setFinalCards] = useState([]);
     useEffect(() => {
-        let tmpCards = [];
-        if(selectedRole === 4){
-            tmpCards = cards;
-        } else {
-            tmpCards = cards.filter(card => card.主角 === roleMap[selectedRole]);
+        if (!cards || cards.length === 0) return;
+        if (!sortedCards || sortedCards.length === 0) {
+            // sortedCards 还没处理好，先用 cards 展示（带角色筛选）
+            const fallback = cards.filter(
+                card => roleMap[selectedRole] === "全部" || card.主角 === roleMap[selectedRole]
+            );
+            setFinalCards(sortCards(fallback, orderChoice));
+            return;
         }
-        const sorted = sortCards(tmpCards || []);
-        setSortedCards(sorted);
+        // 正常情况，用 sortedCards 展示
+        const filtered = sortedCards.filter(
+            card => roleMap[selectedRole] === "全部" || card.主角 === roleMap[selectedRole]
+        );
+        setFinalCards(sortCards(filtered, orderChoice));
+    }, [selectedRole, sortedCards, orderChoice, cards]);
 
-        scrollToIndex(0);
-    }, [cards, selectedRole, orderChoice]);
+
 
 
     const [scrollT, setScrollT] = useState(0);
@@ -115,7 +81,7 @@ const GalleryPage = ({
 
      // ======================================= 滚动相关
     const scrollToIndex = (index) => {
-        const clampedIndex = Math.max(0, Math.min(sortedCards.length - 1, index)); // 防越界
+        const clampedIndex = Math.max(0, Math.min(finalCards.length - 1, index)); // 防越界
         const targetSlot = clampedIndex + paddingCount;
         const tValue = (targetSlot - targetIndex) / (totalSlots - 1);
         setScrollT(Math.max(SCROLL_T_MIN, Math.min(SCROLL_T_MAX, tValue)));
@@ -137,13 +103,13 @@ const GalleryPage = ({
     }, [scrollT]);
 
     useEffect(() => {
-        const realLength = sortedCards.length;
+        const realLength = finalCards.length;
         if (currentCardIndex < -1) {
             setTimeout(() => scrollToIndex(0), 150);
         } else if (currentCardIndex >= realLength) {
             setTimeout(() => scrollToIndex(realLength - 1), 150);
         } else {
-            setGalleryCard(sortedCards[currentCardIndex]);
+            setGalleryCard(finalCards[currentCardIndex]);
         }
     }, [scrollT]);
 
@@ -252,7 +218,7 @@ const GalleryPage = ({
         }
 
         // 限制范围
-        targetIndex = Math.max(0, Math.min(sortedCards.length - 1, targetIndex));
+        targetIndex = Math.max(0, Math.min(finalCards.length - 1, targetIndex));
         scrollToIndex(targetIndex);
     };
 
@@ -284,22 +250,22 @@ const GalleryPage = ({
     // ======================================= 获取当前展示的卡
     const getDisplayCardIndex = () => {
         if (currentCardIndex < 0) return 0;
-        if (currentCardIndex >= sortedCards.length) return sortedCards.length - 1;
+        if (currentCardIndex >= finalCards.length) return finalCards.length - 1;
         return currentCardIndex;
     };
 
-    const displayCard = sortedCards[getDisplayCardIndex()];
-
+    const displayCard = finalCards[getDisplayCardIndex()];
+    console.log(displayCard)
     // ==================== 设置点击进入大图的初始化
     useEffect(() => {
-        setGalleryCard(sortedCards[currentCardIndex] ? sortedCards[currentCardIndex] : sortedCards[0]);
-    }, [scrollT, orderChoice, selectedRole, sortedCards]);
+        setGalleryCard(finalCards[currentCardIndex] ? finalCards[currentCardIndex] : finalCards[0]);
+    }, [scrollT, orderChoice, selectedRole, finalCards]);
 
     useEffect(() => {
-        if (sortedCards.length > 0 && !galleryCard) {
-            setGalleryCard(sortedCards[0]);
+        if (finalCards.length > 0 && !galleryCard) {
+            setGalleryCard(finalCards[0]);
         }
-    }, [sortedCards, galleryCard, orderChoice, selectedRole]);
+    }, [finalCards, galleryCard, orderChoice, selectedRole]);
 
 
 
@@ -308,14 +274,14 @@ const GalleryPage = ({
 
     const [imageIndexes, setImageIndexes] = useState({});
 
-    // ✅ 每当 sortedCards 或 indexMap 改变，重新同步 imageIndexes
+    // ✅ 每当 finalCards 或 indexMap 改变，重新同步 imageIndexes
     useEffect(() => {
         const init = {};
-        sortedCards.forEach(card => {
+        finalCards.forEach(card => {
             init[card.卡名] = indexMap[card.卡名] ?? 0;
         });
         setImageIndexes(init);
-    }, [sortedCards, indexMap, orderChoice, selectedRole]);
+    }, [finalCards, indexMap, orderChoice, selectedRole]);
 
     // ✅ 当前显示卡的大图 index
     const imageIndex = imageIndexes[displayCard?.卡名] ?? 0;
@@ -378,13 +344,13 @@ const GalleryPage = ({
                 }}
                 onClick={() => {
                     playClickSound();
-                    setShowGalleryFullImage(!showGalleryFullImage);
+                    if(!displayCard.owned === false) setShowGalleryFullImage(!showGalleryFullImage);
                 }}
             >
 
 
                 {/*返回按钮*/}
-                <button className="absolute z-[200] w-auto flex items-center justify-center"
+                <button className="absolute z-[300] w-auto flex items-center justify-center"
                         onClick={(e) => {
                             e.stopPropagation();
                             setShowGallery(false);
@@ -392,7 +358,7 @@ const GalleryPage = ({
                         style={{
                             background: 'transparent',
                             border: 'none',
-                            padding: 10,
+                            padding: 0,
                             top: `${baseSize * 6}px`,
                             left: `${baseSize * 6}px`,
                         }}
@@ -435,7 +401,7 @@ const GalleryPage = ({
                         style={{
                             marginLeft: `${baseSize * 6}px`,
                             fontSize: `${baseSize * 6}px`,
-                            width: `${baseSize * 40}px`,
+                            width: `${baseSize * 50}px`,
                             bottom: `${baseSize * 12}px`,
                             left: `${baseSize * 12}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
@@ -461,7 +427,7 @@ const GalleryPage = ({
                             // visibility: 'hidden',
                             marginLeft: `${baseSize * 6}px`,
                             fontSize: `${baseSize * 6}px`,
-                            width: `${baseSize * 40}px`,
+                            width: `${baseSize * 50}px`,
                             bottom: `${baseSize * 32}px`,
                             left: `${baseSize * 12}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
@@ -473,7 +439,7 @@ const GalleryPage = ({
                             setShowOrderChoiceView(true);
                         }}
                     >
-                        {orderChoice === 1 ? "属性数值" : rarityOrderMap[orderChoice]}
+                        {orderChoice === 2 ? "属性数值" : rarityOrderMap[orderChoice]}
                     </button>
 
                     {/*选更具体的筛选*/}
@@ -484,12 +450,12 @@ const GalleryPage = ({
                                 setShowFilterPage(true);
                             }}
                             style={{
-                                visibility: 'hidden',
+                                // visibility: 'hidden',
                                 background: 'transparent',
                                 padding: `${baseSize * 2}px`,
                                 border: 'none',
                                 bottom: `${baseSize * 12}px`,
-                                left: `${baseSize * 60}px`,
+                                left: `${baseSize * 70}px`,
                             }}
                     >
                         <FilterIcon size={baseSize * 10} color="white"/>
@@ -505,6 +471,15 @@ const GalleryPage = ({
                                 cardSrc={getImageUrl(displayCard, imageIndex, 1)}
                                 cardSrcset={getImageUrl(displayCard, imageIndex, 0)}
                             />
+
+                            {displayCard.owned === false && (
+                                <div
+                                    className="absolute w-full h-full flex justify-center items-center"
+                                    style={{backgroundColor: '#00000060'}}
+                                >
+                                    <LockIcon color="lightgray" size={baseSize * 16} />
+                                </div>
+                            )}
 
 
                             {/*大图标注*/}
@@ -614,8 +589,8 @@ const GalleryPage = ({
                         const y = -rawX * Math.sin(rad) + rawY * Math.cos(rad);
 
                         const cardIndex = i - paddingCount;
-                        const isRealImage = cardIndex >= 0 && cardIndex < sortedCards.length;
-                        const card = isRealImage ? sortedCards[cardIndex] : null;
+                        const isRealImage = cardIndex >= 0 && cardIndex < finalCards.length;
+                        const card = isRealImage ? finalCards[cardIndex] : null;
 
                         const imageIndex = isRealImage
                             ? imageIndexes[card.卡名] ?? getImageIndex(card.卡名)

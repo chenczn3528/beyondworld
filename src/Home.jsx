@@ -803,6 +803,7 @@ const Home = () => {
             {showFilterPage && (
                 <FilterPage
                     baseSize={baseSize}
+                    cards={galleryHistory}
                     onClose={setShowFilterPage}
                     onCloseHome={() => {setShowFilterPage(false);setShowGallery(false);}}
                     selectedRole={gallerySelectedRole}
@@ -815,6 +816,11 @@ const Home = () => {
                     setWorldChoice={setWorldChoice}
                     typeChoice={typeChoice}
                     setTypeChoice={setTypeChoice}
+                    sortedCards={sortedCards}
+                    setSortedCards={setSortedCards}
+                    setGalleryCard={setGalleryCard}
+                    showGalleryFullImage={showGalleryFullImage}
+                    setShowGalleryFullImage={setShowGalleryFullImage}
                 />
             )}
 

@@ -4,15 +4,22 @@ import {playClickSound} from "../utils/playClickSound.js";
 
 const GalleryTypeSelectPage = ({ baseSize, onClose, position, orderChoice, setOrderChoice}) => {
 
-    const rarityOrderMap = ['稀有度', '全部', '思维', '魅力', '体魄', '感知', '灵巧'];
+    const rarityOrderMap = ['稀有度', '主属性数值', '全部', '思维', '魅力', '体魄', '感知', '灵巧'];
 
     const [showType, setShowType] = useState(false);
 
     useEffect(()=>{
-        if(orderChoice !== 0){
+        if(orderChoice !== 0 && orderChoice !== 1){
             setShowType(true);
         }
     },[]);
+
+
+    useEffect(()=>{
+        console.log(orderChoice)
+    },[orderChoice])
+
+
 
     return (
         <div
@@ -36,7 +43,10 @@ const GalleryTypeSelectPage = ({ baseSize, onClose, position, orderChoice, setOr
                         height: `${baseSize * 20}px`,
                         textShadow: orderChoice === 0 ? `0 0 ${baseSize * 6}px white, 0 0 ${baseSize * 12}px white` : `0 0 ${baseSize * 1}px black, 0 0 ${baseSize * 2}px black`,
                     }}
-                    onClick={() => {playClickSound();setOrderChoice(0);}}
+                    onClick={() => {
+                        playClickSound();
+                        setOrderChoice(0);
+                    }}
                 >
                     稀有度
                 </div>
@@ -46,7 +56,7 @@ const GalleryTypeSelectPage = ({ baseSize, onClose, position, orderChoice, setOr
                     style={{
                         width: `${baseSize * 40}px`,
                         height: `${baseSize * 20}px`,
-                        textShadow: orderChoice !== 0 ? `0 0 ${baseSize * 6}px white, 0 0 ${baseSize * 12}px white` : `0 0 ${baseSize * 1}px black, 0 0 ${baseSize * 2}px black`,
+                        textShadow: orderChoice > 1 ? `0 0 ${baseSize * 6}px white, 0 0 ${baseSize * 12}px white` : `0 0 ${baseSize * 1}px black, 0 0 ${baseSize * 2}px black`,
                     }}
                     onClick={(e) => {
                         e.stopPropagation();
@@ -55,6 +65,21 @@ const GalleryTypeSelectPage = ({ baseSize, onClose, position, orderChoice, setOr
                     }}
                 >
                     属性数值
+                </div>
+
+                <div
+                    className="flex items-center justify-center"
+                    style={{
+                        width: `${baseSize * 40}px`,
+                        height: `${baseSize * 20}px`,
+                        textShadow: orderChoice === 1 ? `0 0 ${baseSize * 6}px white, 0 0 ${baseSize * 12}px white` : `0 0 ${baseSize * 1}px black, 0 0 ${baseSize * 2}px black`,
+                    }}
+                    onClick={() => {
+                        playClickSound();
+                        setOrderChoice(1);
+                    }}
+                >
+                    主属性数值
                 </div>
 
             </div>
@@ -69,9 +94,9 @@ const GalleryTypeSelectPage = ({ baseSize, onClose, position, orderChoice, setOr
                         borderRadius: 8,
                     }}
                 >
-                    {rarityOrderMap.slice(1).map((item, index)=>{
-                        const key = index + 1;
-                        return(
+                    {rarityOrderMap.slice(2).map((item, index) => {
+                        const key = index + 2;
+                        return (
                             <div
                                 key={key}
                                 className="flex items-center justify-center"

@@ -63,7 +63,7 @@ const GalleryFullImage = (
         showGalleryFullImage && (
             <div
                 style={{backgroundColor: 'black'}}
-                className="absolute w-full h-full z-[100]"
+                className="absolute w-full h-full z-[500]"
             >
                 <CardMeet
                     showMeet={showMeet}
@@ -158,7 +158,7 @@ const GalleryFullImage = (
                                 style={{
                                     background: 'transparent',
                                     border: 'none',
-                                    padding: 10,
+                                    padding: 0,
                                     top: `${fontsize}px`,
                                     left: `${fontsize}px`,
                                 }}
