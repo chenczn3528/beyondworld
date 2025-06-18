@@ -3,6 +3,11 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import time
 
+
+
+songs_json_path = "src/assets/songs.json"
+songs_list_path = "src/assets/songs_list.json"
+
 def get_albums(id):
     artist_url = f"https://music.163.com/#/artist/album?id={id}&limit=1000"
 
@@ -99,23 +104,23 @@ def get_songs(id, album):
 
 
 
-# final_results = {}
-# albums = get_albums("59888486")
-# print(f"共找到 {len(albums)} 张专辑：")
-# for album_id, album_title in albums:
-#     print(f"\n{album_id} : {album_title}")
-#     songs = get_songs(album_id, album_title)
-#     final_results[album_id] = {
-#         "name": album_title,
-#         "songs": songs
-#     }
-#
-# with open("assets/songs.json", "w", encoding="utf-8") as f:
-#     json.dump(final_results, f, ensure_ascii=False, indent=4)
+final_results = {}
+albums = get_albums("59888486")
+print(f"共找到 {len(albums)} 张专辑：")
+for album_id, album_title in albums:
+    print(f"\n{album_id} : {album_title}")
+    songs = get_songs(album_id, album_title)
+    final_results[album_id] = {
+        "name": album_title,
+        "songs": songs
+    }
+
+with open(songs_json_path, "w", encoding="utf-8") as f:
+    json.dump(final_results, f, ensure_ascii=False, indent=4)
 
 
 songs_list = []
-with open("assets/songs.json", "r", encoding="utf-8") as f:
+with open(songs_json_path, "r", encoding="utf-8") as f:
     final_results = json.load(f)
     for key, value in final_results.items():
         for song in value["songs"]:
@@ -125,5 +130,5 @@ print(len(songs_list))
 for i in songs_list:
     print(i)
 
-with open("assets/songs_list.json", "w", encoding="utf-8") as f:
+with open(songs_list_path, "w", encoding="utf-8") as f:
     json.dump(songs_list, f, ensure_ascii=False, indent=4)
