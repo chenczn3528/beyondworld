@@ -13,13 +13,19 @@ songs_list_path = "src/assets/songs_list.json"
 
 
 
+import chromedriver_autoinstaller  # 顶部引入
+
 def create_driver():
+    chromedriver_autoinstaller.install()  # 自动下载并安装匹配的 chromedriver
+
     chrome_options = Options()
-    chrome_options.binary_location = "/usr/bin/chromium-browser"  # 指定 chromium 路径
+    chrome_options.binary_location = "/usr/bin/google-chrome"
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
+
     return webdriver.Chrome(options=chrome_options)
+
 
 
 
