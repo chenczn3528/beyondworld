@@ -32,7 +32,7 @@ def create_driver():
 
 
 def get_albums(driver, artist_id):
-    artist_url = f"https://music.163.com/#/artist/album?id={artist_id}&limit=1000"
+    artist_url = f"https://music.163.com/artist/album?id={artist_id}&limit=1000"
 
     driver.set_page_load_timeout(30)  # 最多等 30 秒加载页面
     try:
@@ -75,7 +75,7 @@ def get_albums(driver, artist_id):
     return albums
 
 def get_songs(driver, album_id, album_title):
-    album_url = f"https://music.163.com/#/album?id={album_id}&limit=1000"
+    album_url = f"https://music.163.com/album?id={album_id}&limit=1000"
 
     driver.set_page_load_timeout(30)  # 最多等 30 秒加载页面
     try:
