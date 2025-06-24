@@ -5,8 +5,8 @@ import time
 
 
 
-songs_json_path = "src/assets/songs.json"
-songs_list_path = "src/assets/songs_list.json"
+songs_json_path = "assets/songs.json"
+songs_list_path = "assets/songs_list.json"
 
 def get_albums(id):
     artist_url = f"https://music.163.com/#/artist/album?id={id}&limit=1000"
