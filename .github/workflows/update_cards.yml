@@ -65,6 +65,7 @@ jobs:
             # 推送更改到远程
             echo "Pushing changes to remote..."
             git push https://github.com/${{ github.repository }}.git HEAD:main --verbose
+            sleep 60
           else
             echo "No new lines in the file, skipping commit and push."
           fi
