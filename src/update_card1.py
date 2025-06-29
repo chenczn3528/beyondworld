@@ -123,21 +123,21 @@ for index, row in enumerate(rows):
             except Exception as e:
                 print(f"抓取失败：{card_name} -> {e}")
                 if attempt < max_retries - 1:
-                    time.sleep(2)  # 等待再重试
+                    time.sleep(5)  # 等待再重试
                 else:
                     print(f"已达最大重试次数，跳过：{card_name}")
                     print(wiki_detailed_info(card_name))
                     print(info_dict)
 
         # 避免请求过快
-        time.sleep(1.5)
+        time.sleep(3)
 
     info_dict = check_cards(info_dict)
 
     cards.append(info_dict)
 
 # 保存到文件
-with open('assets/cards1.json', 'w', encoding='utf-8') as f:
+with open('src/assets/cards1.json', 'w', encoding='utf-8') as f:
     json.dump(cards, f, ensure_ascii=False, indent=2)
 
 print(f"共抓取 {len(cards)} 张卡片信息并保存完成。")
