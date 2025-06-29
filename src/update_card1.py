@@ -94,7 +94,7 @@ for index, row in enumerate(rows):
         max_retries = 5
         for attempt in range(max_retries):
             try:
-                print(f"[{index}] 正在抓取：{card_name} 的详情页内容（尝试第 {attempt+1} 次）")
+                print(f"[{index}] 正在抓取：{card_name} 的详情页内容（尝试第 {attempt+1} 次）", flush=True)
                 detail_resp = requests.get(detail_url, headers=headers, timeout=10)
                 detail_resp.encoding = 'utf-8'
                 detail_soup = BeautifulSoup(detail_resp.text, 'html.parser')
@@ -121,13 +121,13 @@ for index, row in enumerate(rows):
                 break  # 成功抓取，退出重试循环
 
             except Exception as e:
-                print(f"抓取失败：{card_name} -> {e}")
+                print(f"抓取失败：{card_name} -> {e}", flush=True)
                 if attempt < max_retries - 1:
                     time.sleep(5)  # 等待再重试
                 else:
-                    print(f"已达最大重试次数，跳过：{card_name}")
-                    print(wiki_detailed_info(card_name))
-                    print(info_dict)
+                    print(f"已达最大重试次数，跳过：{card_name}", flush=True)
+                    print(wiki_detailed_info(card_name), flush=True)
+                    print(info_dict, flush=True)
 
         # 避免请求过快
         time.sleep(3)
@@ -140,4 +140,4 @@ for index, row in enumerate(rows):
 with open('src/assets/cards1.json', 'w', encoding='utf-8') as f:
     json.dump(cards, f, ensure_ascii=False, indent=2)
 
-print(f"共抓取 {len(cards)} 张卡片信息并保存完成。")
+print(f"共抓取 {len(cards)} 张卡片信息并保存完成。", flush=True)

@@ -41,9 +41,14 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
+          
+          # 确认是否有文件更改
           git add src/assets/cards1.json
-          git status # 查看是否有变更
+          git status
+          
+          # 检查文件是否有更改，若有则提交并推送
           git diff --exit-code src/assets/cards1.json || (
+            echo "Changes detected, committing and pushing..." &&
             git commit -m "Update cards1.json" &&
             git push https://github.com/${{ github.repository }}.git HEAD:main
           )

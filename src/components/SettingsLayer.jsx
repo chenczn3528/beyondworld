@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Carousel from "./Carousel";
-import cardData from "../assets/cards.json";
+import cardData from "../assets/cards1.json";
 import {playClickSound} from "../utils/playClickSound.js";
 import MusicIcon from "../icons/MusicIcon.jsx";
 

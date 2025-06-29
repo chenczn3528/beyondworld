@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { playClickSound } from "../utils/playClickSound.js";
 import {getAvailablePools, getDynamicAttributeCounts} from "../utils/cardDataUtils.js";
-import cardData from "../assets/cards.json";
+import cardData from "../assets/cards1.json";
 
 const CardPoolFilter = ({
     baseSize,
