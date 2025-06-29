@@ -123,14 +123,14 @@ for index, row in enumerate(rows):
             except Exception as e:
                 print(f"抓取失败：{card_name} -> {e}", flush=True)
                 if attempt < max_retries - 1:
-                    time.sleep(5)  # 等待再重试
+                    time.sleep(2)  # 等待再重试
                 else:
                     print(f"已达最大重试次数，跳过：{card_name}", flush=True)
                     print(wiki_detailed_info(card_name), flush=True)
                     print(info_dict, flush=True)
 
         # 避免请求过快
-        time.sleep(3)
+        time.sleep(1.5)
 
     info_dict = check_cards(info_dict)
 
