@@ -1,5 +1,5 @@
 import {playClickSound} from "../utils/playClickSound.js";
-import cardData from '../assets/cards1.json';
+import cardData from '../assets/cards.json';
 import React, { useRef, useState} from "react";
 
 const FilterRoleCard = ({ baseSize, onClose, selectedRole, setSelectedRole, position, showShadow, oritationLeft=false }) => {

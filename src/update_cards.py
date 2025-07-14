@@ -17,11 +17,11 @@ soup = BeautifulSoup(response.text, 'html.parser')
 rows = soup.find_all('tr')
 cards = []
 
+# 连接到 BWIKI
+site = mwclient.Site('wiki.biligame.com', path='/world/')
 
 # 用wiki API获取其他详细信息
 def wiki_detailed_info(card_name):
-    # 连接到 BWIKI
-    site = mwclient.Site('wiki.biligame.com', path='/world/')
 
     # 指定页面名
     page = site.pages[card_name]  # 页面标题不需要编码（会自动处理）
@@ -95,7 +95,7 @@ for index, row in enumerate(rows):
         for attempt in range(max_retries):
             try:
                 print(f"[{index}] 正在抓取：{card_name} 的详情页内容（尝试第 {attempt+1} 次）", flush=True)
-                detail_resp = requests.get(detail_url, headers=headers, timeout=10)
+                detail_resp = requests.get(detail_url, headers=headers, timeout=30)
                 detail_resp.encoding = 'utf-8'
                 detail_soup = BeautifulSoup(detail_resp.text, 'html.parser')
 
@@ -137,7 +137,7 @@ for index, row in enumerate(rows):
     cards.append(info_dict)
 
 # 保存到文件
-with open('src/assets/cards1.json', 'w', encoding='utf-8') as f:
+with open('src/assets/cards.json', 'w', encoding='utf-8') as f:
     json.dump(cards, f, ensure_ascii=False, indent=2)
 
 print(f"共抓取 {len(cards)} 张卡片信息并保存完成。", flush=True)

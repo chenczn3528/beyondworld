@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef, useMemo} from 'react';
-import cardData from './assets/cards1.json';
+import cardData from './assets/cards.json';
 import songsList from './assets/songs_list.json'
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import useLocalStorageState from "./hooks/useLocalStorageState.js";

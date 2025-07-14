@@ -1,5 +1,5 @@
 import {playClickSound} from "../utils/playClickSound.js";
-import cardData from '../assets/cards1.json';
+import cardData from '../assets/cards.json';
 import React, {useEffect, useRef, useState} from "react";
 import LeftIcon from "../icons/LeftIcon.jsx";
 import HomeIcon from "../icons/HomeIcon.jsx";

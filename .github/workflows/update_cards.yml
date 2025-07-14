@@ -2,81 +2,88 @@ name: Update Cards JSON
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # 每天的00:00执行，使用Cron语法
-  workflow_dispatch:  # 允许手动触发
+    - cron: '0 5 * * *'  # 每天00:00执行
+  workflow_dispatch:
 
 jobs:
   update_cards:
-    runs-on: ubuntu-latest  # 使用Ubuntu最新版本的运行环境
+    runs-on: ubuntu-latest
 
     steps:
-      # Checkout 项目代码
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # 设置 Python 环境
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'  # 使用Python 3.x
+          python-version: '3.x'
 
-      # 安装依赖（假设你有一个 requirements.txt 文件）
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 运行 Python 脚本
       - name: Run update script
         run: |
-          python src/update_card1.py  # 使用新的脚本名称
+          python src/update_cards.py
 
-      # 检查文件行数并提交
-      - name: Check file line count and commit changes
+      - name: Check for changes
+        id: check
         run: |
-          # 获取旧文件的行数
-          git fetch origin main
-          old_line_count=$(git show origin/main:src/assets/cards1.json | wc -l)
-          
-          # 获取新文件的行数
-          new_line_count=$(wc -l < src/assets/cards1.json)
-
-          echo "Old file line count: $old_line_count"
-          echo "New file line count: $new_line_count"
-          
-          # 如果新文件的行数多于旧文件，才执行提交
-          if [ "$new_line_count" -gt "$old_line_count" ]; then
-            echo "Changes detected, proceeding with commit and push."
-
-            # 设置 Git 配置信息
-            git config --global user.name "GitHub Actions"
-            git config --global user.email "actions@github.com"
-
-            # 检查当前 Git 状态
-            git status
-
-            # 添加文件并提交
-            git add src/assets/cards1.json
-            git commit -m "Update cards1.json with more lines"
-
-            # 查看 commit 日志
-            git log -n 1
-
-            # 推送更改到远程
-            echo "Pushing changes to remote..."
-            git push https://github.com/${{ github.repository }}.git HEAD:main --verbose
-            sleep 60
+          if git diff --quiet src/assets/cards.json; then
+            echo "changes_detected=false" >> "$GITHUB_OUTPUT"
           else
-            echo "No new lines in the file, skipping commit and push."
+            ADDED=$(git diff --numstat src/assets/cards.json | awk '{print $1}')
+            REMOVED=$(git diff --numstat src/assets/cards.json | awk '{print $2}')
+            echo "ADDED=$ADDED, REMOVED=$REMOVED"  # 调试用，可删
+
+            if [ "$ADDED" -gt "$REMOVED" ]; then
+              echo "Meaningful change detected: +$ADDED > -$REMOVED"
+              echo "changes_detected=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "Change rejected: +$ADDED <= -$REMOVED"
+              echo "changes_detected=false" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
-      # ✅ 触发 GitHub Pages 部署
-      - name: Trigger GitHub Pages deployment
+      - name: Extract and highlight diff of cards.json
+        if: steps.check.outputs.changes_detected == 'true'
+        id: diff
         run: |
-          echo "Triggering GitHub Pages deployment..."
-          curl -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/pages/builds
-      
-      
+          echo "diff_html<<EOF" >> "$GITHUB_OUTPUT"
+          git diff src/assets/cards.json | \
+          sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' | \
+          sed -E \
+            -e '/^\+/ s|^+|<div style="background-color:#e6ffed;color:#22863a;"><code>+|' \
+            -e '/^-/ s|^-|<div style="background-color:#ffeef0;color:#b31d28;"><code>-|' \
+            -e '/^ / s|^ |<div><code> |' \
+            -e 's|$|</code></div>|' \
+            >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Commit updated cards.json
+        if: steps.check.outputs.changes_detected == 'true'
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add src/assets/cards.json
+          DATE=$(date +'%Y-%m-%d')
+          git commit -m "chore: update cards data on $DATE"
+          git push
+
+      - name: Send email if cards.json changed
+        if: steps.check.outputs.changes_detected == 'true'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.qq.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: BeyondWorld Cards Updated
+          to: chenczn3528@163.com
+          from: ${{ secrets.EMAIL_USERNAME }}
+          html_body: |
+            <h3>cards.json 已更新</h3>
+            <p>以下是更新内容：</p>
+            <pre style="background:#f6f8fa;padding:16px;border-radius:6px;overflow:auto;font-family:monospace;">${{ steps.diff.outputs.diff_html }}
+            </pre>

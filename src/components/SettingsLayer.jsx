@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Carousel from "./Carousel";
-import cardData from "../assets/cards1.json";
+import cardData from "../assets/cards.json";
 import {playClickSound} from "../utils/playClickSound.js";
 import MusicIcon from "../icons/MusicIcon.jsx";
 
@@ -261,8 +261,6 @@ const SettingsLayer = ({
 
             {/*左下反馈*/}
             <div className="absolute flex flex-col" style={{left: `${baseSize * 12}px`, bottom: `${baseSize * 12}px`}}>
-                <label style={{color: "yellow", fontSize: baseSize * 7}}>可以的话 希望宝宝们去我主页</label>
-                <label style={{color: "yellow", fontSize: baseSize * 7}}>投票看看想要哪种背景音乐❤</label>
                 <label
                     className="mb-[2vmin]"
                     style={{
