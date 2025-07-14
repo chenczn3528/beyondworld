@@ -55,10 +55,10 @@ jobs:
           sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' | \
           sed -E \
             -e '/^\+/ s|^+|<div style="background-color:#e6ffed;color:#22863a;"><code>+|' \
-            -e '/^-/ s|^-|<div style="background-color:#ffeef0;color:#b31d28;"><code>-|' \
+            -e '/^\-/ s|^-|<div style="background-color:#ffeef0;color:#b31d28;"><code>-|' \
             -e '/^ / s|^ |<div><code> |' \
             -e 's|$|</code></div>|' \
-            >> "$GITHUB_OUTPUT"
+          >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Commit updated cards.json
