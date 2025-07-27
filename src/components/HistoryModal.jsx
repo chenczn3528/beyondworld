@@ -101,6 +101,7 @@ const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
               >
                   {history.slice(-2000).reverse().map((card, idx) => {
                       const cardHistoryColors = {
+                          "刹那": {color: "#ffd700"},
                           "星": {color: "gray"},
                           "辰星": {color: "gray"},
                           "月": {color: "#a855f7"},

@@ -13,13 +13,14 @@ const CardFullImage = (
     }) => {
 
     const rarityMap = {
+        刹那: 'images/instant.png',
         世界: 'images/world.png',
         月: 'images/moon.png',
         辰星: 'images/star1.png',
         星: 'images/star2.png',
     };
 
-    const isFiveStar = card.稀有度 === '世界';
+    const isFiveStar = card.稀有度 === '世界' || card.稀有度 === '刹那';
 
     const [showSecondImage, setShowSecondImage] = useState(false);
     const [isClickable, setIsClickable] = useState(false);

@@ -39,7 +39,7 @@ export function getAvailablePools(cardData) {
   const poolCountMap = {};
 
   cardData.forEach((card) => {
-    if (card.稀有度 === "世界") {
+    if (card.稀有度 === "世界" || card.稀有度 === "刹那") {
       const pool = card["获取途径"];
       if (!poolCountMap[pool]) {
         poolCountMap[pool] = 0;

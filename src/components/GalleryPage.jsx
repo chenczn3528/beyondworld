@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import LeftIcon from "../icons/LeftIcon.jsx";
 import useCardImageIndex from "../hooks/useCardImageIndex.js";
 import FadeImage from "./FadeImage.jsx";
-import {Filter} from "lucide-react";
 import FilterIcon from "../icons/FilterIcon.jsx";
 import {playClickSound} from "../utils/playClickSound.js";
 import FilterRoleCard from "./FilterRoleCard.jsx";
@@ -39,18 +38,16 @@ const GalleryPage = ({
     const [finalCards, setFinalCards] = useState([]);
     useEffect(() => {
         if (!cards || cards.length === 0) return;
-        if (!sortedCards || sortedCards.length === 0) {
-            // sortedCards 还没处理好，先用 cards 展示（带角色筛选）
-            const fallback = cards.filter(
-                card => roleMap[selectedRole] === "全部" || card.主角 === roleMap[selectedRole]
-            );
-            setFinalCards(sortCards(fallback, orderChoice));
-            return;
-        }
-        // 正常情况，用 sortedCards 展示
-        const filtered = sortedCards.filter(
+        
+        // 优先使用sortedCards，如果为空则使用cards
+        const sourceCards = (sortedCards && sortedCards.length > 0) ? sortedCards : cards;
+        
+        // 应用角色筛选
+        const filtered = sourceCards.filter(
             card => roleMap[selectedRole] === "全部" || card.主角 === roleMap[selectedRole]
         );
+        
+        // 应用排序
         setFinalCards(sortCards(filtered, orderChoice));
     }, [selectedRole, sortedCards, orderChoice, cards]);
 
@@ -258,8 +255,11 @@ const GalleryPage = ({
     console.log(displayCard)
     // ==================== 设置点击进入大图的初始化
     useEffect(() => {
-        setGalleryCard(finalCards[currentCardIndex] ? finalCards[currentCardIndex] : finalCards[0]);
-    }, [scrollT, orderChoice, selectedRole, finalCards]);
+        if (finalCards.length > 0) {
+            const targetCard = finalCards[currentCardIndex] || finalCards[0];
+            setGalleryCard(targetCard);
+        }
+    }, [scrollT, orderChoice, selectedRole, finalCards, currentCardIndex]);
 
     useEffect(() => {
         if (finalCards.length > 0 && !galleryCard) {
@@ -317,6 +317,7 @@ const GalleryPage = ({
     const rad = (-80 * Math.PI) / 180;
 
     const rarityMap = {
+        刹那: 'images/instant.png',
         世界: 'images/world.png',
         月: 'images/moon.png',
         辰星: 'images/star1.png',
@@ -344,7 +345,9 @@ const GalleryPage = ({
                 }}
                 onClick={() => {
                     playClickSound();
-                    if(!displayCard.owned === false) setShowGalleryFullImage(!showGalleryFullImage);
+                    if(displayCard && displayCard.owned !== false) {
+                        setShowGalleryFullImage(!showGalleryFullImage);
+                    }
                 }}
             >
 

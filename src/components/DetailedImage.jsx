@@ -4,6 +4,7 @@ import {playClickSound} from "../utils/playClickSound.js";
 const DetailedImage = ({ card, onClose, baseSize }) => {
 
     const rarityMap = {
+        刹那: 'images/instant.png',
         世界: 'images/world.png',
         月: 'images/moon.png',
         辰星: 'images/star1.png',

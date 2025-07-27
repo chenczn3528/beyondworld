@@ -29,9 +29,11 @@ const SettingsLayer = ({
     galleryHistory,
     showMusicPageZIndex,
     setShowMusicPageZIndex,
+    selectedPools,
+    cardData,
 }) => {
 
-    const filtered_cardData = cardData.filter(card => card.稀有度 === '世界');
+    const filtered_cardData = cardData.filter(card => card.稀有度 === '世界' || card.稀有度 === '刹那');
 
 
 
@@ -207,14 +209,28 @@ const SettingsLayer = ({
                                 0 0 30px gold,
                                 0 0 40px gold,
                                 0 0 50px gold
-                            `
+                            `,
+                            whiteSpace: 'nowrap'
                         }}
                     >
                         <label className="text-shadow"
-                               style={{fontSize: `${baseSize * 10}px`,}}> {70 - pityCount} </label>
-                        <label className="text-shadow"> 次感召必出 </label>
-                        <img src="images/world.png" style={{width: `${baseSize * 20}px`}}/>
-                        <label className="text-shadow">侧影</label>
+                               style={{fontSize: `${baseSize * 10}px`, whiteSpace: 'nowrap'}}> {70 - pityCount} </label>
+                        <label className="text-shadow" style={{whiteSpace: 'nowrap'}}> 次感召必出 </label>
+                        <img src="images/world.png" style={{height: `${baseSize * 20}px`}}/>
+                        {(() => {
+                          // 检查是否选择了包含刹那卡的卡池
+                          const hasInstantCards = cardData.some(card => 
+                            card.稀有度 === '刹那' && 
+                            selectedPools.includes(card.获取途径)
+                          );
+                          return hasInstantCards ? (
+                            <>
+                              <label className="text-shadow" style={{whiteSpace: 'nowrap'}}> 或 </label>
+                              <img src="images/instant.png" style={{height: `${baseSize * 20}px`}}/>
+                            </>
+                          ) : null;
+                        })()}
+                        <label className="text-shadow" style={{whiteSpace: 'nowrap'}}>侧影</label>
                     </div>
 
                     {/*总抽卡数、总出金数、平均出金数*/}
@@ -223,12 +239,13 @@ const SettingsLayer = ({
                         style={{
                             fontSize: `${baseSize * 6}px`,
                             color: 'white',
-                            textShadow: '0 0 10px gold'
+                            textShadow: '0 0 10px gold',
+                            whiteSpace: 'nowrap'
                         }}
                     >
-                        <label className="text-shadow"> 总抽卡数：{totalDrawCount}</label>
-                        <label className="text-shadow">总出金数：{totalFiveStarCount}</label>
-                        <label className="text-shadow">平均出金数: {totalFiveStarCount === 0 ?
+                        <label className="text-shadow" style={{whiteSpace: 'nowrap'}}> 总抽卡数：{totalDrawCount}</label>
+                        <label className="text-shadow" style={{whiteSpace: 'nowrap'}}>总出金数：{totalFiveStarCount}</label>
+                        <label className="text-shadow" style={{whiteSpace: 'nowrap'}}>平均出金数: {totalFiveStarCount === 0 ?
                             '0' : (totalDrawCount / totalFiveStarCount).toFixed(2)}
                         </label>
                     </div>
@@ -239,12 +256,13 @@ const SettingsLayer = ({
                         style={{
                             fontSize: `${baseSize * 6}px`,
                             color: 'white',
-                            textShadow: '0 0 10px gold'
+                            textShadow: '0 0 10px gold',
+                            whiteSpace: 'nowrap'
                         }}
                     >
                         {(selectedRole.length === 1 && selectedRole[0] === "随机") || !useSoftGuarantee ? (
                             <>
-                                还剩 {70 - pityCount} 抽 必得世界卡
+                                还剩 {70 - pityCount} 抽 必得金卡
                             </>
                         ) : softPityFailed ? (
                             <>
@@ -266,7 +284,8 @@ const SettingsLayer = ({
                     style={{
                         fontSize: `${baseSize * 7}px`,
                         color: 'white',
-                        textShadow: '0 0 10px gold'
+                        textShadow: '0 0 10px gold',
+                        whiteSpace: 'nowrap'
                     }}
                 >
                     {copyState !== 2 ? "反馈bug或功能需求" : "小红书号840305422"}
@@ -278,7 +297,8 @@ const SettingsLayer = ({
                         boxShadow: '0 0 10px #111214, 0 0 20px #111214',
                         color: 'white',
                         width: `${baseSize * 60}px`,
-                        textShadow: '0 0 5px gray'
+                        textShadow: '0 0 5px gray',
+                        whiteSpace: 'nowrap'
                     }}
                     onClick={async () => {
                         if (copyState === 2) setCopyState(0);
@@ -319,12 +339,12 @@ const SettingsLayer = ({
 
             <div className="absolute flex flex-col items-end"
                  style={{right: `${baseSize * 12}px`, bottom: `${baseSize * 12}px`, fontSize: baseSize * 7}}>
-                <label style={{color: 'red', fontWeight: 800}}>重要提示：</label>
-                <label>手机请竖屏，平板请横屏</label>
-                <label>频繁旋转手机或平板可能会卡住</label>
-                <label>关掉重开或刷新可解决</label>
-                <label style={{color: "yellow"}}>旋转屏幕后最好刷新一下</label>
-                <label>数据来源：世界之外WIKI</label>
+                <label style={{color: 'red', fontWeight: 800, whiteSpace: 'nowrap'}}>重要提示：</label>
+                <label style={{whiteSpace: 'nowrap'}}>手机请竖屏，平板请横屏</label>
+                <label style={{whiteSpace: 'nowrap'}}>频繁旋转手机或平板可能会卡住</label>
+                <label style={{whiteSpace: 'nowrap'}}>关掉重开或刷新可解决</label>
+                <label style={{color: "yellow", whiteSpace: 'nowrap'}}>旋转屏幕后最好刷新一下</label>
+                <label style={{whiteSpace: 'nowrap'}}>数据来源：世界之外WIKI</label>
             </div>
         </div>
     );

@@ -22,7 +22,7 @@ const CardOverlay = ({
     useEffect(() => {
         if (!showCardOverlay || !card) return;
         let sound;
-        if (card.稀有度 === '世界') {
+        if (card.稀有度 === '世界' || card.稀有度 === '刹那') {
             sound = 'audios/金卡音效.mp3';
         } else if (card.稀有度 === '月') {
             sound = 'audios/月卡音效.mp3';

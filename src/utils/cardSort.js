@@ -1,6 +1,6 @@
 const rarityOrderMap = ['稀有度', '主属性数值', '全部', '思维', '魅力', '体魄', '感知', '灵巧'];
 
-const rarityOrder = {'世界': 4, '月': 3, '辰星': 2, '星': 1};
+const rarityOrder = {'刹那': 5, '世界': 4, '月': 3, '辰星': 2, '星': 1};
 const roleOrder = {'顾时夜':4, '易遇':3, '柏源':2, '夏萧因':1};
 const sourceOrder = {'累充' :4, '商店': 3, '活动': 2, '感召':1}
 const sumFields = rarityOrderMap.slice(2);

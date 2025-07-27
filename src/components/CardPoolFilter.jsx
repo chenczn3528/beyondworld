@@ -59,7 +59,7 @@ const CardPoolFilter = ({
         let temp_pools = Object.keys(
           getDynamicAttributeCounts(
             cardData.filter(
-              card => selectedRole.includes(card.主角) && card.稀有度 === '世界'
+              card => selectedRole.includes(card.主角) && (card.稀有度 === '世界' || card.稀有度 === '刹那')
             )
           ).countByAttributes.获取途径
         );
@@ -98,7 +98,7 @@ const CardPoolFilter = ({
           : permanentPools.filter(pool =>
               cardData.some(card =>
                 selectedRole.includes(card.主角)
-                && card.稀有度 === '世界'
+                && (card.稀有度 === '世界' || card.稀有度 === '刹那')
                 && card.获取途径 === pool
               )
             );

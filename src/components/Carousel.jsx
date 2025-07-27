@@ -24,6 +24,7 @@ const Carousel = ({
   //     星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png',
   //   };
     const rarityMap = {
+        刹那: 'images/instant.png',
         世界: 'images/world.png',
         月: 'images/moon.png',
         辰星: 'images/star1.png',

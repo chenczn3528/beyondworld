@@ -101,7 +101,7 @@ const CardSummary = ({
             {row.map((card, colIndex) => {
               let glowStyle = {};
 
-              if (card && card.card.稀有度 === "世界") {
+              if (card && (card.card.稀有度 === "世界" || card.card.稀有度 === "刹那")) {
                 glowStyle = {
                   boxShadow: '0 -10px 20px rgba(255, 215, 0, 0.9), 0 10px 20px rgba(255, 215, 0, 0.9)',
                 };
@@ -131,13 +131,15 @@ const CardSummary = ({
 
                           <img
                               src={
-                                  card.card.稀有度 === "世界"
-                                    ? "images/world.png"
-                                    : card.card.稀有度 === "月"
-                                        ? "images/moon.png"
-                                        : card.card.稀有度 === "辰星"
-                                            ? "images/star1.png"
-                                            : "images/star2.png"
+                                  card.card.稀有度 === "刹那"
+                                    ? "images/instant.png"
+                                    : card.card.稀有度 === "世界"
+                                        ? "images/world.png"
+                                        : card.card.稀有度 === "月"
+                                            ? "images/moon.png"
+                                            : card.card.稀有度 === "辰星"
+                                                ? "images/star1.png"
+                                                : "images/star2.png"
                               }
                               className="absolute h-auto z-10"
                               style={{top: `${fontsize * -1.1}px`, right: "0px", height: `${fontsize * 2.5}px`,}}

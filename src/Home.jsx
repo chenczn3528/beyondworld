@@ -244,11 +244,49 @@ const Home = () => {
 
         await appendHistory(newEntries); // 自动维护 100000 条限制
 
+        // 立即更新galleryHistory，不等待history的异步更新
+        const enriched = newEntries
+            .map((entry) => {
+                const fullCard = cardData.find((card) => card.卡名 === entry.卡名);
+                return fullCard ? { ...fullCard, timestamp: entry.timestamp } : null;
+            })
+            .filter(Boolean);
+        
+        setGalleryHistory(prev => {
+            const combined = [...prev, ...enriched];
+            return removeDuplicates(combined);
+        });
+
         setShowAnimationDrawCards(false);
         setisAnimatingDrawCards(false);
     };
 
 
+
+    // ======================================================== 首次进入对话框
+    const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
+    
+    useEffect(() => {
+        // 检查是否是第一次进入
+        const hasShownWelcome = localStorage.getItem('bw_welcomeShown');
+        if (!hasShownWelcome) {
+            setShowWelcomeDialog(true);
+        }
+    }, []);
+
+    const handleWelcomeDialogClose = () => {
+        setShowWelcomeDialog(false);
+        localStorage.setItem('bw_welcomeShown', 'true');
+        
+        // 清除所有localStorage数据
+        localStorage.clear();
+        
+        // 重新设置欢迎对话框标记，确保下次不会显示
+        localStorage.setItem('bw_welcomeShown', 'true');
+        
+        // 清除历史数据
+        clearHistory();
+    };
 
     // ======================================================== 图鉴相关
     // ------------------------------- 去重逻辑
@@ -297,8 +335,8 @@ const Home = () => {
     // ======================================================== 判断当前卡片是不是五星
     useEffect(() => {
         const card = drawResultsRef.current[currentCardIndex]?.card;
-        if (card?.star === '世界') {
-          setIsFiveStar(true); // 是五星卡片
+        if (card?.star === '世界' || card?.稀有度 === '刹那') {
+          setIsFiveStar(true); // 是五星卡片或刹那卡片
         } else {
           setIsFiveStar(false); // 不是五星卡片，直接展示卡片
         }
@@ -364,11 +402,11 @@ const Home = () => {
         // 提取剩下未展示卡中的五星
         const fiveStarCards = remainingResults
             .map(item => item.card)
-            .filter(card => card?.稀有度 === '世界');
+            .filter(card => card?.稀有度 === '世界' || card?.稀有度 === '刹那');
 
         // 加上当前这张卡（如果是五星）作为第一张
         const currentCard = allResults[currentCardIndex]?.card;
-        if (currentCard?.稀有度 === '世界') {
+        if (currentCard?.稀有度 === '世界' || currentCard?.稀有度 === '刹那') {
             fiveStarCards.unshift(currentCard);
         }
 
@@ -452,7 +490,6 @@ const Home = () => {
         let rarity;
 
         const isAllRoles = selectedRole.includes('随机');
-        // const isSingleTarget = selectedRole.length === 1 && !isAllRoles;
         const isSingleTarget = !isAllRoles;
 
         let forceGuaranteeMode = null;
@@ -460,6 +497,10 @@ const Home = () => {
         if (!onlySelectedRoleCard && useSoftGuarantee && isSingleTarget) {
           forceGuaranteeMode = localSoftPityFailed ? 'hard' : 'soft';
         }
+
+        // 十抽保底机制：每十抽必出月卡及以上
+        const isTenDrawGuarantee = (i + 1) % 10 === 0 && 
+          drawResults.filter(r => r.rarity === '月' || r.rarity === '世界' || r.rarity === '刹那').length === 0;
 
         // 调用抽卡
         do {
@@ -472,13 +513,14 @@ const Home = () => {
             includeThreeStarM,
             selectedPools,
             cardData,
-            forceGuaranteeMode
+            forceGuaranteeMode,
+            isTenDrawGuarantee
           );
           rarity = result.rarity;
         } while ((rarity === '星' && !includeThreeStar) || (rarity === '辰星' && !includeThreeStarM));
 
         // 更新保底状态
-        if (rarity === '世界') {
+        if (rarity === '世界' || rarity === '刹那') {
           currentPity = 0;
           currentFourStarCounter = 0;
 
@@ -491,7 +533,6 @@ const Home = () => {
                 const gotTarget = result.card && selectedRole.includes(result.card.主角) && permanentPools.includes(result.card.获取途径);
                 localSoftPityFailed = !gotTarget;
             }
-
           }
         } else {
           currentPity++;
@@ -500,7 +541,7 @@ const Home = () => {
 
         drawResults.push(result);
         setTotalDrawCount(prev => prev + 1);
-        if (rarity === '世界') {
+        if (rarity === '世界' || rarity === '刹那') {
           setTotalFiveStarCount(prev => prev + 1);
         }
       }
@@ -511,7 +552,7 @@ const Home = () => {
       currentPityRef.current = currentPity;
       currentFourStarRef.current = currentFourStarCounter;
       setSoftPityFailed(localSoftPityFailed);
-      setHasFiveStarAnimation(drawResults.some(r => r.rarity === '世界'));
+      setHasFiveStarAnimation(drawResults.some(r => r.rarity === '世界' || r.rarity === '刹那'));
       setShowAnimationDrawCards(true);
       setDrawnCards(drawResults.map(r => r.card).filter(Boolean));
     };
@@ -527,7 +568,8 @@ const Home = () => {
       includeThreeStarM = true,
       selectedPools = ['全部'],
       cardData = [],
-      forceGuaranteeMode = null // 'soft' | 'hard' | null
+      forceGuaranteeMode = null, // 'soft' | 'hard' | null
+      isTenDrawGuarantee = false // 新增参数，表示是否是十抽保底
     ) => {
       let rarity;
       let pool = cardData;
@@ -547,128 +589,159 @@ const Home = () => {
       const fourStarRate = 7;
 
       // 判断稀有度
-      if (fourStarCounter >= 9) {
-        rarity = roll < dynamicFiveStarRate ? '世界' : '月';
+      if (isTenDrawGuarantee) {
+        // 十抽保底：必出月卡及以上
+        const guaranteeRoll = Math.random();
+        if (guaranteeRoll < 0.5) {
+          // 50%概率出月卡
+          rarity = '月';
+        } else {
+          // 50%概率出世界/刹那
+          rarity = Math.random() < 0.5 ? '世界' : '刹那';
+        }
+      } else if (fourStarCounter >= 9) {
+        // 四星保底时，在"世界"和"刹那"之间随机选择
+        if (roll < dynamicFiveStarRate) {
+          rarity = Math.random() < 0.5 ? '世界' : '刹那';
+        } else {
+          rarity = '月';
+        }
       } else if (roll < dynamicFiveStarRate) {
-        rarity = '世界';
+        // 非保底时，在"世界"和"刹那"之间随机选择
+        rarity = Math.random() < 0.5 ? '世界' : '刹那';
       } else if (roll < dynamicFiveStarRate + fourStarRate) {
         rarity = '月';
       } else {
-        // rarity = '星'; // 星或辰星统一为稀有度“星”
-          // 单独判断辰星/星星
-          const lowRoll = Math.random();
-          if (includeThreeStarM && !includeThreeStar) {
-            rarity = '辰星';
-          } else if (includeThreeStar && !includeThreeStarM) {
-            rarity = '星';
-          } else {
-            // 如果都选了，随机一个
-            rarity = lowRoll < 0.2 ? '辰星' : '星';
-          }
+        // rarity = '星'; // 星或辰星统一为稀有度"星"
+        // 单独判断辰星/星星
+        const lowRoll = Math.random();
+        if (includeThreeStarM && !includeThreeStar) {
+          rarity = '辰星';
+        } else if (includeThreeStar && !includeThreeStarM) {
+          rarity = '星';
+        } else {
+          // 如果都选了，随机一个
+          rarity = lowRoll < 0.2 ? '辰星' : '星';
+        }
       }
 
       // 筛选卡池
-      if (rarity === '世界') {
-        if (forceGuaranteeMode === 'hard') {
-            console.log(1)
-          // 大保底：限定池中选定角色
+      if (rarity === '刹那' || rarity === '世界') {
+        // 先按当前稀有度筛选
+        let pool = [];
+        const filterPool = (targetRarity) => {
+          if (forceGuaranteeMode === 'hard') {
             if(limitedPools.length > 0){
-                console.log(11)
-                pool = cardData.filter(card =>
-                    card.稀有度 === '世界' &&
-                    limitedPools.includes(card.获取途径) &&
-                    selectedRole.includes(card.主角)
-                );
+              return cardData.filter(card =>
+                  card.稀有度 === targetRarity &&
+                  limitedPools.includes(card.获取途径) &&
+                  selectedRole.includes(card.主角)
+              );
             } else {
-                console.log(12)
-                pool = cardData.filter(card =>
-                    card.稀有度 === '世界' &&
-                    selectedPools.includes(card.获取途径) &&
-                    selectedRole.includes(card.主角)
-                );
+              return cardData.filter(card =>
+                  card.稀有度 === targetRarity &&
+                  selectedPools.includes(card.获取途径) &&
+                  selectedRole.includes(card.主角)
+              );
             }
-        } else if (forceGuaranteeMode === 'soft') {
-            console.log(2)
-          // 小保底歪：常驻池任意 + 限定池中未选定角色
+          } else if (forceGuaranteeMode === 'soft') {
             if(limitedPools.length > 0){
-                pool = cardData.filter(card =>
-                    card.稀有度 === '世界' &&
-                    (
-                      permanentPools.includes(card.获取途径) ||
-                      (limitedPools.includes(card.获取途径) && !selectedRole.includes(card.主角))
-                    )
-                );
+              return cardData.filter(card =>
+                  card.稀有度 === targetRarity &&
+                  (
+                    permanentPools.includes(card.获取途径) ||
+                    (limitedPools.includes(card.获取途径) && !selectedRole.includes(card.主角))
+                  )
+              );
             } else {
-                pool = cardData.filter(card =>
-                    card.稀有度 === '世界' &&
-                    permanentPools.includes(card.获取途径) && !selectedRole.includes(card.主角)
-                );
+              return cardData.filter(card =>
+                  card.稀有度 === targetRarity &&
+                  permanentPools.includes(card.获取途径) && !selectedRole.includes(card.主角)
+              );
             }
-        } else if (!isAllRoles) {
+          } else if (!isAllRoles) {
             if (onlySelectedRoleCard) {
-                console.log(3)
-              // 选了只抽定向角色卡（稀有度不限）
-              pool = cardData.filter(card =>
-                card.稀有度 === '世界' &&
+              return cardData.filter(card =>
+                card.稀有度 === targetRarity &&
                 selectedRole.includes(card.主角) &&
                 (isAllPools || selectedPools.includes(card.获取途径))
               );
             } else {
-              // 选了定向角色，没选只抽定向角色的卡，也没选大小保底
-                if(limitedPools.length > 0){
-                    console.log(4)
-                    pool = cardData.filter(card =>
-                        card.稀有度 === '世界' &&
-                        selectedRole.includes(card.主角) &&
-                        limitedPools.includes(card.获取途径)
-                    );
-                } else {
-                    console.log(5)
-                    pool = cardData.filter(card =>
-                        card.稀有度 === '世界' &&
-                        selectedRole.includes(card.主角) &&
-                        selectedPools.includes(card.获取途径)
-                      );
-                }
+              if(limitedPools.length > 0){
+                return cardData.filter(card =>
+                    card.稀有度 === targetRarity &&
+                    selectedRole.includes(card.主角) &&
+                    limitedPools.includes(card.获取途径)
+                );
+              } else {
+                return cardData.filter(card =>
+                    card.稀有度 === targetRarity &&
+                    selectedRole.includes(card.主角) &&
+                    selectedPools.includes(card.获取途径)
+                  );
+              }
             }
-        } else {
-          // 正常五星抽卡（不指定角色）
+          } else {
             if(limitedPools.length > 0){
-                console.log(6)
-                pool = cardData.filter(card =>
-                    card.稀有度 === '世界' &&
-                    (limitedPools.includes(card.获取途径))
-                );
+              return cardData.filter(card =>
+                  card.稀有度 === targetRarity &&
+                  (limitedPools.includes(card.获取途径))
+              );
             } else {
-                console.log(7)
-                pool = cardData.filter(card =>
-                    card.稀有度 === '世界' &&
-                    (selectedPools.includes(card.获取途径))
-                );
+              return cardData.filter(card =>
+                  card.稀有度 === targetRarity &&
+                  (selectedPools.includes(card.获取途径))
+              );
             }
+          }
+        };
+        pool = filterPool(rarity);
+        // 如果当前稀有度没卡，自动切换到另一种
+        if (pool.length === 0) {
+          const altRarity = rarity === '刹那' ? '世界' : '刹那';
+          pool = filterPool(altRarity);
+          rarity = altRarity;
         }
+        // 如果还没有卡，才返回null
+        if(!includeMoneyCard){
+          const excludedKeywords = ["崩坍", "累充", "活动", "奇遇瞬间"];
+          pool = pool.filter(card =>
+              !excludedKeywords.some(keyword => card.获取途径.includes(keyword))
+          );
+        }
+        if (pool.length === 0) return { card: null, rarity };
+        const chosen = pool[Math.floor(Math.random() * pool.length)];
+        return { card: chosen, rarity };
       } else if (rarity === '月') {
         pool = cardData.filter(card => card.稀有度 === '月');
         if (onlySelectedRoleCard && !isAllRoles) {
           pool = pool.filter(card => selectedRole.includes(card.主角));
         }
-      } else {
-        // 星 / 辰星
-          if (onlySelectedRoleCard && selectedRole[0] !== "随机") {
-              pool = cardData.filter(card => ((includeThreeStarM && card.稀有度 === "辰星")
-                  || (includeThreeStar && card.稀有度 === "星")) && selectedRole.includes(card.主角));
-          } else {
-              pool = cardData.filter(card => (includeThreeStarM && card.稀有度 === "辰星")
-                  || (includeThreeStar && card.稀有度 === "星"));
-          }
-      }
-
-      if(!includeMoneyCard){
+        if(!includeMoneyCard){
           const excludedKeywords = ["崩坍", "累充", "活动", "奇遇瞬间"];
           pool = pool.filter(card =>
               !excludedKeywords.some(keyword => card.获取途径.includes(keyword))
           );
+        }
+        if (pool.length === 0) return { card: null, rarity };
+        const chosen = pool[Math.floor(Math.random() * pool.length)];
+        return { card: chosen, rarity };
+      }
 
+      // 星 / 辰星
+      if (onlySelectedRoleCard && selectedRole[0] !== "随机") {
+        pool = cardData.filter(card => ((includeThreeStarM && card.稀有度 === "辰星")
+            || (includeThreeStar && card.稀有度 === "星")) && selectedRole.includes(card.主角));
+      } else {
+        pool = cardData.filter(card => (includeThreeStarM && card.稀有度 === "辰星")
+            || (includeThreeStar && card.稀有度 === "星"));
+      }
+
+      if(!includeMoneyCard){
+        const excludedKeywords = ["崩坍", "累充", "活动", "奇遇瞬间"];
+        pool = pool.filter(card =>
+            !excludedKeywords.some(keyword => card.获取途径.includes(keyword))
+        );
       }
 
       // 抽卡
@@ -722,6 +795,67 @@ const Home = () => {
     // 返回数据时显示的页面
     return (
         <div className="w-full h-full relative overflow-hidden" style={{backgroundColor: 'black'}} ref={divRef}>
+
+            {/* 欢迎对话框 */}
+            {showWelcomeDialog && (
+                <div 
+                    className="absolute w-full h-full z-[1000] flex items-center justify-center"
+                    style={{
+                        backgroundColor: 'rgba(0, 0, 0, 0.6)'
+                    }}
+                >
+                    <div 
+                        className="flex flex-col items-center justify-center"
+                        style={{
+                            backgroundColor: "white",
+                            borderRadius: '16px',
+                            border: '1px solid #e5e7eb',
+                            width: `${160 * baseSize}px`,
+                            height: `${120 * baseSize}px`,
+                            color: 'black',
+                            fontSize: `${baseSize * 8}px`
+                        }}
+                    >
+                        <label 
+                            style={{
+                                color: '#333', 
+                                marginTop: `${baseSize * 12}px`,
+                                marginBottom: `${baseSize * 8}px`,
+                                fontSize: `${baseSize * 10}px`,
+                                fontWeight: 800
+                            }}
+                        >
+                            重要提示
+                        </label>
+                        <label 
+                            className="mb-6" 
+                            style={{
+                                color: '#666', 
+                                lineHeight: '1.6', 
+                                fontSize: `${baseSize * 8}px`,
+                                marginBottom: `${baseSize * 8}px`,
+                            }}
+                        >
+                            2025.07.27更新<br/>
+                            由于新增 <span style={{color: 'rgba(236, 168, 8, 1)', fontWeight: 600}}>刹那</span> 类型侧影<br/>
+                            与原代码可能不兼容<br/>
+                            需要点击 <span style={{color: 'rgba(236, 168, 8, 1)', fontWeight: 600}}>确定</span> 清除所有记录
+                        </label>
+                        <button
+                            onClick={handleWelcomeDialogClose}
+                            className="border px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                            style={{
+                                borderRadius: '8px',
+                                marginBottom: `${baseSize * 12}px`,
+                                fontSize: `${baseSize * 7}px`,
+                                backgroundColor: "gold"
+                            }}
+                        >
+                            确定
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* 视频层（最底层） */}
             <video
@@ -904,11 +1038,12 @@ const Home = () => {
                 galleryHistory={galleryHistory}
                 showMusicPageZIndex={showMusicPageZIndex}
                 setShowMusicPageZIndex={setShowMusicPageZIndex}
+                selectedPools={selectedPools}
+                cardData={cardData}
             />
 
         </div>
     );
-    }
-;
+};
 
 export default Home;
