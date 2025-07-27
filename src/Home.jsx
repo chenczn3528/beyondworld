@@ -268,8 +268,12 @@ const Home = () => {
     
     useEffect(() => {
         // 检查是否是第一次进入
-        const hasShownWelcome = localStorage.getItem('bw_welcomeShown');
-        if (!hasShownWelcome) {
+        let hasShownWelcome = localStorage.getItem('bw_welcomeShown');
+        if (hasShownWelcome === null) {
+            localStorage.setItem('bw_welcomeShown', 'false');
+            hasShownWelcome = 'false';
+        }
+        if (hasShownWelcome !== 'true') {
             setShowWelcomeDialog(true);
         }
     }, []);
@@ -277,14 +281,8 @@ const Home = () => {
     const handleWelcomeDialogClose = () => {
         setShowWelcomeDialog(false);
         localStorage.setItem('bw_welcomeShown', 'true');
-        
-        // 清除所有localStorage数据
         localStorage.clear();
-        
-        // 重新设置欢迎对话框标记，确保下次不会显示
         localStorage.setItem('bw_welcomeShown', 'true');
-        
-        // 清除历史数据
         clearHistory();
     };
 
@@ -833,13 +831,14 @@ const Home = () => {
                                 color: '#666', 
                                 lineHeight: '1.6', 
                                 fontSize: `${baseSize * 8}px`,
-                                marginBottom: `${baseSize * 8}px`,
+                                marginBottom: `${baseSize * 4}px`,
                             }}
                         >
                             2025.07.27更新<br/>
                             由于新增 <span style={{color: 'rgba(236, 168, 8, 1)', fontWeight: 600}}>刹那</span> 类型侧影<br/>
                             与原代码可能不兼容<br/>
-                            需要点击 <span style={{color: 'rgba(236, 168, 8, 1)', fontWeight: 600}}>确定</span> 清除所有记录
+                            需要点击 <span style={{color: 'rgba(236, 168, 8, 1)', fontWeight: 600}}>确定</span> 清除所有记录<br/>
+                            然后刷新页面
                         </label>
                         <button
                             onClick={handleWelcomeDialogClose}

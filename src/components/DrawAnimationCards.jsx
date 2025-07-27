@@ -47,8 +47,6 @@ const DrawAnimationCards = ({ isFiveStar, onAnimationEnd }) => {
             controls={false}
         >
           <source
-              // src={isFiveStar ? 'https://cdn.chenczn3528.dpdns.org/beyondworld/videos/gold.mp4' : 'https://cdn.chenczn3528.dpdns.org/beyondworld/videos/no_gold.mp4'}
-
               src={isFiveStar ? 'videos/gold.mp4' : 'videos/no_gold.mp4'}
               type="video/mp4"
           />
@@ -59,11 +57,10 @@ const DrawAnimationCards = ({ isFiveStar, onAnimationEnd }) => {
             ref={audioRef}
             preload="auto"
             autoPlay
-            loop
+            // loop
             muted={false}
         >
           <source
-              // src='https://cdn.chenczn3528.dpdns.org/beyondworld/audios/抽卡音频.mp3'
               src='audios/抽卡音频.mp3'
               type="audio/mp3"
           />
