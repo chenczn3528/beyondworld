@@ -1,21 +1,18 @@
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import {playClickSound} from "../utils/playClickSound.js";
+import { Asset } from './Asset.jsx';
 
 const DetailedImage = ({ card, onClose, baseSize }) => {
 
     const rarityMap = {
-        刹那: 'images/instant.png',
-        世界: 'images/world.png',
-        月: 'images/moon.png',
-        辰星: 'images/star1.png',
-        星: 'images/star2.png',
+        刹那: 'instant.png',
+        世界: 'world.png',
+        月: 'moon.png',
+        辰星: 'star1.png',
+        星: 'star2.png',
     };
 
     const attributes = ['思维', '魅力', '体魄', '感知', '灵巧'];
-
-
-
-
 
     return (
         <div
@@ -41,9 +38,10 @@ const DetailedImage = ({ card, onClose, baseSize }) => {
                     }}
                 />
                 {/* 角标图标：定位在主图右上角 */}
-                <img
-                    className="absolute"
+                <Asset
                     src={rarityMap[card.稀有度]}
+                    type="image"
+                    className="absolute"
                     style={{
                         top: `${baseSize * 35}px`,
                         left: `${baseSize * 190}px`,
@@ -64,8 +62,9 @@ const DetailedImage = ({ card, onClose, baseSize }) => {
                 />
 
                 {/* 重逢图标：贴在卡面右上角 */}
-                <img
-                    src="images/重逢.png"
+                <Asset
+                    src="重逢.png"
+                    type="image"
                     alt="重逢图标"
                     className="absolute"
                     style={{
@@ -113,8 +112,9 @@ const DetailedImage = ({ card, onClose, baseSize }) => {
                                 key={attr}
                                 className="flex flex-col mr-[3vmin] items-center"
                             >
-                                <img
-                                    src={`images/60px-${attr}.png`}
+                                <Asset
+                                    src={`60px-${attr}.png`}
+                                    type="image"
                                     className="mb-[0.5vmin]"
                                     style={{width: `${baseSize * 12}px`}}
                                 />
@@ -132,7 +132,6 @@ const DetailedImage = ({ card, onClose, baseSize }) => {
                         ))}
                     </div>
                 </div>
-
 
             </div>
 

@@ -1,6 +1,7 @@
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import {useEffect, useState} from "react";
 import FadeImage from "./FadeImage.jsx";
+import { Asset } from './Asset.jsx';
 
 const CardFullImage = (
     {
@@ -13,11 +14,11 @@ const CardFullImage = (
     }) => {
 
     const rarityMap = {
-        刹那: 'images/instant.png',
-        世界: 'images/world.png',
-        月: 'images/moon.png',
-        辰星: 'images/star1.png',
-        星: 'images/star2.png',
+        刹那: 'instant.png',
+        世界: 'world.png',
+        月: 'moon.png',
+        辰星: 'star1.png',
+        星: 'star2.png',
     };
 
     const isFiveStar = card.稀有度 === '世界' || card.稀有度 === '刹那';
@@ -47,7 +48,6 @@ const CardFullImage = (
         }
     }, [card]);
 
-
     return (
         <div className="relative w-full h-full flex z-100" key={`${card.卡名}`}>
             <div style={{zIndex: 5}} onClick={() => {if(!isFiveStar && isClickable) onClick();}}>
@@ -66,10 +66,11 @@ const CardFullImage = (
                     />
                 </div>
             )}
-
-            <img
+            
+            <Asset 
                 className="absolute z-25"
                 src={rarityMap[card.稀有度]}
+                type="image"
                 style={{
                     height: `${fontsize * 5}px`,
                     left: `${fontsize * 4}px`,
@@ -109,9 +110,10 @@ const CardFullImage = (
                 >
                     {card.卡名}
                 </label>
-                <img
-                    src={`images/60px-${card.属性}.png`}
+                <Asset
+                    src={`60px-${card.属性}.png`}
                     alt="图标"
+                    type="image"
                     style={{
                         height: `${fontsize * 3}px`,
                         width: 'auto',

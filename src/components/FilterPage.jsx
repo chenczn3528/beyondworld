@@ -9,6 +9,7 @@ import GalleryTypeSelectPage from "./GalleryTypeSelectPage.jsx";
 import {sortCards} from "../utils/cardSort.js";
 import {Lock} from "lucide-react";
 import LockIcon from "../icons/LockIcon.jsx";
+import { Asset } from './Asset.jsx';
 
 const FilterPage = ({
     baseSize,
@@ -40,10 +41,10 @@ const FilterPage = ({
     ]
 
     const rarityPictureMap = {
-        世界: 'images/world.png',
-        月: 'images/moon.png',
-        辰星: 'images/star1.png',
-        星: 'images/star2.png',
+        世界: 'world.png',
+        月: 'moon.png',
+        辰星: 'star1.png',
+        星: 'star2.png',
     };
 
     // 是否显示点击选择顺序的界面（稀有度，属性数值）
@@ -54,7 +55,6 @@ const FilterPage = ({
 
     const roleMap = {0: '顾时夜', 1: '易遇', 3: '夏萧因', 2: '柏源', 4: '全部'};
     const rarityOrderMap = ['稀有度', '主属性数值', '全部', '思维', '魅力', '体魄', '感知', '灵巧'];
-
 
     useEffect(() => {
         let tmpCards = [];
@@ -87,7 +87,6 @@ const FilterPage = ({
         const sorted = sortCards(tmpCards || [], orderChoice);
         setSortedCards(sorted);
     }, [cards, selectedRole, orderChoice, ownChoice, rarityChoice, worldChoice, typeChoice]);
-
 
     const finalSortedCards = [
         ...sortedCards.filter(card => roleMap[selectedRole] === "全部" || card.主角 === roleMap[selectedRole]),
@@ -148,7 +147,6 @@ const FilterPage = ({
                     }}>数量：{finalSortedCards.length - 9}</label>
             </div>
 
-
             {/*中间卡片*/}
             <div
                 className="absolute w-[50%] h-[75%] z-500 flex grid grid-cols-3 overflow-x-auto items-center"
@@ -174,9 +172,10 @@ const FilterPage = ({
                                         }}
                                         height={`${baseSize * 30}px`}
                                     />
-                                    <img
+                                    <Asset
+                                        src={`60px-${card.属性}.png`}
+                                        type="image"
                                         className="absolute left-[0]"
-                                        src={`images/60px-${card.属性}.png`}
                                         width={`${baseSize * 10}px`}
                                         style={{pointerEvents: "none"}}
                                     />
@@ -192,9 +191,10 @@ const FilterPage = ({
                                         }}>
                                         {card.卡名}
                                     </label>
-                                    <img
-                                        className="absolute"
+                                    <Asset
                                         src={rarityPictureMap[card.稀有度]}
+                                        type="image"
+                                        className="absolute"
                                         height={`${baseSize * 12}px`}
                                         style={{right: `${baseSize * 7}px`, pointerEvents: "none"}}
                                     />
@@ -215,7 +215,6 @@ const FilterPage = ({
                 })}
 
             </div>
-
 
             {/*选排序 右上角*/}
             <button

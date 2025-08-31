@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from "react";
 import {playClickSound} from "../utils/playClickSound.js";
-
+import { Asset } from './Asset.jsx';
 
 const GalleryTypeSelectPage = ({ baseSize, onClose, position, orderChoice, setOrderChoice}) => {
 
@@ -14,12 +14,9 @@ const GalleryTypeSelectPage = ({ baseSize, onClose, position, orderChoice, setOr
         }
     },[]);
 
-
     useEffect(()=>{
         console.log(orderChoice)
     },[orderChoice])
-
-
 
     return (
         <div
@@ -104,8 +101,9 @@ const GalleryTypeSelectPage = ({ baseSize, onClose, position, orderChoice, setOr
                                 style={{width: `${baseSize * 40}px`, height: `${baseSize * 20}px`,}}
                             >
                                 {item !== "全部" && (
-                                    <img
-                                        src={`images/60px-${item}.png`}
+                                    <Asset
+                                        src={`60px-${item}.png`}
+                                        type="image"
                                         height={baseSize * 12}
                                         style={{marginRight: `${baseSize}px`}}
                                     />

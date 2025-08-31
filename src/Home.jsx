@@ -18,9 +18,10 @@ import {useHistoryDB} from "./hooks/useHistoryDB.js";
 import useCardImageIndex from "./hooks/useCardImageIndex.js";
 import FilterPage from "./components/FilterPage.jsx";
 import MusicPage from "./components/MusicPage.jsx";
+import { Asset } from './components/Asset.jsx';
 
 
-const Home = () => {
+const Home = ({isPortrait, openAssetTest}) => {
 
 
     // 加载serviceWorker
@@ -263,28 +264,28 @@ const Home = () => {
 
 
 
-    // ======================================================== 首次进入对话框
-    const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
+    // // ======================================================== 首次进入对话框
+    // const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
     
-    useEffect(() => {
-        // 检查是否是第一次进入
-        let hasShownWelcome = localStorage.getItem('bw_welcomeShown');
-        if (hasShownWelcome === null) {
-            localStorage.setItem('bw_welcomeShown', 'false');
-            hasShownWelcome = 'false';
-        }
-        if (hasShownWelcome !== 'true') {
-            setShowWelcomeDialog(true);
-        }
-    }, []);
+    // useEffect(() => {
+    //     // 检查是否是第一次进入
+    //     let hasShownWelcome = localStorage.getItem('bw_welcomeShown');
+    //     if (hasShownWelcome === null) {
+    //         localStorage.setItem('bw_welcomeShown', 'false');
+    //         hasShownWelcome = 'false';
+    //     }
+    //     if (hasShownWelcome !== 'true') {
+    //         setShowWelcomeDialog(true);
+    //     }
+    // }, []);
 
-    const handleWelcomeDialogClose = () => {
-        setShowWelcomeDialog(false);
-        localStorage.setItem('bw_welcomeShown', 'true');
-        localStorage.clear();
-        localStorage.setItem('bw_welcomeShown', 'true');
-        clearHistory();
-    };
+    // const handleWelcomeDialogClose = () => {
+    //     setShowWelcomeDialog(false);
+    //     localStorage.setItem('bw_welcomeShown', 'true');
+    //     localStorage.clear();
+    //     localStorage.setItem('bw_welcomeShown', 'true');
+    //     clearHistory();
+    // };
 
     // ======================================================== 图鉴相关
     // ------------------------------- 去重逻辑
@@ -794,7 +795,7 @@ const Home = () => {
     return (
         <div className="w-full h-full relative overflow-hidden" style={{backgroundColor: 'black'}} ref={divRef}>
 
-            {/* 欢迎对话框 */}
+            {/* 欢迎对话框
             {showWelcomeDialog && (
                 <div 
                     className="absolute w-full h-full z-[1000] flex items-center justify-center"
@@ -854,25 +855,15 @@ const Home = () => {
                         </button>
                     </div>
                 </div>
-            )}
+            )} */}
 
             {/* 视频层（最底层） */}
-            <video
-                preload="auto"
-                autoPlay
-                loop
-                playsInline
-                muted
-                controls={false}
-                onEnded={() => {
-                    const validDrawId = drawSessionIdRef.current;
-                    if (!validDrawId) return;
-                    setisAnimatingDrawCards(false);
-                    drawSessionIdRef.current = 0; // 重置流程 ID，防止后续重复触发
-                }}
-                className="absolute top-0 left-0 w-full h-full object-cover z-0">
-                <source src="videos/background1.mp4" type="video/mp4"/>
-            </video>
+            <Asset src="background1.mp4" type="video" controls={false} onEnded={() => {
+                const validDrawId = drawSessionIdRef.current;
+                if (!validDrawId) return;
+                setisAnimatingDrawCards(false);
+                drawSessionIdRef.current = 0; // 重置流程 ID，防止后续重复触发
+            }} className="absolute top-0 left-0 w-full h-full object-cover z-0"/>
 
 
             {/* 抽卡动画层 */}
@@ -1039,6 +1030,7 @@ const Home = () => {
                 setShowMusicPageZIndex={setShowMusicPageZIndex}
                 selectedPools={selectedPools}
                 cardData={cardData}
+                openAssetTest={openAssetTest}
             />
 
         </div>

@@ -5,6 +5,7 @@ import LeftIcon from "../icons/LeftIcon.jsx";
 import CardMeet from "./CardMeet.jsx";
 import useCardImageIndex from "../hooks/useCardImageIndex.js";
 import FadeImage from "./FadeImage.jsx";
+import { Asset } from './Asset.jsx';
 
 const GalleryFullImage = (
 {
@@ -35,7 +36,6 @@ const GalleryFullImage = (
     const [showInformation, setShowInformation] = useState(true);
     const [showMeet, setShowMeet] = useState(false);
 
-
     const attributes = ['思维', '魅力', '体魄', '感知', '灵巧'];
     const button_style = {
         marginRight: '1vmin',
@@ -52,12 +52,11 @@ const GalleryFullImage = (
     });
 
     const rarityMap = {
-        世界: 'images/world.png',
-        月: 'images/moon.png',
-        辰星: 'images/star1.png',
-        星: 'images/star2.png',
+        世界: 'world.png',
+        月: 'moon.png',
+        辰星: 'star1.png',
+        星: 'star2.png',
     };
-
 
     return (
         showGalleryFullImage && (
@@ -89,7 +88,6 @@ const GalleryFullImage = (
                         />
                     </div>
 
-
                     {showInformation && (
                         <div className="absolute w-full h-full">
                             {/*角色名 世界*/}
@@ -115,8 +113,9 @@ const GalleryFullImage = (
 
                             {/*稀有度 卡名*/}
                             <div className="absolute flex items-center" style={{bottom: `${fontsize * 6.5}px`,left: `${fontsize * 2}px`}}>
-                                <img
+                                <Asset
                                     src={rarityMap[card.稀有度]}
+                                    type="image"
                                     style={{height: `${fontsize * 5}px`, width: 'auto', marginRight: `${fontsize / 2}px`,}}
                                 />
                                 <label
@@ -136,8 +135,11 @@ const GalleryFullImage = (
                             <div className="absolute flex flex-row" style={{bottom: `${fontsize * 2.5}px`,left: `${fontsize * 3}px`}}>
                                 {attributes.map(attr => (
                                     <div key={attr} className="flex flex-col items-center" style={{marginRight: `${fontsize}px`,}}>
-                                        <img
-                                            src={`images/60px-${attr}.png`} style={{width: `${fontsize * 2}px`}}/>
+                                        <Asset
+                                            src={`60px-${attr}.png`}
+                                            type="image"
+                                            style={{width: `${fontsize * 2}px`}}
+                                        />
                                         <label
                                             style={{
                                                 color: card.属性 === attr ? 'gold' : 'white',
@@ -171,7 +173,6 @@ const GalleryFullImage = (
                                 style={{...button_style, top: `${fontsize * 2}px`, right: `${fontsize * 3}px`,}}
                                 onClick={(e) => {e.stopPropagation();setShowMeet(true)}}
                             >相会</button>
-
 
                             {/*右下角按钮*/}
                             <div

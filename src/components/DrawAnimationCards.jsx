@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Asset } from './Asset.jsx';
+import { useAssetLoader } from '../hooks/useAssetLoader';
 
 const DrawAnimationCards = ({ isFiveStar, onAnimationEnd }) => {
   const videoRef = useRef(null);
   const audioRef = useRef(null);
   const [videoDuration, setVideoDuration] = useState(0);
+  const { loadAsset } = useAssetLoader();
 
   const handleVideoLoaded = () => {
     if (videoRef.current) {
@@ -16,11 +19,37 @@ const DrawAnimationCards = ({ isFiveStar, onAnimationEnd }) => {
   };
 
   useEffect(() => {
-    if (videoRef.current && audioRef.current) {
-      videoRef.current.play();
-      audioRef.current.play();
-    }
-  }, [isFiveStar]);
+    const playMedia = async () => {
+      try {
+        // 加载视频
+        const videoFileName = isFiveStar ? 'gold.mp4' : 'no_gold.mp4';
+        const videoUrl = await loadAsset('video', videoFileName);
+        
+        // 加载音频
+        const audioUrl = await loadAsset('audio', '抽卡音频.mp3');
+        
+        if (videoRef.current && audioRef.current) {
+          // 设置视频源
+          if (videoRef.current.src !== videoUrl) {
+            videoRef.current.src = videoUrl;
+          }
+          
+          // 设置音频源
+          if (audioRef.current.src !== audioUrl) {
+            audioRef.current.src = audioUrl;
+          }
+          
+          // 播放媒体
+          await videoRef.current.play();
+          await audioRef.current.play();
+        }
+      } catch (error) {
+        console.warn('媒体播放失败:', error);
+      }
+    };
+
+    playMedia();
+  }, [isFiveStar, loadAsset]);
 
   useEffect(() => {
     if (videoDuration > 0) {
@@ -46,10 +75,6 @@ const DrawAnimationCards = ({ isFiveStar, onAnimationEnd }) => {
             muted
             controls={false}
         >
-          <source
-              src={isFiveStar ? 'videos/gold.mp4' : 'videos/no_gold.mp4'}
-              type="video/mp4"
-          />
           Your browser does not support the video tag.
         </video>
 
@@ -60,10 +85,6 @@ const DrawAnimationCards = ({ isFiveStar, onAnimationEnd }) => {
             // loop
             muted={false}
         >
-          <source
-              src='audios/抽卡音频.mp3'
-              type="audio/mp3"
-          />
           Your browser does not support the audio element.
         </audio>
       </div>

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {playClickSound} from "../utils/playClickSound.js";
+import { Asset } from './Asset.jsx';
 
 const Carousel = ({
     cardData,
@@ -15,20 +16,12 @@ const Carousel = ({
   const deltaX = useRef(0);
 
 
-
-
-  // const rarityMap = {
-  //     世界: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/world.png',
-  //     月: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/moon.png',
-  //     辰星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star1.png',
-  //     星: 'https://cdn.chenczn3528.dpdns.org/beyondworld/images/star2.png',
-  //   };
     const rarityMap = {
-        刹那: 'images/instant.png',
-        世界: 'images/world.png',
-        月: 'images/moon.png',
-        辰星: 'images/star1.png',
-        星: 'images/star2.png',
+        刹那: 'instant.png',
+        世界: 'world.png',
+        月: 'moon.png',
+        辰星: 'star1.png',
+        星: 'star2.png',
     };
 
     const timerRef = useRef(null);
@@ -144,6 +137,7 @@ const Carousel = ({
             {/* 主图 */}
             <img
                 src={card.图片信息[0]?.src}
+                // type="image"
                 alt={`slide-${index}`}
                 className="object-contain rounded-lg shadow-xl edge-blur-mask"
                 style={{width: `${fontsize * 20}px`}}
@@ -176,8 +170,9 @@ const Carousel = ({
                   {card.主角} · {card.卡名}
                 </label>
                 {/* 稀有度角标 */}
-                <img
+                <Asset
                     src={rarityMap[card.稀有度]}
+                    type="image"
                     style={{width: `${fontsize * 3}px`}}
                     alt="Rarity Badge"
                 />

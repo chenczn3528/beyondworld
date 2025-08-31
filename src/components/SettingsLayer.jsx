@@ -3,6 +3,7 @@ import Carousel from "./Carousel";
 import cardData from "../assets/cards.json";
 import {playClickSound} from "../utils/playClickSound.js";
 import MusicIcon from "../icons/MusicIcon.jsx";
+import { Asset } from './Asset.jsx';
 
 const SettingsLayer = ({
     baseSize,
@@ -31,11 +32,10 @@ const SettingsLayer = ({
     setShowMusicPageZIndex,
     selectedPools,
     cardData,
+    openAssetTest,
 }) => {
 
     const filtered_cardData = cardData.filter(card => card.稀有度 === '世界' || card.稀有度 === '刹那');
-
-
 
     const [copyState, setCopyState] = useState(0);
 
@@ -48,17 +48,11 @@ const SettingsLayer = ({
         }
     }, [copyState])
 
-
-
-
-
-
     return (
         <div
             className="absolute w-full h-full"
             style={{filter: showDetailedImage ? 'blur(10px)' : 'none', transition: 'filter 0.3s ease'}}
         >
-
 
             {/*主页显示卡片轮播图*/}
             <div
@@ -79,7 +73,6 @@ const SettingsLayer = ({
                     fontsize={baseSize * 7}
                 />
             </div>
-
 
             {/*抽卡按钮*/}
             <div
@@ -122,7 +115,6 @@ const SettingsLayer = ({
                     感召十次
                 </button>
             </div>
-
 
             {/*最上层按钮和文字*/}
             <div
@@ -196,6 +188,13 @@ const SettingsLayer = ({
                     </button>
                 </div>
 
+                {/*素材测试*/}
+                <button className='absolute'
+                        style={{fontSize: `${fontsize * 1.2}px`, top: `${fontsize * 4}px`, backgroundColor: 'rgba(255,255,255,0.4)', color: 'white', zIndex: showDetailedImage ? 2 : 4}} 
+                        onClick={() => openAssetTest && openAssetTest()}>
+                        动画缓存
+                </button>
+
                 {/* 保底显示 */}
                 <div className="flex flex-col">
                     <div
@@ -216,7 +215,7 @@ const SettingsLayer = ({
                         <label className="text-shadow"
                                style={{fontSize: `${baseSize * 10}px`, whiteSpace: 'nowrap'}}> {70 - pityCount} </label>
                         <label className="text-shadow" style={{whiteSpace: 'nowrap'}}> 次感召必出 </label>
-                        <img src="images/world.png" style={{height: `${baseSize * 20}px`}}/>
+                        <Asset src="world.png" type="image" style={{height: `${baseSize * 20}px`}}/>
                         {(() => {
                           // 检查是否选择了包含刹那卡的卡池
                           const hasInstantCards = cardData.some(card => 
@@ -226,7 +225,7 @@ const SettingsLayer = ({
                           return hasInstantCards ? (
                             <>
                               <label className="text-shadow" style={{whiteSpace: 'nowrap'}}> 或 </label>
-                              <img src="images/instant.png" style={{height: `${baseSize * 20}px`}}/>
+                              <Asset src="instant.png" type="image" style={{height: `${baseSize * 20}px`}}/>
                             </>
                           ) : null;
                         })()}
@@ -317,7 +316,6 @@ const SettingsLayer = ({
                 </button>
             </div>
 
-
             {/*音乐按钮*/}
             <button className="absolute z-20"
                 onClick={(e) => {
@@ -335,7 +333,6 @@ const SettingsLayer = ({
             >
                 <MusicIcon size={baseSize * 16} color="white"/>
             </button>
-
 
             <div className="absolute flex flex-col items-end"
                  style={{right: `${baseSize * 12}px`, bottom: `${baseSize * 12}px`, fontSize: baseSize * 7}}>

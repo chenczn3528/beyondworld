@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import CardFullImage from "./CardFullImage.jsx";
+import { useAssetLoader } from '../hooks/useAssetLoader';
 
 const CardOverlay = ({
     showCardOverlay,
@@ -11,36 +12,45 @@ const CardOverlay = ({
     handleSkip,
 }) => {
     const cardSoundRef = useRef(null);
-
+    const { loadAsset } = useAssetLoader();
 
     const allCards = drawResultsRef.current.map(item => item.card);
     const card = allCards[currentCardIndex];
 
-
-
     // ⭐ 播放音效
     useEffect(() => {
         if (!showCardOverlay || !card) return;
-        let sound;
+        
+        let soundFileName;
         if (card.稀有度 === '世界' || card.稀有度 === '刹那') {
-            sound = 'audios/金卡音效.mp3';
+            soundFileName = '金卡音效.mp3';
         } else if (card.稀有度 === '月') {
-            sound = 'audios/月卡音效.mp3';
+            soundFileName = '月卡音效.mp3';
         } else {
-            sound = 'audios/切换音效.mp3';
+            soundFileName = '切换音效.mp3';
         }
-        const audio = new Audio(sound);
-        audio.volume = 1;
-        audio.currentTime = 0;
-        audio.play().catch(err => console.warn("音效播放失败:", err));
-        cardSoundRef.current = audio;
-    }, [card, showCardOverlay]);
+
+        // 使用 Asset 系统加载音频
+        const playSound = async () => {
+            try {
+                const audioUrl = await loadAsset('audio', soundFileName);
+                if (audioUrl) {
+                    const audio = new Audio(audioUrl);
+                    audio.volume = 1;
+                    audio.currentTime = 0;
+                    await audio.play();
+                    cardSoundRef.current = audio;
+                }
+            } catch (err) {
+                console.warn("音效播放失败:", err);
+            }
+        };
+
+        playSound();
+    }, [card, showCardOverlay, loadAsset]);
 
     // ⭐ 空卡保护
     if (!card) return null;
-
-
-
 
     return (
         showCardOverlay && (

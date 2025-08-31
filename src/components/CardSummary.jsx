@@ -3,6 +3,8 @@ import { LazyLoadImage } from "react-lazy-load-image-component";
 import clsx from "clsx";
 import CardFullImage from "./CardFullImage.jsx";
 import {playClickSound} from "../utils/playClickSound.js";
+import { useAssetLoader } from '../hooks/useAssetLoader';
+import { Asset } from './Asset.jsx';
 
 const CardSummary = ({
     drawResults,
@@ -18,26 +20,35 @@ const CardSummary = ({
     const picWidthRatio = 16 * scale;
     const picHeightRatio = 9 * scale;
 
-
-
   // ========================================================
   // 设置音效
   const summaryAudioRef = useRef(null);
   const [fullImage, setFullImage] = useState(null);
   const [showFullImage, setShowFullImage] = useState(false);
+  const { loadAsset } = useAssetLoader();
 
   useEffect(() => {
-    // summaryAudioRef.current = new Audio("https://cdn.chenczn3528.dpdns.org/beyondworld/audios/展示总结音效.mp3");
-    summaryAudioRef.current = new Audio("audios/展示总结音效.mp3");
-    summaryAudioRef.current.volume = 1;
-    summaryAudioRef.current.currentTime = 0;
+    // 使用 Asset 系统加载并播放展示总结音效
+    const playSummarySound = async () => {
+      try {
+        const audioUrl = await loadAsset('audio', '展示总结音效.mp3');
+        if (audioUrl) {
+          const audio = new Audio(audioUrl);
+          audio.volume = 1;
+          audio.currentTime = 0;
+          await audio.play();
+          summaryAudioRef.current = audio;
+        }
+      } catch (err) {
+        console.warn("播放十抽总结音效失败：", err);
+      }
+    };
 
-    summaryAudioRef.current
-      .play()
-      .catch((err) => console.warn("播放十抽总结音效失败：", err));
-  }, []); // 组件加载时播放一次
+    playSummarySound();
+  }, [loadAsset]); // 组件加载时播放一次
 
   const rarityPriority = {
+    "刹那": 5,
     "世界": 4,
     "月": 3,
     "辰星": 2,
@@ -80,8 +91,9 @@ const CardSummary = ({
   return (
     <div className="absolute w-full h-full flex items-center justify-center">
       {/*底部图片（绝对定位） */}
-      <img
-        src="images/bg_main2.jpg"
+      <Asset
+        src="bg_main2.jpg"
+        type="image"
         alt="底部装饰"
         className="absolute z-30 w-full h-full"
       />
@@ -129,18 +141,19 @@ const CardSummary = ({
                               }}
                           />
 
-                          <img
+                          <Asset
                               src={
                                   card.card.稀有度 === "刹那"
-                                    ? "images/instant.png"
+                                    ? "instant.png"
                                     : card.card.稀有度 === "世界"
-                                        ? "images/world.png"
+                                        ? "world.png"
                                         : card.card.稀有度 === "月"
-                                            ? "images/moon.png"
+                                            ? "moon.png"
                                             : card.card.稀有度 === "辰星"
-                                                ? "images/star1.png"
-                                                : "images/star2.png"
+                                                ? "star1.png"
+                                                : "star2.png"
                               }
+                              type="image"
                               className="absolute h-auto z-10"
                               style={{top: `${fontsize * -1.1}px`, right: "0px", height: `${fontsize * 2.5}px`,}}
                           />
@@ -149,8 +162,9 @@ const CardSummary = ({
                               className="absolute top-[0] left-[0] rounded-full flex items-center justify-center z-10"
                               style={{background: "radial-gradient(circle, rgba(256,256,256,0.5) 0%, rgba(128,128,128,0) 60%)"}}
                           >
-                            <img
-                                src={`images/60px-${card.card.属性}.png`}
+                            <Asset
+                                src={`60px-${card.card.属性}.png`}
+                                type="image"
                                 style={{height: `${fontsize * 1.5}px`}}
                                 alt="属性图标"
                             />

@@ -8,6 +8,7 @@ import FilterRoleCard from "./FilterRoleCard.jsx";
 import GalleryTypeSelectPage from "./GalleryTypeSelectPage.jsx";
 import {sortCards} from "../utils/cardSort.js";
 import LockIcon from "../icons/LockIcon.jsx";
+import { Asset } from './Asset.jsx';
 
 const GalleryPage = ({
     baseSize,
@@ -33,8 +34,6 @@ const GalleryPage = ({
 
     const [showFilterCard, setShowFilterCard] = useState(false);
 
-
-
     const [finalCards, setFinalCards] = useState([]);
     useEffect(() => {
         if (!cards || cards.length === 0) return;
@@ -51,9 +50,6 @@ const GalleryPage = ({
         setFinalCards(sortCards(filtered, orderChoice));
     }, [selectedRole, sortedCards, orderChoice, cards]);
 
-
-
-
     const [scrollT, setScrollT] = useState(0);
     const timeoutRef = useRef(null);
 
@@ -61,7 +57,6 @@ const GalleryPage = ({
     const targetIndex = 1; // 希望第几张显示在视觉焦点位（第三张）
 
     const totalSlots = 300;
-
 
     const clippedT = Math.max(0, Math.min(1, scrollT));
     const rawIndex = Math.round(clippedT * (totalSlots - 1)) - paddingCount;
@@ -71,19 +66,13 @@ const GalleryPage = ({
     const SCROLL_T_MIN = -0.2;
     const SCROLL_T_MAX = 1.1;
 
-
-
-
-
-
-     // ======================================= 滚动相关
+    // ======================================= 滚动相关
     const scrollToIndex = (index) => {
         const clampedIndex = Math.max(0, Math.min(finalCards.length - 1, index)); // 防越界
         const targetSlot = clampedIndex + paddingCount;
         const tValue = (targetSlot - targetIndex) / (totalSlots - 1);
         setScrollT(Math.max(SCROLL_T_MIN, Math.min(SCROLL_T_MAX, tValue)));
     };
-
 
     useEffect(() => {
         const container = document.querySelector('#gallery-scroll-container');
@@ -110,7 +99,6 @@ const GalleryPage = ({
         }
     }, [scrollT]);
 
-
     const handleWheel = (e) => {
         // e.preventDefault();
 
@@ -134,7 +122,6 @@ const GalleryPage = ({
         }, 2000);
     };
 
-
     useEffect(() => {
         if (!showGallery) return; // 不显示时不绑定
 
@@ -153,18 +140,9 @@ const GalleryPage = ({
         };
     }, [showGallery]);
 
-
-
-
-
     useEffect(() => {
         scrollToIndex(0); // ✅ 初始加载时将第0号卡片放到参考位置（第3张）
     }, [showGallery]);
-
-
-
-
-
 
     const touchStartRef = useRef(null);
     const initialTouchRef = useRef(null); // 用来记录 touchstart 时的原始位置
@@ -178,7 +156,6 @@ const GalleryPage = ({
         touchStartRef.current = startPos;
         initialTouchRef.current = startPos; // 用来和 touchend 对比判断方向
     };
-
 
     const handleTouchMove = (e) => {
         if (!touchStartRef.current) return;
@@ -199,7 +176,6 @@ const GalleryPage = ({
         touchStartRef.current = currentPos;
     };
 
-
     const handleTouchEnd = (e) => {
         const isVertical = window.innerWidth <= 600;
         const endPos = isVertical ? e.changedTouches[0].clientY : e.changedTouches[0].clientX;
@@ -219,7 +195,6 @@ const GalleryPage = ({
         scrollToIndex(targetIndex);
     };
 
-
     const divRef = useRef(null); // 获取当前绑定的容器的尺寸
     useEffect(() => {
         const container = divRef.current;
@@ -235,14 +210,6 @@ const GalleryPage = ({
             container.removeEventListener('touchend', handleTouchEnd);
         };
     }, [currentCardIndex]);
-
-
-
-
-
-
-
-
 
     // ======================================= 获取当前展示的卡
     const getDisplayCardIndex = () => {
@@ -266,8 +233,6 @@ const GalleryPage = ({
             setGalleryCard(finalCards[0]);
         }
     }, [finalCards, galleryCard, orderChoice, selectedRole]);
-
-
 
     // ======================================= 从大图详情退回小图的时候重新加载图片
     const { getImageIndex, indexMap } = useCardImageIndex();
@@ -305,8 +270,6 @@ const GalleryPage = ({
         return hd === 0 ? info.srcset2 : hd === 1 ? info.src || info.srcset2 : info.src;
     };
 
-
-
     const defaultWhiteImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGUlEQVR42mNgGAWjgP///xkYGBgAADEMAQEGAP8GC04EtW8gAAAAAElFTkSuQmCC";
     const startX = 30;
     const startY = -5;
@@ -317,11 +280,11 @@ const GalleryPage = ({
     const rad = (-80 * Math.PI) / 180;
 
     const rarityMap = {
-        刹那: 'images/instant.png',
-        世界: 'images/world.png',
-        月: 'images/moon.png',
-        辰星: 'images/star1.png',
-        星: 'images/star2.png',
+        刹那: 'instant.png',
+        世界: 'world.png',
+        月: 'moon.png',
+        辰星: 'star1.png',
+        星: 'star2.png',
     };
 
     const [showOrderChoiceView, setShowOrderChoiceView] = useState(false);
@@ -329,7 +292,6 @@ const GalleryPage = ({
         {bottom:`${baseSize * 50}px`, left: `${baseSize * 16}px`},
         {bottom:`${baseSize * 50}px`, left: `${baseSize * 58}px`}
     ]
-
 
     return (
         showGallery && (
@@ -351,7 +313,6 @@ const GalleryPage = ({
                 }}
             >
 
-
                 {/*返回按钮*/}
                 <button className="absolute z-[300] w-auto flex items-center justify-center"
                         onClick={(e) => {
@@ -369,7 +330,6 @@ const GalleryPage = ({
                     <LeftIcon size={baseSize * 24} color="white"/>
                 </button>
 
-
                 {showFilterCard && (
                     <FilterRoleCard
                         baseSize={baseSize}
@@ -380,7 +340,6 @@ const GalleryPage = ({
                     />
                 )}
 
-
                 {showOrderChoiceView && (
                     <GalleryTypeSelectPage
                         baseSize={baseSize}
@@ -390,7 +349,6 @@ const GalleryPage = ({
                         setOrderChoice={setOrderChoice}
                     />
                 )}
-
 
                 <div
                     className="absolute w-[35%] h-full z-10 no-click"
@@ -418,10 +376,6 @@ const GalleryPage = ({
                     >
                         {roleMap[selectedRole]}
                     </button>
-
-
-
-
 
                     {/*选排序*/}
                     <button
@@ -465,7 +419,6 @@ const GalleryPage = ({
                     </button>
                 </div>
 
-
                 {/*大图*/}
                 <div key={`${displayCard?.卡名}-${imageIndex}`} className="absolute w-full h-full">
                     {displayCard && (
@@ -484,7 +437,6 @@ const GalleryPage = ({
                                 </div>
                             )}
 
-
                             {/*大图标注*/}
                             <div className="absolute flex flex-row items-center z-10"
                                  style={{top: `${baseSize * 6}px`, right: `${baseSize * 6}px`}}>
@@ -500,8 +452,9 @@ const GalleryPage = ({
                                     >
                                         <label style={{fontSize: `${baseSize * 5.5}px`}}>{displayCard?.主角}</label>
                                         <div className="flex flex-row gap-[1px]">
-                                            <img
-                                                src={`images/60px-${displayCard?.属性}.png`}
+                                            <Asset
+                                                src={`60px-${displayCard?.属性}.png`}
+                                                type="image"
                                                 className="h-auto"
                                                 style={{width: `${baseSize * 10}px`, height: `${baseSize * 10}px`}}
                                             />
@@ -511,8 +464,9 @@ const GalleryPage = ({
 
                                     </div>
                                 </div>
-                                <img
+                                <Asset
                                     src={rarityMap[displayCard?.稀有度]}
+                                    type="image"
                                     style={{height: `${baseSize * 28}px`}}
                                 />
                             </div>
@@ -520,7 +474,6 @@ const GalleryPage = ({
                     )}
 
                 </div>
-
 
                 {/*阴影*/}
                 <div>
@@ -630,8 +583,9 @@ const GalleryPage = ({
                                 />
                                 {imageAttr && (
                                     <div>
-                                        <img
-                                            src={`images/60px-${imageAttr}.png`}
+                                        <Asset
+                                            src={`60px-${imageAttr}.png`}
+                                            type="image"
                                             className="absolute"
                                             style={{
                                                 width: `${baseSize * 8 * scale}px`,
@@ -657,8 +611,9 @@ const GalleryPage = ({
                                             {imageCardName}
                                         </label>
 
-                                        <img
+                                        <Asset
                                             src={rarityMap[imageRarity]}
+                                            type="image"
                                             className="absolute"
                                             style={{
                                                 width: `${baseSize * 20 * scale}px`,
@@ -676,7 +631,6 @@ const GalleryPage = ({
                     })}
 
                 </div>
-
 
             </div>
         )

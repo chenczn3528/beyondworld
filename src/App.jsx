@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
 import Home from './Home.jsx';
+import AssetTest from './components/AssetTest.jsx';
 
 function App() {
     const wrapperRef = useRef();
     const gameRef = useRef();
     const [isPortrait, setIsPortrait] = useState(window.innerHeight >= window.innerWidth);
-
+    const [showAssetTest, setShowAssetTest] = useState(true);
+    
     const resize = () => {
         const w = window.innerWidth;
         const h = window.innerHeight;
@@ -109,7 +111,11 @@ function App() {
             <div className="wrapper" ref={wrapperRef}>
                 <div className="game relative" ref={gameRef}>
                     <div className="scrollable-content">
-                        <Home/>
+                    {showAssetTest ? (
+                        <AssetTest onClose={() => setShowAssetTest(false)} />
+                    ) : (
+                        <Home isPortrait={isPortrait} openAssetTest={() => setShowAssetTest(true)} />
+                    )}
                     </div>
                 </div>
             </div>
