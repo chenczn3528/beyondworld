@@ -1,16 +1,56 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Asset } from './Asset';
 import { useAssetStorage } from '../hooks/useAssetStorage';
 import LeftIcon from '../icons/LeftIcon';
 import useResponsiveFontSize from '../hooks/useResponsiveFontSize';
+import { getAssetsByType } from '../assets/assets_config.js';
 
 const AssetTest = ({ onClose }) => {
   const { storeAllAssets, getStorageStats, clearStorage, status, progress, currentAsset } = useAssetStorage();
   const [stats, setStats] = useState(null);
   // 自动刷新：移除开关，始终自动刷新
   const [fileSizeInfo, setFileSizeInfo] = useState(null);
+  const [gitInfo] = useState(() => ({
+    hash: typeof __BUILD_GIT_HASH__ !== 'undefined' ? __BUILD_GIT_HASH__ : null,
+    dateIso: typeof __BUILD_GIT_DATE_ISO__ !== 'undefined' ? __BUILD_GIT_DATE_ISO__ : null,
+    message: typeof __BUILD_GIT_MESSAGE__ !== 'undefined' ? __BUILD_GIT_MESSAGE__ : null,
+  }));
+  const [showLog, setShowLog] = useState(false);
 
-  const fontsize = useResponsiveFontSize({scale: 0.9});
+  // const fontsize = useResponsiveFontSize({scale: 0.9});
+
+  // ======================================= 获取容器尺寸（16:9下）
+  const [baseSize, setBaseSize] = useState(1);
+  const divRef = useRef(null); // 获取当前绑定的容器的尺寸
+
+  useEffect(() => {
+      const updateSize = () => {
+          if (divRef.current) {
+              const width = divRef.current.clientWidth;
+              const height = divRef.current.clientHeight;
+
+              if (height > 0) {
+                  const newBaseSize = width / 375;
+                  setBaseSize(newBaseSize);
+                  return true;
+              }
+          }
+          return false;
+      };
+
+      // 初始化时轮询直到能获取有效高度
+      const tryInitSize = () => {
+          const success = updateSize();
+          if (!success) {
+              // 如果失败，延迟一帧继续尝试
+              requestAnimationFrame(tryInitSize);
+          }
+      };
+      tryInitSize(); // 启动初始化
+      window.addEventListener('resize', updateSize); // 响应窗口变化
+
+      return () => {window.removeEventListener('resize', updateSize);};
+  }, []);
 
   // 加载统计信息 - 使用 useCallback 避免无限循环
   const loadStats = useCallback(async () => {
@@ -71,19 +111,20 @@ const AssetTest = ({ onClose }) => {
     const displayProgress = status === 'storing' ? progress : localProgress;
 
     return (
-      <div style={{ marginBottom: '16px' }}>
+      <div style={{ marginBottom: `${baseSize * 18}px` }}>
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
-          marginBottom: '8px',
-          fontSize: '14px'
+          marginBottom: `${baseSize * 10}px`,
+          fontSize: `${baseSize * 20}px`,
+          fontWeight: '800',
         }}>
           <span>存储进度</span>
           <span>{displayProgress}%</span>
         </div>
         <div style={{ 
           width: '100%', 
-          height: '20px', 
+          height: `${baseSize * 18}px`, 
           backgroundColor: '#374151', 
           borderRadius: '10px',
           overflow: 'hidden'
@@ -99,7 +140,7 @@ const AssetTest = ({ onClose }) => {
         {status === 'storing' && currentAsset && (
           <p style={{ 
             margin: '8px 0 0 0', 
-            fontSize: '14px', 
+            fontSize: `${baseSize * 18}px`, 
             color: '#9ca3af' 
           }}>
             当前: {currentAsset.name} ({(currentAsset.size / 1024 / 1024).toFixed(2)} MB)
@@ -122,17 +163,15 @@ const AssetTest = ({ onClose }) => {
     };
     
     return (
-      <div style={{ 
-        marginBottom: '16px', 
-        padding: '16px', 
+      <div style={{
+        padding: `${baseSize * 10}px`,
         backgroundColor: '#1f2937', 
         borderRadius: '8px'
       }}>
         <label style={{ 
           display: 'block',
-          fontSize: '18px', 
-          fontWeight: '500', 
-          marginBottom: '12px'
+          fontSize: `${baseSize * 20}px`, 
+          fontWeight: '800', 
         }}>
           文件大小信息
         </label>
@@ -140,7 +179,7 @@ const AssetTest = ({ onClose }) => {
           display: 'grid', 
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
           gap: '16px',
-          fontSize: '14px'
+          fontSize: `${baseSize * 18}px`
         }}>
           <div>
             <p style={{ margin: '4px 0', color: '#9ca3af' }}>视频文件</p>
@@ -173,52 +212,94 @@ const AssetTest = ({ onClose }) => {
 
   return (
     <div style={{ 
-      padding: `${fontsize * 2}px`, 
+      padding: `${baseSize * 40}px`, 
       backgroundColor: '#111827', 
       color: 'white',
       minHeight: '100vh',
-      // overflowY: 'auto',
       position: 'relative'
     }}>
 
       <button
           className="absolute items-center z-20"
           onClick={onClose}
-          style={{background: 'transparent', border: 'none', padding: 0, marginTop: `${fontsize}px`}}
+          style={{background: 'transparent', border: 'none', padding: 0}}
       >
-          <LeftIcon size={fontsize * 2} color="white"/>
+          <LeftIcon size={baseSize * 48} color="white"/>
       </button>
 
       <label style={{ 
         display: 'block',
-        fontSize: '28px', 
+        fontSize: `${baseSize * 30}px`,
         fontWeight: 'bold', 
-        marginTop: `${fontsize}px`,
-        marginBottom: '12px',
+        marginBottom: `${baseSize * 10}px`,
         textAlign: 'center'
       }}>
         动画素材缓存
       </label>
 
-      <label style={{color: "gray", fontSize: `${fontsize * 1.1}px`}}>
+      {/* 更新日志切换按钮 */}
+      {(gitInfo.dateIso || gitInfo.hash || gitInfo.message) && (
+        <button
+          onClick={() => setShowLog(v => !v)}
+          style={{
+            position: 'absolute',
+            top: `${baseSize * 40}px`,
+            right: `${baseSize * 40}px`,
+            zIndex: 6,
+            backgroundColor: '#334155',
+            color: 'white',
+            border: 'none',
+            borderRadius: 6,
+            padding: `${baseSize * 8}px ${baseSize * 12}px`,
+            cursor: 'pointer'
+          }}
+        >{showLog ? '隐藏更新日志' : '更新日志'}</button>
+      )}
+
+      {/* 更新日志 */}
+      {showLog && (gitInfo.dateIso || gitInfo.hash || gitInfo.message) && (
+        <div style={{ 
+          margin: `${baseSize * 60}px`,
+          padding: `${baseSize * 18}px`,
+          backgroundColor: '#1f2937',
+          borderRadius: '8px',
+          border: '1px solid #374151',
+          position: 'absolute',
+          top: `${baseSize * 5}px`,
+          right: `${baseSize * 5}px`,
+          width: `${baseSize * 360}px`,
+          zIndex: 5
+        }}>
+          <div style={{ fontSize: `${baseSize * 18}px`, color: '#d1d5db', lineHeight: 1.6 }}>
+            {gitInfo.dateIso && (
+              <div>• 更新时间：{new Date(gitInfo.dateIso).toLocaleString()}</div>
+            )}
+            {gitInfo.message && (
+              <div>• 更新说明：{gitInfo.message}</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <label style={{color: "gray", fontSize: `${baseSize * 18}px`}}>
         解决各种视频音频播放很卡的问题，先点击“存储所有素材”按钮，存储完后点击“刷新网页”按钮，退出页面再开始抽卡
       </label>
       
       {/* 控制面板 */}
       <div style={{ 
-        marginTop: `${fontsize}px`,
-        marginBottom: `${fontsize}px`,
-        padding: `${fontsize}px`,
+        marginTop: `${baseSize * 12}px`,
+        marginBottom: `${baseSize * 12}px`,
+        padding: `${baseSize * 12}px`,
         backgroundColor: '#1f2937', 
         borderRadius: '8px'
       }}>
         
-        <div style={{ display: 'flex', gap: '16px', marginBottom: '16px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: `${baseSize * 18}px`, marginBottom: `${baseSize * 18}px`, flexWrap: 'wrap' }}>
           <button
             onClick={handleStoreAll}
             disabled={status === 'storing'}
             style={{
-              padding: '8px 16px',
+              padding: `${baseSize * 18}px ${baseSize * 18}px`,
               backgroundColor: status === 'storing' ? '#6b7280' : '#2563eb',
               color: 'white',
               border: 'none',
@@ -242,7 +323,7 @@ const AssetTest = ({ onClose }) => {
           <button
             onClick={() => window.location.reload()}
             style={{
-              padding: '8px 16px',
+              padding: `${baseSize * 18}px ${baseSize * 18}px`,
               backgroundColor: '#059669',
               color: 'white',
               border: 'none',
@@ -260,7 +341,7 @@ const AssetTest = ({ onClose }) => {
           <button
             onClick={handleClear}
             style={{
-              padding: '8px 16px',
+              padding: `${baseSize * 18}px ${baseSize * 18}px`,
               backgroundColor: '#dc2626',
               color: 'white',
               border: 'none',
@@ -276,7 +357,7 @@ const AssetTest = ({ onClose }) => {
           <button
             onClick={() => onClose()}
             style={{
-              padding: '8px 16px',
+              padding: `${baseSize * 18}px ${baseSize * 18}px`,
               backgroundColor: '#059669',
               color: 'white',
               border: 'none',
@@ -298,11 +379,11 @@ const AssetTest = ({ onClose }) => {
         {/* 统计信息 - 移到进度条下面 */}
         {stats && (
           <div style={{ 
-            padding: '12px', 
+            padding: `${baseSize * 18}px`,
             backgroundColor: '#374151', 
             borderRadius: '4px',
-            marginTop: '8px',
-            marginBottom: '8px'
+            marginTop: `${baseSize * 18}px`,
+            marginBottom: `${baseSize * 18}px`,
           }}>
             <p style={{ margin: '4px 0' }}>总素材数: {stats.totalAssets}</p>
             <p style={{ margin: '4px 0' }}>已完成: {stats.completedAssets}</p>
@@ -315,224 +396,48 @@ const AssetTest = ({ onClose }) => {
         {renderFileSizeInfo()}
       </div>
 
-      {/* 视频测试 */}
+      {/* 媒体测试：直接按顺序列出所有视频与音频 */}
       <div style={{ marginBottom: '32px' }}>
         <label style={{ 
           display: 'block',
-          fontSize: '24px', 
+          fontSize: `${baseSize * 18}px`,
           fontWeight: '600', 
-          marginBottom: '16px'
+          marginBottom: `${baseSize * 12}px`,
         }}>
-          视频测试
+          视频
         </label>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-          gap: '24px'
-        }}>
-          <div style={{ backgroundColor: '#1f2937', padding: '16px', borderRadius: '8px' }}>
-            <label style={{ 
-              display: 'block',
-              fontSize: '18px', 
-              fontWeight: '500', 
-              marginBottom: '8px'
-            }}>
-              背景视频1
-            </label>
-            <Asset 
-              src="background.mp4" 
-              type="video" 
-              controls
-              style={{ width: '100%', height: 'auto' }}
-            />
-          </div>
-          
-          <div style={{ backgroundColor: '#1f2937', padding: '16px', borderRadius: '8px' }}>
-            <label style={{ 
-              display: 'block',
-              fontSize: '18px', 
-              fontWeight: '500', 
-              marginBottom: '8px'
-            }}>
-              背景视频2
-            </label>
-            <Asset 
-              src="background1.mp4" 
-              type="video" 
-              controls
-              style={{ width: '100%', height: 'auto' }}
-            />
-          </div>
-          
-          <div style={{ backgroundColor: '#1f2937', padding: '16px', borderRadius: '8px' }}>
-            <label style={{ 
-              display: 'block',
-              fontSize: '18px', 
-              fontWeight: '500', 
-              marginBottom: '8px'
-            }}>
-              出金动画
-            </label>
-            <Asset 
-              src="gold.mp4" 
-              type="video" 
-              controls
-              style={{ width: '100%', height: 'auto' }}
-            />
-          </div>
-
-          <div style={{ backgroundColor: '#1f2937', padding: '16px', borderRadius: '8px' }}>
-            <label style={{ 
-              display: 'block',
-              fontSize: '18px', 
-              fontWeight: '500', 
-              marginBottom: '8px'
-            }}>
-              不出金动画
-            </label>
-            <Asset 
-              src="no_gold.mp4" 
-              type="video" 
-              controls
-              style={{ width: '100%', height: 'auto' }}
-            />
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: `${baseSize * 12}px`, maxWidth: `${baseSize * 600}px`, margin: '0 auto' }}>
+          {(fileSizeInfo?.assets?.video || []).map(v => {
+            const name = v.path.replace(/^.*\//, '');
+            return (
+              <div key={v.path} style={{ backgroundColor: '#1f2937', padding: `${baseSize * 12}px`, borderRadius: 8 }}>
+                <div style={{ color: '#d1d5db', marginBottom: `${baseSize * 8}px`, fontSize: `${baseSize * 14}px` }}>{name}</div>
+                <Asset type="video" src={name} controls style={{ width: '100%', height: 'auto' }} />
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* 音频测试 */}
       <div style={{ marginBottom: '32px' }}>
         <label style={{ 
           display: 'block',
-          fontSize: '24px', 
+          fontSize: `${baseSize * 18}px`,
           fontWeight: '600', 
-          marginBottom: '16px'
+          marginBottom: `${baseSize * 12}px`,
         }}>
-          音频测试
+          音频
         </label>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-          gap: '16px'
-        }}>
-          <div style={{ backgroundColor: '#1f2937', padding: '16px', borderRadius: '8px' }}>
-            <label style={{ 
-              display: 'block',
-              fontSize: '18px', 
-              fontWeight: '500', 
-              marginBottom: '8px'
-            }}>
-              抽卡音频
-            </label>
-            <Asset 
-              src="抽卡音频.mp3" 
-              type="audio" 
-              controls
-              style={{ width: '100%' }}
-            />
-          </div>
-          
-          <div style={{ backgroundColor: '#1f2937', padding: '16px', borderRadius: '8px' }}>
-            <label style={{ 
-              display: 'block',
-              fontSize: '18px', 
-              fontWeight: '500', 
-              marginBottom: '8px'
-            }}>
-              金卡音效
-            </label>
-            <Asset 
-              src="金卡音效.mp3" 
-              type="audio" 
-              controls
-              style={{ width: '100%' }}
-            />
-          </div>
-          
-          <div style={{ backgroundColor: '#1f2937', padding: '16px', borderRadius: '8px' }}>
-            <label style={{ 
-              display: 'block',
-              fontSize: '18px', 
-              fontWeight: '500', 
-              marginBottom: '8px'
-            }}>
-              月卡音效
-            </label>
-            <Asset 
-              src="月卡音效.mp3" 
-              type="audio" 
-              controls
-              style={{ width: '100%' }}
-            />
-          </div>
-          
-          <div style={{ backgroundColor: '#1f2937', padding: '16px', borderRadius: '8px' }}>
-            <label style={{ 
-              display: 'block',
-              fontSize: '18px', 
-              fontWeight: '500', 
-              marginBottom: '8px'
-            }}>
-              切换音效
-            </label>
-            <Asset 
-              src="切换音效.mp3" 
-              type="audio" 
-              controls
-              style={{ width: '100%' }}
-            />
-          </div>
-
-          <div style={{ backgroundColor: '#1f2937', padding: '16px', borderRadius: '8px' }}>
-            <label style={{ 
-              display: 'block',
-              fontSize: '18px', 
-              fontWeight: '500', 
-              marginBottom: '8px'
-            }}>
-              点击音效
-            </label>
-            <Asset 
-              src="点击音效.mp3" 
-              type="audio" 
-              controls
-              style={{ width: '100%' }}
-            />
-          </div>
-
-          <div style={{ backgroundColor: '#1f2937', padding: '16px', borderRadius: '8px' }}>
-            <label style={{ 
-              display: 'block',
-              fontSize: '18px', 
-              fontWeight: '500', 
-              marginBottom: '8px'
-            }}>
-              切换音效
-            </label>
-            <Asset 
-              src="切换音效.mp3" 
-              type="audio" 
-              controls
-              style={{ width: '100%' }}
-            />
-          </div>
-
-          <div style={{ backgroundColor: '#1f2937', padding: '16px', borderRadius: '8px' }}>
-            <label style={{ 
-              display: 'block',
-              fontSize: '18px', 
-              fontWeight: '500', 
-              marginBottom: '8px'
-            }}>
-              展示总结音效
-            </label>
-            <Asset 
-              src="展示总结音效.mp3" 
-              type="audio" 
-              controls
-              style={{ width: '100%' }}
-            />
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: `${baseSize * 12}px`, maxWidth: `${baseSize * 500}px`, margin: '0 auto' }}>
+          {(fileSizeInfo?.assets?.audio || []).map(a => {
+            const name = a.path.replace(/^.*\//, '');
+            return (
+              <div key={a.path} style={{ backgroundColor: '#1f2937', padding: `${baseSize * 12}px`, borderRadius: 8 }}>
+                <div style={{ color: '#d1d5db', marginBottom: `${baseSize * 8}px`, fontSize: `${baseSize * 14}px` }}>{name}</div>
+                <Asset type="audio" src={name} controls style={{ width: '100%' }} />
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -562,5 +467,7 @@ const AssetTest = ({ onClose }) => {
     </div>
   );
 };
+
+// 之前的复杂选择器已移除，现直接在上方按顺序列表展示。
 
 export default AssetTest;

@@ -47,7 +47,7 @@ const CardOverlay = ({
         };
 
         playSound();
-    }, [card, showCardOverlay, loadAsset]);
+    }, [card, showCardOverlay, loadAsset, currentCardIndex]);
 
     // ⭐ 空卡保护
     if (!card) return null;
