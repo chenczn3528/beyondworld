@@ -19,10 +19,17 @@ import useCardImageIndex from "./hooks/useCardImageIndex.js";
 import FilterPage from "./components/FilterPage.jsx";
 import MusicPage from "./components/MusicPage.jsx";
 import { Asset } from './components/Asset.jsx';
+import { useAssetLoader } from './hooks/useAssetLoader.js';
+import { setAssetLoader } from './utils/playClickSound.js';
 
 
 const Home = ({isPortrait, openAssetTest}) => {
 
+    // 初始化 Asset Loader 并设置给 playClickSound
+    const assetLoader = useAssetLoader();
+    useEffect(() => {
+        setAssetLoader(assetLoader);
+    }, [assetLoader]);
 
     // 加载serviceWorker
     if ('serviceWorker' in navigator) {
@@ -794,68 +801,6 @@ const Home = ({isPortrait, openAssetTest}) => {
     // 返回数据时显示的页面
     return (
         <div className="w-full h-full relative overflow-hidden" style={{backgroundColor: 'black'}} ref={divRef}>
-
-            {/* 欢迎对话框
-            {showWelcomeDialog && (
-                <div 
-                    className="absolute w-full h-full z-[1000] flex items-center justify-center"
-                    style={{
-                        backgroundColor: 'rgba(0, 0, 0, 0.6)'
-                    }}
-                >
-                    <div 
-                        className="flex flex-col items-center justify-center"
-                        style={{
-                            backgroundColor: "white",
-                            borderRadius: '16px',
-                            border: '1px solid #e5e7eb',
-                            width: `${160 * baseSize}px`,
-                            height: `${120 * baseSize}px`,
-                            color: 'black',
-                            fontSize: `${baseSize * 8}px`
-                        }}
-                    >
-                        <label 
-                            style={{
-                                color: '#333', 
-                                marginTop: `${baseSize * 12}px`,
-                                marginBottom: `${baseSize * 8}px`,
-                                fontSize: `${baseSize * 10}px`,
-                                fontWeight: 800
-                            }}
-                        >
-                            重要提示
-                        </label>
-                        <label 
-                            className="mb-6" 
-                            style={{
-                                color: '#666', 
-                                lineHeight: '1.6', 
-                                fontSize: `${baseSize * 8}px`,
-                                marginBottom: `${baseSize * 4}px`,
-                            }}
-                        >
-                            2025.07.27更新<br/>
-                            由于新增 <span style={{color: 'rgba(236, 168, 8, 1)', fontWeight: 600}}>刹那</span> 类型侧影<br/>
-                            与原代码可能不兼容<br/>
-                            需要点击 <span style={{color: 'rgba(236, 168, 8, 1)', fontWeight: 600}}>确定</span> 清除所有记录<br/>
-                            然后刷新页面
-                        </label>
-                        <button
-                            onClick={handleWelcomeDialogClose}
-                            className="border px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                            style={{
-                                borderRadius: '8px',
-                                marginBottom: `${baseSize * 12}px`,
-                                fontSize: `${baseSize * 7}px`,
-                                backgroundColor: "gold"
-                            }}
-                        >
-                            确定
-                        </button>
-                    </div>
-                </div>
-            )} */}
 
             {/* 视频层（最底层） */}
             <Asset src="background1.mp4" type="video" controls={false} onEnded={() => {

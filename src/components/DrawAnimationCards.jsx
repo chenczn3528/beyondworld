@@ -39,6 +39,33 @@ const DrawAnimationCards = ({ isFiveStar, onAnimationEnd }) => {
             audioRef.current.src = audioUrl;
           }
           
+          // 为音频应用增益
+          try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioCtx();
+            if (ctx.state === 'suspended') {
+              try { await ctx.resume(); } catch {}
+            }
+            
+            // 获取增益设置
+            let sfxGain = 1;
+            try {
+              const saved = localStorage.getItem('sfxGain');
+              if (saved) {
+                const parsed = parseFloat(saved);
+                if (!Number.isNaN(parsed) && parsed > 0) sfxGain = parsed;
+              }
+            } catch {}
+            
+            const source = ctx.createMediaElementSource(audioRef.current);
+            const gainNode = ctx.createGain();
+            gainNode.gain.value = sfxGain;
+            source.connect(gainNode);
+            gainNode.connect(ctx.destination);
+          } catch (e) {
+            // 忽略增益管线错误，保底直接播放
+          }
+          
           // 播放媒体
           await videoRef.current.play();
           await audioRef.current.play();

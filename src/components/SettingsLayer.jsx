@@ -4,6 +4,8 @@ import cardData from "../assets/cards.json";
 import {playClickSound} from "../utils/playClickSound.js";
 import MusicIcon from "../icons/MusicIcon.jsx";
 import { Asset } from './Asset.jsx';
+import { useAssetLoader } from '../hooks/useAssetLoader';
+import MusicVolumeIcon from '../icons/MusicVolumeIcon.jsx';
 
 const SettingsLayer = ({
     baseSize,
@@ -38,6 +40,72 @@ const SettingsLayer = ({
     const filtered_cardData = cardData.filter(card => card.稀有度 === '世界' || card.稀有度 === '刹那');
 
     const [copyState, setCopyState] = useState(0);
+    const { loadAsset } = useAssetLoader();
+
+    // 音效增益设置开关与数值
+    const [showGainCtrl, setShowGainCtrl] = useState(false);
+    const [sfxGain, setSfxGain] = useState(() => {
+        try {
+            const saved = localStorage.getItem('sfxGain');
+            const v = saved ? parseFloat(saved) : 1;
+            return Number.isNaN(v) ? 1 : v;
+        } catch { return 1; }
+    });
+
+    useEffect(() => {
+        try { localStorage.setItem('sfxGain', String(sfxGain)); } catch {}
+    }, [sfxGain]);
+
+    // 点击外部区域关闭音效设置面板
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (showGainCtrl) {
+                // 检查点击是否在音效设置面板外部
+                const gainPanel = document.querySelector('[data-gain-panel]');
+                const gainButton = document.querySelector('[data-gain-button]');
+                
+                if (gainPanel && gainButton && 
+                    !gainPanel.contains(event.target) && 
+                    !gainButton.contains(event.target)) {
+                    setShowGainCtrl(false);
+                    playClickSound();
+                }
+            }
+        };
+
+        if (showGainCtrl) {
+            document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('touchstart', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
+        };
+    }, [showGainCtrl]);
+
+    const playTestSfx = async () => {
+        try {
+            const url = await loadAsset('audio', '切换音效.mp3');
+            if (!url) return;
+            const audio = new Audio(url);
+            audio.volume = 1;
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioCtx();
+                if (ctx.state === 'suspended') {
+                    try { await ctx.resume(); } catch {}
+                }
+                const source = ctx.createMediaElementSource(audio);
+                const gainNode = ctx.createGain();
+                gainNode.gain.value = sfxGain > 0 ? sfxGain : 1;
+                source.connect(gainNode);
+                gainNode.connect(ctx.destination);
+            } catch {}
+            audio.currentTime = 0;
+            await audio.play();
+        } catch {}
+    };
 
     useEffect(()=>{
         if (copyState === 1) {
@@ -297,9 +365,11 @@ const SettingsLayer = ({
                         color: 'white',
                         width: `${baseSize * 60}px`,
                         textShadow: '0 0 5px gray',
-                        whiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap',
+                        zIndex: showDetailedImage ? 2 : 4
                     }}
                     onClick={async () => {
+                        playClickSound();
                         if (copyState === 2) setCopyState(0);
                         try {
                             await navigator.clipboard.writeText("840305422");
@@ -319,11 +389,11 @@ const SettingsLayer = ({
             {/*音乐按钮*/}
             <button className="absolute z-20"
                 onClick={(e) => {
+                    playClickSound();
                     e.stopPropagation();
                     setShowMusicPageZIndex(200);
                 }}
                 style={{
-                    // visibility: 'hidden',
                     background: '#ffffff05',
                     border: 'none',
                     padding: 0,
@@ -333,6 +403,52 @@ const SettingsLayer = ({
             >
                 <MusicIcon size={baseSize * 16} color="white"/>
             </button>
+
+            {/* 音效增益按钮与隐藏面板 */}
+            <button className="absolute z-20"
+                data-gain-button
+                onClick={() => {playClickSound(); setShowGainCtrl(v => !v)}}
+                style={{
+                    background: '#ffffff05',
+                    border: 'none',
+                    padding: 0,
+                    bottom: `${baseSize * 13}px`,
+                    left: `${baseSize * 96}px`,
+                }}
+            >
+                <MusicVolumeIcon size={baseSize * 16} color="white"/>
+            </button>
+
+
+            
+            {showGainCtrl && (
+                <div className="absolute items-center gap-[1vmin]"
+                        data-gain-panel
+                        style={{
+                        bottom: `${baseSize * 33}px`,
+                        left: `${baseSize * 96}px`,
+                        padding: `${baseSize * 4}px`,
+                        borderRadius: `${baseSize * 1}px`,
+                        backgroundColor: 'rgba(43, 45, 57)',
+                        }}
+                >
+                    <label style={{color: 'white', textShadow: '0 0 6px black', fontSize: `${baseSize * 6}px`, whiteSpace: 'nowrap', marginRight: `${baseSize * 5}px`}}>音效音量大小</label>
+                    <input
+                        type="range"
+                        min="0.5"
+                        max="10"
+                        step="0.1"
+                        value={sfxGain}
+                        onChange={(e) => setSfxGain(parseFloat(e.target.value))}
+                        onMouseUp={playTestSfx}
+                        onTouchEnd={playTestSfx}
+                        style={{width: `${baseSize * 40}px`}}
+                    />
+                    <span style={{color: 'white', textShadow: '0 0 6px black', fontSize: `${baseSize * 6}px`, minWidth: `${baseSize * 8}px`, textAlign: 'right'}}>
+                        {`${(sfxGain || 1).toFixed(1)}`}
+                    </span>
+                </div>
+            )}
 
             <div className="absolute flex flex-col items-end"
                  style={{right: `${baseSize * 12}px`, bottom: `${baseSize * 12}px`, fontSize: baseSize * 7}}>

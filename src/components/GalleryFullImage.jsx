@@ -1,5 +1,4 @@
 import React, { useState} from 'react';
-import { LazyLoadImage } from 'react-lazy-load-image-component';
 import StarIcon from "../icons/StarIcon.jsx";
 import LeftIcon from "../icons/LeftIcon.jsx";
 import CardMeet from "./CardMeet.jsx";
@@ -52,6 +51,7 @@ const GalleryFullImage = (
     });
 
     const rarityMap = {
+        刹那: 'instant.png',
         世界: 'world.png',
         月: 'moon.png',
         辰星: 'star1.png',

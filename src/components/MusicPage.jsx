@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from "react";
+import {playClickSound} from "../utils/playClickSound.js";
 
 const MusicPage = ({
     baseSize,
@@ -13,7 +14,7 @@ const MusicPage = ({
         <div
             className="absolute w-full h-full flex items-center justify-center"
             style={{zIndex: showMusicPageZIndex}}
-            onClick={()=>{setShowMusicPageZIndex(-1)}}
+            onClick={()=>{setShowMusicPageZIndex(-1); playClickSound();}}
         >
             <div
                 className="absolute w-[60%] h-[80%] flex flex-col justify-center "

@@ -37,6 +37,31 @@ const CardOverlay = ({
                 if (audioUrl) {
                     const audio = new Audio(audioUrl);
                     audio.volume = 1;
+
+                    // 使用 WebAudio 增益放大（可配置）
+                    try {
+                        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                        const ctx = new AudioCtx();
+                        if (ctx.state === 'suspended') {
+                            try { await ctx.resume(); } catch {}
+                        }
+                        const source = ctx.createMediaElementSource(audio);
+                        const gainNode = ctx.createGain();
+                        let sfxGain = 1;
+                        try {
+                            const saved = localStorage.getItem('sfxGain');
+                            if (saved) {
+                                const parsed = parseFloat(saved);
+                                if (!Number.isNaN(parsed) && parsed > 0) sfxGain = parsed;
+                            }
+                        } catch {}
+                        gainNode.gain.value = sfxGain;
+                        source.connect(gainNode);
+                        gainNode.connect(ctx.destination);
+                    } catch (e) {
+                        // 失败则忽略增益管线，直接播放
+                    }
+
                     audio.currentTime = 0;
                     await audio.play();
                     cardSoundRef.current = audio;

@@ -35,6 +35,31 @@ const CardSummary = ({
         if (audioUrl) {
           const audio = new Audio(audioUrl);
           audio.volume = 1;
+
+          // 使用 WebAudio 增益放大（可配置，读取 localStorage 的 sfxGain）
+          try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioCtx();
+            if (ctx.state === 'suspended') {
+              try { await ctx.resume(); } catch {}
+            }
+            const source = ctx.createMediaElementSource(audio);
+            const gainNode = ctx.createGain();
+            let sfxGain = 1;
+            try {
+              const saved = localStorage.getItem('sfxGain');
+              if (saved) {
+                const parsed = parseFloat(saved);
+                if (!Number.isNaN(parsed) && parsed > 0) sfxGain = parsed;
+              }
+            } catch {}
+            gainNode.gain.value = sfxGain;
+            source.connect(gainNode);
+            gainNode.connect(ctx.destination);
+          } catch (e) {
+            // 忽略增益管线错误，保底直接播放
+          }
+
           audio.currentTime = 0;
           await audio.play();
           summaryAudioRef.current = audio;

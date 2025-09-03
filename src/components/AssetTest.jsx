@@ -434,7 +434,7 @@ const AssetTest = ({ onClose }) => {
             return (
               <div key={a.path} style={{ backgroundColor: '#1f2937', padding: `${baseSize * 12}px`, borderRadius: 8 }}>
                 <div style={{ color: '#d1d5db', marginBottom: `${baseSize * 8}px`, fontSize: `${baseSize * 14}px` }}>{name}</div>
-                <Asset type="audio" src={name} controls style={{ width: '100%' }} />
+                <Asset type="audio" src={name} controls style={{ width: '100%' }}  />
               </div>
             );
           })}
