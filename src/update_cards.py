@@ -136,6 +136,97 @@ for index, row in enumerate(rows):
 
     cards.append(info_dict)
 
+
+
+
+
+# 卡池分类文件路径
+pool_categories_path = 'src/assets/poolCategories.json'
+
+# 检查是否有新的卡池并更新配置
+try:
+    with open(pool_categories_path, 'r', encoding='utf-8') as f:
+        pool_categories = json.load(f)
+except FileNotFoundError:
+    pool_categories = {}
+
+existing_pools = set()
+
+world_between = pool_categories.get('worldBetween', {})
+subcategories = world_between.get('subcategories', {})
+for category in subcategories.values():
+    for pool_name in category.get('pools', []):
+        existing_pools.add(pool_name)
+
+for key, value in pool_categories.items():
+    if key == 'worldBetween':
+        continue
+    pools = value.get('pools')
+    if isinstance(pools, list):
+        for pool_name in pools:
+            existing_pools.add(pool_name)
+
+new_pool_candidates = {}
+for card in cards:
+    pool_name = card.get('获取途径')
+    if not pool_name:
+        continue
+    if pool_name in existing_pools:
+        continue
+    if pool_name not in new_pool_candidates:
+        new_pool_candidates[pool_name] = card
+
+newly_added_pools = []
+
+if new_pool_candidates:
+    world_between = pool_categories.setdefault('worldBetween', {
+        "name": "世界之间系列",
+        "icon": "🌟",
+        "subcategories": {}
+    })
+    subcategories = world_between.setdefault('subcategories', {})
+
+    collapsed_category = subcategories.setdefault('collapsed', {
+        "name": "崩坍系列",
+        "pools": []
+    })
+    birthday_category = subcategories.setdefault('birthday', {
+        "name": "生日系列",
+        "pools": []
+    })
+    limited_category = subcategories.setdefault('limited', {
+        "name": "限定",
+        "pools": []
+    })
+
+    collapsed_pools = collapsed_category.setdefault('pools', [])
+    birthday_pools = birthday_category.setdefault('pools', [])
+    limited_pools = limited_category.setdefault('pools', [])
+
+    for pool_name, card in new_pool_candidates.items():
+        target_list = None
+
+        if card.get('所属世界') == "崩坍之界":
+            target_list = collapsed_pools
+        elif card.get('板块') == "特别纪念":
+            target_list = birthday_pools
+        else:
+            if "活动" in pool_name or "奇遇" in pool_name:
+                continue
+            target_list = limited_pools
+
+        if target_list is not None and pool_name not in target_list:
+            target_list.append(pool_name)
+            newly_added_pools.append(pool_name)
+            existing_pools.add(pool_name)
+
+if newly_added_pools:
+    with open(pool_categories_path, 'w', encoding='utf-8') as f:
+        json.dump(pool_categories, f, ensure_ascii=False, indent=2)
+    print(f"检测到新的卡池并已更新: {', '.join(newly_added_pools)}", flush=True)
+else:
+    print("未检测到新的卡池。", flush=True)
+
 # 保存到文件
 with open('src/assets/cards.json', 'w', encoding='utf-8') as f:
     json.dump(cards, f, ensure_ascii=False, indent=2)
