@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { playClickSound } from "../utils/playClickSound.js";
 import {getAvailablePools, getDynamicAttributeCounts} from "../utils/cardDataUtils.js";
 import cardData from "../assets/cards.json";
+import poolCategories from "../assets/poolCategories.json";
 
 const CardPoolFilter = ({
     baseSize,
@@ -72,6 +73,40 @@ const CardPoolFilter = ({
         );
       }
     }, [selectedRole, poolsLoaded]);
+
+    const formatPoolName = (pool) => {
+      if (typeof pool !== "string") return pool;
+      const bracketMatch = pool.match(/【([^】]+)】/);
+      if (bracketMatch) return bracketMatch[1];
+      const withoutBrackets = pool.replace(/【|】/g, "");
+      return withoutBrackets.replace(/世界之间$/, "").trim();
+    };
+
+    const { categories: categorizedWorldBetween, uncategorizedPools } = useMemo(() => {
+      const subcategories = poolCategories?.worldBetween?.subcategories ?? {};
+      const categories = Object.entries(subcategories)
+        .filter(([key]) => key !== "basic")
+        .map(([key, value]) => {
+          const candidatePools = (value?.pools ?? []).filter((pool) =>
+            currentAvailablePools.includes(pool)
+          );
+          return {
+            key,
+            name: value?.name ?? key,
+            pools: candidatePools,
+          };
+        })
+        .filter((category) => category.pools.length > 0);
+
+      const categorizedPoolSet = new Set(
+        categories.flatMap((category) => category.pools)
+      );
+      const uncategorized = currentAvailablePools.filter(
+        (pool) => !categorizedPoolSet.has(pool)
+      );
+
+      return { categories, uncategorizedPools: uncategorized };
+    }, [currentAvailablePools]);
 
     // ✅ 是否全选
     const isAllLimitedSelected = currentAvailablePools.every((pool) =>
@@ -275,39 +310,88 @@ const CardPoolFilter = ({
 
                                 <label style={{fontSize: `${baseSize * 5.5}px`, color: "#aaa"}}>（不勾选则仅有常驻{includeMoneyCard ? "+累充" : "" }世界卡）</label>
                                 <label style={{fontSize: `${baseSize * 5.5}px`}}>
-                                    <span style={{color: "white", fontWeight: 800}}>已选卡池：</span>
+                                    {/* <span style={{color: "white", fontWeight: 800}}>已选卡池：</span>
                                     <span style={{color: "#efd6a0"}}>
-                                        {
-                                            selectedPools.length === permanentPools.length + currentAvailablePools.length
-                                                ? '全部'
-                                                : selectedLimitedPools.length === 0
-                                                    ? includeMoneyCard ? '常驻+累充' : "常驻"
-                                                    : includeMoneyCard ? '常驻+累充，' + selectedLimitedPools.map(pool => pool.replace('世界之间', '')).join('，') :
-                                                        '常驻，' + selectedLimitedPools.map(pool => pool.replace('世界之间', '')).join('，')
-                                        }
-                                    </span>
+                                        {selectedPools.length === permanentPools.length + currentAvailablePools.length
+                                            ? '全部'
+                                            : selectedLimitedPools.length === 0
+                                                ? includeMoneyCard ? '常驻+累充' : '常驻'
+                                                : includeMoneyCard
+                                                    ? '常驻+累充，' + selectedLimitedPools.map(formatPoolName).join('，')
+                                                    : '常驻，' + selectedLimitedPools.map(formatPoolName).join('，')}
+                                    </span> */}
                                 </label>
                             </div>
 
                             {/* 选择活动 按钮 */}
-                            <div className="flex flex-col mt-[2vmin] ml-[3vw] mr-[3vw] mb-[4vmin] gap-[2vmin]">
-                                {currentAvailablePools.map((pool) => {
-                                    const isSelected = selectedLimitedPools.includes(pool);
-                                    return (
-                                        <button
-                                            key={pool}
-                                            onClick={() => toggleLimitedPool(pool)}
+                            <div className="flex flex-col mt-[2vmin] ml-[3vw] mr-[3vw] mb-[4vmin] gap-[3vmin]">
+                                {categorizedWorldBetween.map((category) => (
+                                    <div key={category.key} className="flex flex-col gap-[1.5vmin]">
+                                        <label
                                             style={{
-                                                backgroundColor: isSelected ? "rgba(239,218,160,0.8)" : "transparent",
-                                                color: isSelected ? "#111" : "#aaa",
-                                                boxShadow: isSelected ? "0 0 5px gold, 0 0 10px gold" : "0 0 5px #111214, 0 0 10px #111214",
-                                                fontSize: `${baseSize * 6.5}px`,
+                                                fontSize: `${baseSize * 7}px`,
+                                                color: category.key === "collapsed" || category.key === "birthday" || category.key === "limited" ? "#4ea2ff" : "#efd6a0",
+                                                fontWeight: 700,
                                             }}
                                         >
-                                            {pool}
-                                        </button>
-                                    );
-                                })}
+                                            {category.name}
+                                        </label>
+                                        <div className="flex flex-wrap gap-[1.5vmin]">
+                                            {category.pools.map((pool) => {
+                                                const isSelected = selectedLimitedPools.includes(pool);
+                                                return (
+                                                    <button
+                                                        key={pool}
+                                                        onClick={() => toggleLimitedPool(pool)}
+                                                        style={{
+                                                            backgroundColor: isSelected ? "rgba(239,218,160,0.8)" : "transparent",
+                                                            color: isSelected ? "#111" : "#aaa",
+                                                            boxShadow: isSelected ? "0 0 5px gold, 0 0 10px gold" : "0 0 5px #111214, 0 0 10px #111214",
+                                                            fontSize: `${baseSize * 6.5}px`,
+                                                            padding: `${baseSize * 2}px ${baseSize * 4}px`,
+                                                        }}
+                                                    >
+                                                        {formatPoolName(pool)}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {uncategorizedPools.length > 0 && (
+                                    <div className="flex flex-col gap-[1.5vmin]">
+                                        <label
+                                            style={{
+                                                fontSize: `${baseSize * 7}px`,
+                                                color: "#efd6a0",
+                                                fontWeight: 700,
+                                            }}
+                                        >
+                                            其他
+                                        </label>
+                                        <div className="flex flex-wrap gap-[1.5vmin]">
+                                            {uncategorizedPools.map((pool) => {
+                                                const isSelected = selectedLimitedPools.includes(pool);
+                                                return (
+                                                    <button
+                                                        key={pool}
+                                                        onClick={() => toggleLimitedPool(pool)}
+                                                        style={{
+                                                            backgroundColor: isSelected ? "rgba(239,218,160,0.8)" : "transparent",
+                                                            color: isSelected ? "#111" : "#aaa",
+                                                            boxShadow: isSelected ? "0 0 5px gold, 0 0 10px gold" : "0 0 5px #111214, 0 0 10px #111214",
+                                                            fontSize: `${baseSize * 5.5}px`,
+                                                            padding: `${baseSize * 2}px ${baseSize * 4}px`,
+                                                        }}
+                                                    >
+                                                        {formatPoolName(pool)}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

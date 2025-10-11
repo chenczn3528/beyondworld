@@ -41,6 +41,7 @@ const FilterPage = ({
     ]
 
     const rarityPictureMap = {
+        刹那: 'instant.png',
         世界: 'world.png',
         月: 'moon.png',
         辰星: 'star1.png',
