@@ -24,7 +24,7 @@ const CardOverlay = ({
         let soundFileName;
         if (card.稀有度 === '世界' || card.稀有度 === '刹那') {
             soundFileName = '金卡音效.mp3';
-        } else if (card.稀有度 === '月') {
+        } else if (card.稀有度 === '月' || card.稀有度 === '瞬') {
             soundFileName = '月卡音效.mp3';
         } else {
             soundFileName = '切换音效.mp3';

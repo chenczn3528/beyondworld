@@ -53,6 +53,7 @@ const GalleryFullImage = (
     const rarityMap = {
         刹那: 'instant.png',
         世界: 'world.png',
+        瞬: 'moment.png',
         月: 'moon.png',
         辰星: 'star1.png',
         星: 'star2.png',
@@ -179,19 +180,23 @@ const GalleryFullImage = (
                                 className="absolute flex flex-col items-end justify-center"
                                 style={{right: `${fontsize * 3}px`, bottom: `${fontsize * 2}px`,}}
                             >
-                                {/*初始、重逢、无色卡面*/}
+                                {/*初始、重逢、无色卡面（瞬：初始、初始（竖）、重逢）*/}
                                 <div className="flex flex-row mt-[1vmin]">
                                     <button style={getButtonStyle(0)}
                                             onClick={(e) => {e.stopPropagation();onChangePictureNumber(0)}}>初始</button>
 
                                     {card.图片信息.length > 1 && (
                                         <button style={getButtonStyle(1)}
-                                                onClick={(e) => {e.stopPropagation();onChangePictureNumber(1)}}>重逢</button>
+                                                onClick={(e) => {e.stopPropagation();onChangePictureNumber(1)}}>
+                                            {card.稀有度 === '瞬' ? '初始（竖）' : '重逢'}
+                                        </button>
                                     )}
 
                                     {card.图片信息.length === 3 && (
                                         <button style={getButtonStyle(2)}
-                                                onClick={(e) => {e.stopPropagation();onChangePictureNumber(2)}}>无色</button>
+                                                onClick={(e) => {e.stopPropagation();onChangePictureNumber(2)}}>
+                                            {card.稀有度 === '瞬' ? '重逢' : '无色'}
+                                        </button>
                                     )}
                                 </div>
                             </div>

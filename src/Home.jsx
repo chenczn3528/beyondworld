@@ -506,7 +506,7 @@ const Home = ({isPortrait, openAssetTest}) => {
 
         // 十抽保底机制：每十抽必出月卡及以上
         const isTenDrawGuarantee = (i + 1) % 10 === 0 && 
-          drawResults.filter(r => r.rarity === '月' || r.rarity === '世界' || r.rarity === '刹那').length === 0;
+          drawResults.filter(r => r.rarity === '月' || r.rarity === '瞬' || r.rarity === '世界' || r.rarity === '刹那').length === 0;
 
         // 调用抽卡
         do {
@@ -542,7 +542,7 @@ const Home = ({isPortrait, openAssetTest}) => {
           }
         } else {
           currentPity++;
-          currentFourStarCounter = rarity === '月' ? 0 : currentFourStarCounter + 1;
+          currentFourStarCounter = (rarity === '月' || rarity === '瞬') ? 0 : currentFourStarCounter + 1;
         }
 
         drawResults.push(result);
@@ -596,13 +596,13 @@ const Home = ({isPortrait, openAssetTest}) => {
 
       // 判断稀有度
       if (isTenDrawGuarantee) {
-        // 十抽保底：必出月卡及以上
+        // 十抽保底：必出四星（瞬/月）及以上
         const guaranteeRoll = Math.random();
         if (guaranteeRoll < 0.5) {
-          // 50%概率出月卡
-          rarity = '月';
+          // 四星：若未包含“崩坍累充”，则不出“瞬”，只出“月”
+          rarity = includeMoneyCard ? (Math.random() < 0.5 ? '瞬' : '月') : '月';
         } else {
-          // 50%概率出世界/刹那
+          // 50% 概率出五星：世界/刹那
           rarity = Math.random() < 0.5 ? '世界' : '刹那';
         }
       } else if (fourStarCounter >= 9) {
@@ -610,13 +610,15 @@ const Home = ({isPortrait, openAssetTest}) => {
         if (roll < dynamicFiveStarRate) {
           rarity = Math.random() < 0.5 ? '世界' : '刹那';
         } else {
-          rarity = '月';
+          // 四星：若未包含“崩坍累充”，则不出“瞬”，只出“月”；否则 瞬/月 等概率
+          rarity = includeMoneyCard ? (Math.random() < 0.5 ? '瞬' : '月') : '月';
         }
       } else if (roll < dynamicFiveStarRate) {
         // 非保底时，在"世界"和"刹那"之间随机选择
         rarity = Math.random() < 0.5 ? '世界' : '刹那';
       } else if (roll < dynamicFiveStarRate + fourStarRate) {
-        rarity = '月';
+        // 四星：若未包含“崩坍累充”，则不出“瞬”，只出“月”；否则 瞬/月 等概率
+        rarity = includeMoneyCard ? (Math.random() < 0.5 ? '瞬' : '月') : '月';
       } else {
         // rarity = '星'; // 星或辰星统一为稀有度"星"
         // 单独判断辰星/星星
@@ -718,8 +720,8 @@ const Home = ({isPortrait, openAssetTest}) => {
         if (pool.length === 0) return { card: null, rarity };
         const chosen = pool[Math.floor(Math.random() * pool.length)];
         return { card: chosen, rarity };
-      } else if (rarity === '月') {
-        pool = cardData.filter(card => card.稀有度 === '月');
+      } else if (rarity === '月' || rarity === '瞬') {
+        pool = cardData.filter(card => card.稀有度 === rarity);
         if (onlySelectedRoleCard && !isAllRoles) {
           pool = pool.filter(card => selectedRole.includes(card.主角));
         }

@@ -73,8 +73,9 @@ const CardSummary = ({
   }, [loadAsset]); // 组件加载时播放一次
 
   const rarityPriority = {
-    "刹那": 5,
-    "世界": 4,
+    "刹那": 6,
+    "世界": 5,
+    "瞬": 4,
     "月": 3,
     "辰星": 2,
     "星": 1,
@@ -99,7 +100,7 @@ const CardSummary = ({
 
   // 按稀有度优先级排序
   const sortedCards = [...drawResults].sort((a, b) => {
-    return rarityPriority[b.card.稀有度] - rarityPriority[a.card.稀有度];
+    return (rarityPriority[b.card.稀有度] || 0) - (rarityPriority[a.card.稀有度] || 0);
   });
 
   const grid = createEmptyGrid();
@@ -142,7 +143,7 @@ const CardSummary = ({
                 glowStyle = {
                   boxShadow: '0 -10px 20px rgba(255, 215, 0, 0.9), 0 10px 20px rgba(255, 215, 0, 0.9)',
                 };
-              } else if (card && card.card.稀有度 === "月") {
+              } else if (card && (card.card.稀有度 === "月" || card.card.稀有度 === "瞬")) {
                 glowStyle = {
                   boxShadow: '0 -10px 20px rgba(168, 85, 247, 0.9), 0 10px 20px rgba(168, 85, 247, 0.9)',
                 };
@@ -172,11 +173,13 @@ const CardSummary = ({
                                     ? "instant.png"
                                     : card.card.稀有度 === "世界"
                                         ? "world.png"
-                                        : card.card.稀有度 === "月"
-                                            ? "moon.png"
-                                            : card.card.稀有度 === "辰星"
-                                                ? "star1.png"
-                                                : "star2.png"
+                                        : card.card.稀有度 === "瞬"
+                                            ? "moment.png"
+                                            : card.card.稀有度 === "月"
+                                                ? "moon.png"
+                                                : card.card.稀有度 === "辰星"
+                                                    ? "star1.png"
+                                                    : "star2.png"
                               }
                               type="image"
                               className="absolute h-auto z-10"

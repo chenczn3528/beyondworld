@@ -1,9 +1,9 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-08-31T16:38:00.090507",
-  "totalFiles": 25,
-  "totalSize": 39441212,
-  "totalSizeFormatted": "37.61 MB",
+  "lastUpdated": "2025-10-13T18:34:11.419500",
+  "totalFiles": 26,
+  "totalSize": 39475248,
+  "totalSizeFormatted": "37.65 MB",
   "assets": {
     "video": [
       {
@@ -69,6 +69,11 @@
         "path": "images/instant.png",
         "size": 62608,
         "sizeFormatted": "61.14 KB"
+      },
+      {
+        "path": "images/moment.png",
+        "size": 34036,
+        "sizeFormatted": "33.24 KB"
       },
       {
         "path": "images/icon.jpg",
