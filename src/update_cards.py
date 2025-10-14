@@ -95,6 +95,7 @@ for index, row in enumerate(rows):
         for attempt in range(max_retries):
             try:
                 print(f"[{index}] 正在抓取：{card_name} 的详情页内容（尝试第 {attempt+1} 次）", flush=True)
+
                 detail_resp = requests.get(detail_url, headers=headers, timeout=30)
                 detail_resp.encoding = 'utf-8'
                 detail_soup = BeautifulSoup(detail_resp.text, 'html.parser')
@@ -102,7 +103,15 @@ for index, row in enumerate(rows):
                 # 提取前两个resp-tab-content里的src和srcset
                 image_info = []
                 resp_tabs = detail_soup.select('.resp-tabs-container .resp-tab-content')
-                for i, tab in enumerate(resp_tabs[:3]):  # 只取前3个
+
+                def is_pure_img_tab(tab):
+                    # 只统计元素子节点（忽略空白文本）
+                    element_children = [c for c in tab.children if getattr(c, 'name', None)]
+                    return len(element_children) == 1 and element_children[0].name == 'img'
+
+                pure_img_tabs = [t for t in resp_tabs if is_pure_img_tab(t)]
+
+                for i, tab in enumerate(pure_img_tabs):  # 只取前3个
                     img_tag = tab.find('img')
                     if img_tag:
                         src = img_tag.get('src')
@@ -130,7 +139,7 @@ for index, row in enumerate(rows):
                     print(info_dict, flush=True)
 
         # 避免请求过快
-        time.sleep(1.5)
+        # time.sleep(1.5)
 
     info_dict = check_cards(info_dict)
 

@@ -250,6 +250,8 @@ const GalleryPage = ({
 
     // ✅ 当前显示卡的大图 index
     const imageIndex = imageIndexes[displayCard?.卡名] ?? 0;
+    const isMomentCard = displayCard?.稀有度 === '瞬';
+    const isMomentRotated = isMomentCard && imageIndex > 0;
 
     // ✅ 监听来自大图页面的修改事件
     useEffect(() => {
@@ -427,6 +429,8 @@ const GalleryPage = ({
                             <FadeImage
                                 cardSrc={getImageUrl(displayCard, imageIndex, 1)}
                                 cardSrcset={getImageUrl(displayCard, imageIndex, 0)}
+                                isRotated={isMomentRotated}
+                                baseSize={baseSize}
                             />
 
                             {displayCard.owned === false && (
