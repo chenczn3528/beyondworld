@@ -48,7 +48,7 @@ const FadeImage = ({ cardSrc, cardSrcset, isRotated = false, baseSize }) => {
         left: '50%',
         width: rotatedWidth,
         height: rotatedHeight,
-        transform: 'translate(-50%, -50%) rotate(90deg)',
+        transform: 'translate(-50%, -50%) rotate(270deg)',
         transformOrigin: 'center center',
     };
 
