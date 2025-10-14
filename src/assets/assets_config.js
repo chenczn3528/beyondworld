@@ -1,13 +1,13 @@
 // 自动生成的素材配置文件
-// 生成时间: 2025-08-31 16:38:00
+// 生成时间: 2025-10-13 18:34:11
 // 请勿手动修改此文件
 
 export const assetsConfig = {
   version: "1.0.0",
-  lastUpdated: "2025-08-31T16:38:00.090802",
-  totalFiles: 25,
-  totalSize: 39441212,
-  totalSizeFormatted: "37.61 MB",
+  lastUpdated: "2025-10-13T18:34:11.420927",
+  totalFiles: 26,
+  totalSize: 39475248,
+  totalSizeFormatted: "37.65 MB",
   assets: {
   "video": [
     {
@@ -73,6 +73,11 @@ export const assetsConfig = {
       "path": "images/instant.png",
       "size": 62608,
       "sizeFormatted": "61.14 KB"
+    },
+    {
+      "path": "images/moment.png",
+      "size": 34036,
+      "sizeFormatted": "33.24 KB"
     },
     {
       "path": "images/icon.jpg",

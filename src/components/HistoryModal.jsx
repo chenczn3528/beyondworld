@@ -105,6 +105,7 @@ const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
                           "星": {color: "gray"},
                           "辰星": {color: "gray"},
                           "月": {color: "#a855f7"},
+                          "瞬": {color: "#c4a1ff"},
                           "世界": {color: "#dda516"}
                       };
                       const historyColor = cardHistoryColors[card.稀有度] || {color: "black"};

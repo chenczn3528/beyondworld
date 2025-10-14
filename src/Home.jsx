@@ -506,7 +506,7 @@ const Home = ({isPortrait, openAssetTest}) => {
 
         // 十抽保底机制：每十抽必出月卡及以上
         const isTenDrawGuarantee = (i + 1) % 10 === 0 && 
-          drawResults.filter(r => r.rarity === '月' || r.rarity === '世界' || r.rarity === '刹那').length === 0;
+          drawResults.filter(r => r.rarity === '月' || r.rarity === '瞬' || r.rarity === '世界' || r.rarity === '刹那').length === 0;
 
         // 调用抽卡
         do {
@@ -542,7 +542,7 @@ const Home = ({isPortrait, openAssetTest}) => {
           }
         } else {
           currentPity++;
-          currentFourStarCounter = rarity === '月' ? 0 : currentFourStarCounter + 1;
+          currentFourStarCounter = (rarity === '月' || rarity === '瞬') ? 0 : currentFourStarCounter + 1;
         }
 
         drawResults.push(result);
@@ -585,6 +585,107 @@ const Home = ({isPortrait, openAssetTest}) => {
       const isAllRoles = selectedRole.includes('随机');
       const limitedPools = selectedPools.filter(pool => pool !== "世界之间" && !pool.includes("累充"));
       const permanentPools = selectedPools.filter(pool => pool == "世界之间" || pool.includes("累充"));
+      const excludedKeywords = ["崩坍", "累充", "活动", "奇遇瞬间"];
+
+      const applyPaidFilter = (list) => {
+        if (includeMoneyCard) return list;
+        return list.filter(card => !excludedKeywords.some(keyword => card.获取途径.includes(keyword)));
+      };
+
+      const buildFiveStarPool = (targetRarity) => {
+        if (!['世界', '刹那'].includes(targetRarity)) return [];
+
+        const selectWithRoleAndPool = (predicate) =>
+          cardData.filter(card =>
+            card.稀有度 === targetRarity &&
+            predicate(card)
+          );
+
+        let result;
+        if (forceGuaranteeMode === 'hard') {
+          if (limitedPools.length > 0) {
+            result = selectWithRoleAndPool(card =>
+              limitedPools.includes(card.获取途径) &&
+              selectedRole.includes(card.主角)
+            );
+          } else {
+            result = selectWithRoleAndPool(card =>
+              selectedPools.includes(card.获取途径) &&
+              selectedRole.includes(card.主角)
+            );
+          }
+        } else if (forceGuaranteeMode === 'soft') {
+          if (limitedPools.length > 0) {
+            result = selectWithRoleAndPool(card =>
+              permanentPools.includes(card.获取途径) ||
+              (limitedPools.includes(card.获取途径) && !selectedRole.includes(card.主角))
+            );
+          } else {
+            result = selectWithRoleAndPool(card =>
+              permanentPools.includes(card.获取途径) &&
+              !selectedRole.includes(card.主角)
+            );
+          }
+        } else if (!isAllRoles) {
+          if (onlySelectedRoleCard) {
+            result = selectWithRoleAndPool(card =>
+              selectedRole.includes(card.主角) &&
+              (isAllPools || selectedPools.includes(card.获取途径))
+            );
+          } else if (limitedPools.length > 0) {
+            result = selectWithRoleAndPool(card =>
+              selectedRole.includes(card.主角) &&
+              limitedPools.includes(card.获取途径)
+            );
+          } else {
+            result = selectWithRoleAndPool(card =>
+              selectedRole.includes(card.主角) &&
+              selectedPools.includes(card.获取途径)
+            );
+          }
+        } else {
+          if (limitedPools.length > 0) {
+            result = selectWithRoleAndPool(card =>
+              limitedPools.includes(card.获取途径)
+            );
+          } else {
+            result = selectWithRoleAndPool(card =>
+              selectedPools.includes(card.获取途径)
+            );
+          }
+        }
+
+        return applyPaidFilter(result);
+      };
+
+      const buildFourStarPool = (targetRarity) => {
+        if (!['月', '瞬'].includes(targetRarity)) return [];
+        let result = cardData.filter(card => card.稀有度 === targetRarity);
+        if (onlySelectedRoleCard && !isAllRoles) {
+          result = result.filter(card => selectedRole.includes(card.主角));
+        }
+        return applyPaidFilter(result);
+      };
+
+      const buildLowStarPool = (targetRarity) => {
+        if (!['星', '辰星'].includes(targetRarity)) return [];
+
+        let result;
+        if (onlySelectedRoleCard && selectedRole[0] !== "随机") {
+          result = cardData.filter(card =>
+            ((includeThreeStarM && card.稀有度 === "辰星") ||
+              (includeThreeStar && card.稀有度 === "星")) &&
+            selectedRole.includes(card.主角)
+          );
+        } else {
+          result = cardData.filter(card =>
+            (includeThreeStarM && card.稀有度 === "辰星") ||
+            (includeThreeStar && card.稀有度 === "星")
+          );
+        }
+
+        return applyPaidFilter(result.filter(card => card.稀有度 === targetRarity));
+      };
 
       // 五星概率（动态）
       let dynamicFiveStarRate = 2;
@@ -596,13 +697,13 @@ const Home = ({isPortrait, openAssetTest}) => {
 
       // 判断稀有度
       if (isTenDrawGuarantee) {
-        // 十抽保底：必出月卡及以上
+        // 十抽保底：必出四星（瞬/月）及以上
         const guaranteeRoll = Math.random();
         if (guaranteeRoll < 0.5) {
-          // 50%概率出月卡
-          rarity = '月';
+          // 四星：若未包含“崩坍累充”，则不出“瞬”，只出“月”
+          rarity = includeMoneyCard ? (Math.random() < 0.5 ? '瞬' : '月') : '月';
         } else {
-          // 50%概率出世界/刹那
+          // 50% 概率出五星：世界/刹那
           rarity = Math.random() < 0.5 ? '世界' : '刹那';
         }
       } else if (fourStarCounter >= 9) {
@@ -610,13 +711,15 @@ const Home = ({isPortrait, openAssetTest}) => {
         if (roll < dynamicFiveStarRate) {
           rarity = Math.random() < 0.5 ? '世界' : '刹那';
         } else {
-          rarity = '月';
+          // 四星：若未包含“崩坍累充”，则不出“瞬”，只出“月”；否则 瞬/月 等概率
+          rarity = includeMoneyCard ? (Math.random() < 0.5 ? '瞬' : '月') : '月';
         }
       } else if (roll < dynamicFiveStarRate) {
         // 非保底时，在"世界"和"刹那"之间随机选择
         rarity = Math.random() < 0.5 ? '世界' : '刹那';
       } else if (roll < dynamicFiveStarRate + fourStarRate) {
-        rarity = '月';
+        // 四星：若未包含“崩坍累充”，则不出“瞬”，只出“月”；否则 瞬/月 等概率
+        rarity = includeMoneyCard ? (Math.random() < 0.5 ? '瞬' : '月') : '月';
       } else {
         // rarity = '星'; // 星或辰星统一为稀有度"星"
         // 单独判断辰星/星星
@@ -633,124 +736,53 @@ const Home = ({isPortrait, openAssetTest}) => {
 
       // 筛选卡池
       if (rarity === '刹那' || rarity === '世界') {
-        // 先按当前稀有度筛选
-        let pool = [];
-        const filterPool = (targetRarity) => {
-          if (forceGuaranteeMode === 'hard') {
-            if(limitedPools.length > 0){
-              return cardData.filter(card =>
-                  card.稀有度 === targetRarity &&
-                  limitedPools.includes(card.获取途径) &&
-                  selectedRole.includes(card.主角)
-              );
-            } else {
-              return cardData.filter(card =>
-                  card.稀有度 === targetRarity &&
-                  selectedPools.includes(card.获取途径) &&
-                  selectedRole.includes(card.主角)
-              );
-            }
-          } else if (forceGuaranteeMode === 'soft') {
-            if(limitedPools.length > 0){
-              return cardData.filter(card =>
-                  card.稀有度 === targetRarity &&
-                  (
-                    permanentPools.includes(card.获取途径) ||
-                    (limitedPools.includes(card.获取途径) && !selectedRole.includes(card.主角))
-                  )
-              );
-            } else {
-              return cardData.filter(card =>
-                  card.稀有度 === targetRarity &&
-                  permanentPools.includes(card.获取途径) && !selectedRole.includes(card.主角)
-              );
-            }
-          } else if (!isAllRoles) {
-            if (onlySelectedRoleCard) {
-              return cardData.filter(card =>
-                card.稀有度 === targetRarity &&
-                selectedRole.includes(card.主角) &&
-                (isAllPools || selectedPools.includes(card.获取途径))
-              );
-            } else {
-              if(limitedPools.length > 0){
-                return cardData.filter(card =>
-                    card.稀有度 === targetRarity &&
-                    selectedRole.includes(card.主角) &&
-                    limitedPools.includes(card.获取途径)
-                );
-              } else {
-                return cardData.filter(card =>
-                    card.稀有度 === targetRarity &&
-                    selectedRole.includes(card.主角) &&
-                    selectedPools.includes(card.获取途径)
-                  );
-              }
-            }
-          } else {
-            if(limitedPools.length > 0){
-              return cardData.filter(card =>
-                  card.稀有度 === targetRarity &&
-                  (limitedPools.includes(card.获取途径))
-              );
-            } else {
-              return cardData.filter(card =>
-                  card.稀有度 === targetRarity &&
-                  (selectedPools.includes(card.获取途径))
-              );
-            }
-          }
-        };
-        pool = filterPool(rarity);
-        // 如果当前稀有度没卡，自动切换到另一种
+        pool = buildFiveStarPool(rarity);
         if (pool.length === 0) {
           const altRarity = rarity === '刹那' ? '世界' : '刹那';
-          pool = filterPool(altRarity);
+          const altPool = buildFiveStarPool(altRarity);
+          if (altPool.length === 0) return { card: null, rarity };
+          pool = altPool;
           rarity = altRarity;
         }
-        // 如果还没有卡，才返回null
-        if(!includeMoneyCard){
-          const excludedKeywords = ["崩坍", "累充", "活动", "奇遇瞬间"];
-          pool = pool.filter(card =>
-              !excludedKeywords.some(keyword => card.获取途径.includes(keyword))
-          );
-        }
-        if (pool.length === 0) return { card: null, rarity };
         const chosen = pool[Math.floor(Math.random() * pool.length)];
         return { card: chosen, rarity };
-      } else if (rarity === '月') {
-        pool = cardData.filter(card => card.稀有度 === '月');
-        if (onlySelectedRoleCard && !isAllRoles) {
-          pool = pool.filter(card => selectedRole.includes(card.主角));
-        }
-        if(!includeMoneyCard){
-          const excludedKeywords = ["崩坍", "累充", "活动", "奇遇瞬间"];
-          pool = pool.filter(card =>
-              !excludedKeywords.some(keyword => card.获取途径.includes(keyword))
-          );
-        }
+      } else if (rarity === '月' || rarity === '瞬') {
+        pool = buildFourStarPool(rarity);
         if (pool.length === 0) return { card: null, rarity };
         const chosen = pool[Math.floor(Math.random() * pool.length)];
         return { card: chosen, rarity };
       }
 
       // 星 / 辰星
-      if (onlySelectedRoleCard && selectedRole[0] !== "随机") {
-        pool = cardData.filter(card => ((includeThreeStarM && card.稀有度 === "辰星")
-            || (includeThreeStar && card.稀有度 === "星")) && selectedRole.includes(card.主角));
-      } else {
-        pool = cardData.filter(card => (includeThreeStarM && card.稀有度 === "辰星")
-            || (includeThreeStar && card.稀有度 === "星"));
+      pool = buildLowStarPool(rarity);
+
+      if (pool.length === 0) {
+        // 逐级回退：优先月卡，再尝试世界/刹那
+        const fallbackOrder = ['月', '世界'];
+        for (const fallback of fallbackOrder) {
+          if (fallback === '月') {
+            const fallbackPool = buildFourStarPool('月');
+            if (fallbackPool.length > 0) {
+              pool = fallbackPool;
+              rarity = '月';
+              break;
+            }
+          } else {
+            let fallbackPool = buildFiveStarPool('世界');
+            let fallbackRarity = '世界';
+            if (fallbackPool.length === 0) {
+              fallbackPool = buildFiveStarPool('刹那');
+              fallbackRarity = '刹那';
+            }
+            if (fallbackPool.length > 0) {
+              pool = fallbackPool;
+              rarity = fallbackRarity;
+              break;
+            }
+          }
+        }
       }
 
-      if(!includeMoneyCard){
-        const excludedKeywords = ["崩坍", "累充", "活动", "奇遇瞬间"];
-        pool = pool.filter(card =>
-            !excludedKeywords.some(keyword => card.获取途径.includes(keyword))
-        );
-      }
-
-      // 抽卡
       if (pool.length === 0) return { card: null, rarity };
       const chosen = pool[Math.floor(Math.random() * pool.length)];
       return { card: chosen, rarity };

@@ -19,6 +19,14 @@ const GalleryFullImage = (
     const currentCardName = card?.卡名 || '';
     const showPictureNumber = getImageIndex(currentCardName);
 
+    const isMomentCard = card?.稀有度 === '瞬';
+    const pictures = Array.isArray(card?.图片信息) ? card.图片信息 : [];
+    const pictureCount = pictures.length;
+    const currentImage = pictures[showPictureNumber] ?? pictures[0] ?? {};
+    const cardSrc = currentImage?.src || '';
+    const cardSrcset = currentImage?.srcset2 || currentImage?.srcset || currentImage?.src || '';
+    const isMomentRotated = isMomentCard && showPictureNumber > 0;
+
     // 按钮点击时调用 setImageIndex 更新索引
     const onChangePictureNumber = (index) => {
         if (currentCardName) {
@@ -50,9 +58,65 @@ const GalleryFullImage = (
       textShadow: showPictureNumber === index ? button_style.textShadow : null,
     });
 
+    const renderImageButtons = () => {
+        if (pictureCount === 0) return null;
+
+        const buttonConfigs = [];
+
+        if (isMomentCard) {
+            const momentButtons = [
+                { index: 0, label: '初始' },
+                { index: 1, label: '初始(竖)' },
+                { index: 2, label: '重逢(竖)' },
+                { index: 3, label: '初始(签名)' },
+                { index: 4, label: '重逢(签名)' },
+            ];
+            momentButtons.forEach(({ index, label }) => {
+                if (index < pictureCount) {
+                    buttonConfigs.push({ index, label });
+                }
+            });
+        } else {
+            buttonConfigs.push({ index: 0, label: '初始' });
+            if (pictureCount > 1) {
+                buttonConfigs.push({ index: 1, label: '重逢' });
+            }
+            if (pictureCount > 2) {
+                if (pictureCount === 3) {
+                    buttonConfigs.push({ index: 2, label: '无色' });
+                } else {
+                    buttonConfigs.push({
+                        index: 2,
+                        label: pictures[2]?.name || pictures[2]?.type || '卡面3',
+                    });
+                }
+            }
+            if (pictureCount > 3) {
+                for (let i = 3; i < pictureCount; i += 1) {
+                    const label = pictures[i]?.name || pictures[i]?.type || `卡面${i + 1}`;
+                    buttonConfigs.push({ index: i, label });
+                }
+            }
+        }
+
+        return buttonConfigs.map(({ index, label }) => (
+            <button
+                key={`card-image-btn-${index}`}
+                style={getButtonStyle(index)}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onChangePictureNumber(index);
+                }}
+            >
+                {label}
+            </button>
+        ));
+    };
+
     const rarityMap = {
         刹那: 'instant.png',
         世界: 'world.png',
+        瞬: 'moment.png',
         月: 'moon.png',
         辰星: 'star1.png',
         星: 'star2.png',
@@ -81,10 +145,10 @@ const GalleryFullImage = (
                 >
                     <div >
                         <FadeImage
-                            cardSrc={showPictureNumber === 0 ? card?.图片信息?.[0]?.src :
-                                showPictureNumber === 1 ? card?.图片信息?.[1]?.src : card?.图片信息?.[2]?.src}
-                            cardSrcset={showPictureNumber === 0 ? card?.图片信息?.[0]?.srcset2 :
-                                showPictureNumber === 1 ? card?.图片信息?.[1]?.srcset2 : card?.图片信息?.[2]?.srcset2}
+                            cardSrc={cardSrc}
+                            cardSrcset={cardSrcset}
+                            isRotated={isMomentRotated}
+                            baseSize={baseSize}
                         />
                     </div>
 
@@ -179,20 +243,12 @@ const GalleryFullImage = (
                                 className="absolute flex flex-col items-end justify-center"
                                 style={{right: `${fontsize * 3}px`, bottom: `${fontsize * 2}px`,}}
                             >
-                                {/*初始、重逢、无色卡面*/}
-                                <div className="flex flex-row mt-[1vmin]">
-                                    <button style={getButtonStyle(0)}
-                                            onClick={(e) => {e.stopPropagation();onChangePictureNumber(0)}}>初始</button>
-
-                                    {card.图片信息.length > 1 && (
-                                        <button style={getButtonStyle(1)}
-                                                onClick={(e) => {e.stopPropagation();onChangePictureNumber(1)}}>重逢</button>
-                                    )}
-
-                                    {card.图片信息.length === 3 && (
-                                        <button style={getButtonStyle(2)}
-                                                onClick={(e) => {e.stopPropagation();onChangePictureNumber(2)}}>无色</button>
-                                    )}
+                                {/*初始、重逢、无色卡面（瞬：初始、初始（竖）、重逢等）*/}
+                                <div
+                                    className="flex flex-row mt-[1vmin]"
+                                    style={{flexWrap: 'wrap', gap: '0.5vmin'}}
+                                >
+                                    {renderImageButtons()}
                                 </div>
                             </div>
                         </div>

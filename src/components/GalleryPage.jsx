@@ -250,6 +250,8 @@ const GalleryPage = ({
 
     // ✅ 当前显示卡的大图 index
     const imageIndex = imageIndexes[displayCard?.卡名] ?? 0;
+    const isMomentCard = displayCard?.稀有度 === '瞬';
+    const isMomentRotated = isMomentCard && imageIndex > 0;
 
     // ✅ 监听来自大图页面的修改事件
     useEffect(() => {
@@ -282,6 +284,7 @@ const GalleryPage = ({
     const rarityMap = {
         刹那: 'instant.png',
         世界: 'world.png',
+        瞬: 'moment.png',
         月: 'moon.png',
         辰星: 'star1.png',
         星: 'star2.png',
@@ -426,6 +429,8 @@ const GalleryPage = ({
                             <FadeImage
                                 cardSrc={getImageUrl(displayCard, imageIndex, 1)}
                                 cardSrcset={getImageUrl(displayCard, imageIndex, 0)}
+                                isRotated={isMomentRotated}
+                                baseSize={baseSize}
                             />
 
                             {displayCard.owned === false && (
@@ -551,9 +556,11 @@ const GalleryPage = ({
                         const imageIndex = isRealImage
                             ? imageIndexes[card.卡名] ?? getImageIndex(card.卡名)
                             : null;
+                        // 瞬卡缩略图固定显示初始（索引0），不随选择变化
+                        const displayIndex = isRealImage && card['稀有度'] === '瞬' ? 0 : imageIndex;
 
                         const imageSrc = isRealImage
-                            ? card["图片信息"]?.[imageIndex]?.src || defaultWhiteImage
+                            ? card["图片信息"]?.[displayIndex]?.src || defaultWhiteImage
                             : defaultWhiteImage;
 
                         const imageAttr = isRealImage ? card["属性"] : null;
@@ -574,7 +581,8 @@ const GalleryPage = ({
                                         left: `${x * baseSize}px`,
                                         top: `${y * baseSize}px`,
                                         width: `${baseSize * 80 * scale}px`,
-                                        objectFit: "cover",
+                                        height: `${baseSize * 80 * scale * 9 / 16}px`,
+                                        objectFit: "contain",
                                         cursor: isRealImage ? "pointer" : "default",
                                         pointerEvents: isRealImage ? "auto" : "none",
                                         transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",

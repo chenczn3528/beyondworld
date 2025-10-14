@@ -19,6 +19,7 @@ const Carousel = ({
     const rarityMap = {
         刹那: 'instant.png',
         世界: 'world.png',
+        瞬: 'moment.png',
         月: 'moon.png',
         辰星: 'star1.png',
         星: 'star2.png',
