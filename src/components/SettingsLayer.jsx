@@ -258,7 +258,7 @@ const SettingsLayer = ({
 
                 {/*素材测试*/}
                 <button className='absolute'
-                        style={{fontSize: `${fontsize * 1.2}px`, top: `${fontsize * 4}px`, backgroundColor: 'rgba(255,255,255,0.4)', color: 'white', zIndex: showDetailedImage ? 2 : 4}} 
+                        style={{fontSize: `${baseSize * 7}px`, top: `${baseSize * 22}px`, backgroundColor: 'rgba(255,255,255,0.4)', color: 'white', zIndex: showDetailedImage ? 2 : 4}} 
                         onClick={() => openAssetTest && openAssetTest()}>
                         动画缓存
                 </button>
