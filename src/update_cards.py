@@ -1,36 +1,161 @@
-import mwclient
-import requests
-from bs4 import BeautifulSoup
+# -*- coding: utf-8 -*-
+"""
+世界之外WIKI 侧影卡片抓取
+- 合规 UA、Session+Retry、礼貌限速
+- 仅保存图片/视频链接，不下载文件
+- 模板解析更鲁棒；字段清洗
+"""
+
 import json
 import time
+import random
+import re
+from typing import Dict, List
 
-baseurl = "https://wiki.biligame.com"
-url = "https://wiki.biligame.com/world/%E4%BE%A7%E5%BD%B1%E5%9B%BE%E9%89%B4"
-headers = {
-    'User-Agent': 'Mozilla/5.0'
-}
-response = requests.get(url, headers=headers)
-response.encoding = 'utf-8'
+import requests
+import mwclient
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
-soup = BeautifulSoup(response.text, 'html.parser')
+# -----------------------------
+# 基本配置
+# -----------------------------
+BASE_URL = "https://wiki.biligame.com"
+WIKI_PATH = "/world/"
+LIST_URL = f"{BASE_URL}{WIKI_PATH}%E4%BE%A7%E5%BD%B1%E5%9B%BE%E9%89%B4"
 
-rows = soup.find_all('tr')
-cards = []
+UA = "GachaLabCrawler/1.0 (+mailto:chenczn3528@gmail.com)"
+HEADERS = {"User-Agent": UA}
 
-# 连接到 BWIKI
-site = mwclient.Site('wiki.biligame.com', path='/world/')
+# 输出
+CARDS_JSON_PATH = "src/assets/cards.json"
+POOL_CATEGORIES_PATH = "src/assets/poolCategories.json"
 
-# 用wiki API获取其他详细信息
-def wiki_detailed_info(card_name):
+# -----------------------------
+# 会话 & 礼貌访问
+# -----------------------------
+session = requests.Session()
+retries = Retry(
+    total=5,
+    backoff_factor=1.4,
+    status_forcelist=[429, 500, 502, 503, 504],
+    allowed_methods=["GET"],
+    raise_on_status=False,
+)
+session.mount("https://", HTTPAdapter(max_retries=retries))
+session.headers.update(HEADERS)
 
-    # 指定页面名
-    page = site.pages[card_name]  # 页面标题不需要编码（会自动处理）
+def polite_get(url: str, timeout: int = 20) -> requests.Response:
+    time.sleep(1.5 + random.random())  # 1.5~2.5s
+    resp = session.get(url, timeout=timeout)
+    resp.raise_for_status()
+    if not resp.encoding:
+        resp.encoding = resp.apparent_encoding or "utf-8"
+    return resp
 
-    # 获取文本内容
-    text = page.text().split("{{侧影")
+# -----------------------------
+# 工具函数
+# -----------------------------
+def parse_best_from_srcset(srcset: str) -> str:
+    """优先返回 2x，没有则取最后一项。"""
+    if not srcset:
+        return ""
+    parts = [p.strip() for p in srcset.split(",") if p.strip()]
+    if not parts:
+        return ""
+    for part in reversed(parts):
+        if part.endswith(" 2x") or part.endswith("2x"):
+            return part.rsplit(" ", 1)[0]
+    return parts[-1].rsplit(" ", 1)[0] if " " in parts[-1] else parts[-1]
 
-    info_dict = {}
+def clean_kv(line: str):
+    """清洗模板行，返回 (key, value)；不合规返回(None, None)"""
+    if "=" not in line:
+        return None, None
+    k, v = line.split("=", 1)
+    k = k.replace("|", "").strip()
+    v = v.strip()
+    if not k:
+        return None, None
+    return k, v
 
+# -----------------------------
+# mwclient 初始化
+# -----------------------------
+site = mwclient.Site(host="wiki.biligame.com", path=WIKI_PATH, clients_useragent=UA)
+
+# -----------------------------
+# 解析详情页的图片信息（仅链接）
+# -----------------------------
+def extract_image_info_from_detail(detail_url: str) -> List[Dict[str, str]]:
+    """从详情页提取前几个纯图片tab的 src / srcset 链接"""
+    image_info = []
+    max_retries = 5
+    for attempt in range(max_retries):
+        try:
+            detail_resp = polite_get(detail_url, timeout=30)
+            soup = BeautifulSoup(detail_resp.text, "html.parser")
+
+            resp_tabs = soup.select(".resp-tabs-container .resp-tab-content")
+
+            def is_pure_img_tab(tab):
+                element_children = [c for c in tab.children if getattr(c, "name", None)]
+                return len(element_children) == 1 and element_children[0].name == "img"
+
+            pure_tabs = [t for t in resp_tabs if is_pure_img_tab(t)]
+            for tab in pure_tabs:
+                img = tab.find("img")
+                if not img:
+                    continue
+                src = img.get("src") or ""
+                srcset = img.get("srcset") or ""
+                src_1x = parse_best_from_srcset(srcset) or src
+                # 尽量保留两档
+                parts = [p.strip() for p in (srcset or "").split(",") if p.strip()]
+                src_2x = ""
+                for part in reversed(parts):
+                    if part.endswith(" 2x") or part.endswith("2x"):
+                        src_2x = part.rsplit(" ", 1)[0]
+                        break
+                image_info.append({
+                    "src": src,
+                    "srcset": src_1x,
+                    "srcset2": src_2x
+                })
+            break
+        except Exception as e:
+            print(f"抓取详情页失败：{detail_url} -> {e}", flush=True)
+            if attempt < max_retries - 1:
+                time.sleep(2)
+            else:
+                print(f"已达最大重试次数，跳过：{detail_url}", flush=True)
+    return image_info
+
+# -----------------------------
+# 用 wiki API 获取其他详细信息
+# -----------------------------
+def wiki_detailed_info(card_name: str) -> Dict[str, str]:
+    """
+    从页面文本中解析 {{侧影 ...}} 模板相关字段
+    - 兼容键映射
+    - 安全分段（缺段不报错）
+    """
+    info: Dict[str, any] = {}
+    try:
+        page = site.pages[card_name]
+        raw = page.text() or ""
+    except Exception as e:
+        print(f"[mwclient] 读取失败：{card_name} -> {e}", flush=True)
+        return info
+
+    # 以 '{{侧影' 切割，可能得到 [前置, 基础字段段, 相会事件段, ...]
+    parts = raw.split("{{侧影")
+    if len(parts) < 2:
+        return info
+
+    # 字段名映射
     dict_map = {
         "名称": "卡名",
         "角色": "主角",
@@ -41,203 +166,169 @@ def wiki_detailed_info(card_name):
         "主属性": "属性",
     }
 
-    for line in text[1].split("\n"):
-        if "|" in line:
-            key = line.replace("|", "").split("=")[0]
-            if key in dict_map.keys():
-                key = dict_map[key]
-            value = line.replace("|", "").split("=")[1]
-            info_dict[key] = value
-            # if "群星启明时" in value:
-            #     print(text[0])
-            #     s = input()
+    # 基础字段段
+    base_block = parts[1]
+    for line in base_block.split("\n"):
+        k, v = clean_kv(line)
+        if not k:
+            continue
+        if k in dict_map:
+            k = dict_map[k]
+        info[k] = v
 
-
-    meets = []
-    for line in text[2].split("\n"):
-        if "|" in line:
-            if "稀有度" in line.split("=")[0]:
+    # “相会事件”段（如果存在）
+    meets: List[Dict[str, str]] = []
+    # 可能 parts[2] 才是相会事件，也可能更多段，这里保险枚举后续段
+    for blk in parts[2:]:
+        for line in blk.split("\n"):
+            k, v = clean_kv(line)
+            if not k:
                 continue
-            elif "相会事件" in line.split("=")[0]:
-                key = line.replace("|", "").split("=")[0]
-                value = line.replace("|", "").split("=")[1]
-                if value:
-                    meets.append({"title_img": key, "content_html": value})
+            # 跳过“稀有度”这类非事件字段
+            if "稀有度" in k:
+                continue
+            if "相会事件" in k:
+                if v:
+                    meets.append({"title_img": k, "content_html": v})
             else:
-                key = line.replace("|", "").split("=")[0]
-                value = line.replace("|", "").split("=")[1]
-                info_dict[key] = value
-    info_dict["相会事件"] = meets
+                # 其他键值也记录
+                info[k] = v
+    if meets:
+        info["相会事件"] = meets
 
-    return info_dict
+    return info
 
-def check_cards(card):
-    if card['获取途径'] == "【群星启明时】世界之间":
-        card['获取途径'] = "世界之间"
+# -----------------------------
+# 规范化数据
+# -----------------------------
+def check_cards(card: Dict[str, any]) -> Dict[str, any]:
+    """业务上的小修正"""
+    if card.get("获取途径") == "【群星启明时】世界之间":
+        card["获取途径"] = "世界之间"
     return card
 
+# -----------------------------
+# 主流程：列表页 -> 每项详情 -> 组装输出
+# -----------------------------
+def main():
+    print("🚀 开始抓取：", LIST_URL)
+    cards: List[Dict[str, any]] = []
 
-for index, row in enumerate(rows):
-    if not row.has_attr('data-param1'):
-        continue
+    resp = polite_get(LIST_URL)
+    soup = BeautifulSoup(resp.text, "html.parser")
+    rows = soup.find_all("tr")
 
-    name_div = row.find('div', class_='cardname')
-    card_name = name_div.get_text(strip=True).split("·")[-1]
+    for index, row in enumerate(rows):
+        if not row.has_attr("data-param1"):
+            continue
 
-    info_dict = wiki_detailed_info(card_name)
+        name_div = row.find("div", class_="cardname")
+        if not name_div:
+            continue
+        card_name = name_div.get_text(strip=True).split("·")[-1]
 
-    link_tag = row.find('a', href=True)
-    if link_tag:
-        detail_url = baseurl + link_tag['href']
+        info_dict = wiki_detailed_info(card_name)
 
-        # 尝试访问详情页，抓取“相会事件”和图像链接，最多重试5次
-        max_retries = 5
-        for attempt in range(max_retries):
-            try:
-                print(f"[{index}] 正在抓取：{card_name} 的详情页内容（尝试第 {attempt+1} 次）", flush=True)
+        link_tag = row.find("a", href=True)
+        if link_tag:
+            detail_url = urljoin(BASE_URL, link_tag["href"])
+            print(f"[{index}] 抓取：{card_name} -> {detail_url}", flush=True)
 
-                detail_resp = requests.get(detail_url, headers=headers, timeout=30)
-                detail_resp.encoding = 'utf-8'
-                detail_soup = BeautifulSoup(detail_resp.text, 'html.parser')
+            image_info = extract_image_info_from_detail(detail_url)
+            if image_info:
+                info_dict["图片信息"] = image_info
 
-                # 提取前两个resp-tab-content里的src和srcset
-                image_info = []
-                resp_tabs = detail_soup.select('.resp-tabs-container .resp-tab-content')
+        info_dict = check_cards(info_dict)
 
-                def is_pure_img_tab(tab):
-                    # 只统计元素子节点（忽略空白文本）
-                    element_children = [c for c in tab.children if getattr(c, 'name', None)]
-                    return len(element_children) == 1 and element_children[0].name == 'img'
+        cards.append(info_dict)
 
-                pure_img_tabs = [t for t in resp_tabs if is_pure_img_tab(t)]
+    # ------------ 卡池分类更新 ------------
+    try:
+        with open(POOL_CATEGORIES_PATH, "r", encoding="utf-8") as f:
+            pool_categories = json.load(f)
+    except FileNotFoundError:
+        pool_categories = {}
 
-                for i, tab in enumerate(pure_img_tabs):  # 只取前3个
-                    img_tag = tab.find('img')
-                    if img_tag:
-                        src = img_tag.get('src')
-                        srcset = img_tag.get('srcset', '')
-                        srcset_parts = srcset.split(', ')
-                        srcset15 = srcset_parts[0].split(" ")[0] if len(srcset_parts) > 0 else ''
-                        srcset2 = srcset_parts[1].split(" ")[0] if len(srcset_parts) > 1 else ''
-                        image_info.append({
-                            'src': src,
-                            'srcset': srcset15,
-                            'srcset2': srcset2
-                        })
-                if image_info:
-                    info_dict['图片信息'] = image_info
+    existing_pools = set()
 
-                break  # 成功抓取，退出重试循环
-
-            except Exception as e:
-                print(f"抓取失败：{card_name} -> {e}", flush=True)
-                if attempt < max_retries - 1:
-                    time.sleep(2)  # 等待再重试
-                else:
-                    print(f"已达最大重试次数，跳过：{card_name}", flush=True)
-                    print(wiki_detailed_info(card_name), flush=True)
-                    print(info_dict, flush=True)
-
-        # 避免请求过快
-        # time.sleep(1.5)
-
-    info_dict = check_cards(info_dict)
-
-    cards.append(info_dict)
-
-
-
-
-
-# 卡池分类文件路径
-pool_categories_path = 'src/assets/poolCategories.json'
-
-# 检查是否有新的卡池并更新配置
-try:
-    with open(pool_categories_path, 'r', encoding='utf-8') as f:
-        pool_categories = json.load(f)
-except FileNotFoundError:
-    pool_categories = {}
-
-existing_pools = set()
-
-world_between = pool_categories.get('worldBetween', {})
-subcategories = world_between.get('subcategories', {})
-for category in subcategories.values():
-    for pool_name in category.get('pools', []):
-        existing_pools.add(pool_name)
-
-for key, value in pool_categories.items():
-    if key == 'worldBetween':
-        continue
-    pools = value.get('pools')
-    if isinstance(pools, list):
-        for pool_name in pools:
+    world_between = pool_categories.get("worldBetween", {})
+    subcategories = world_between.get("subcategories", {})
+    for category in subcategories.values():
+        for pool_name in category.get("pools", []):
             existing_pools.add(pool_name)
 
-new_pool_candidates = {}
-for card in cards:
-    pool_name = card.get('获取途径')
-    if not pool_name:
-        continue
-    if pool_name in existing_pools:
-        continue
-    if pool_name not in new_pool_candidates:
-        new_pool_candidates[pool_name] = card
+    for key, value in pool_categories.items():
+        if key == "worldBetween":
+            continue
+        pools = value.get("pools")
+        if isinstance(pools, list):
+            for pool_name in pools:
+                existing_pools.add(pool_name)
 
-newly_added_pools = []
+    new_pool_candidates = {}
+    for card in cards:
+        pool_name = card.get("获取途径")
+        if not pool_name:
+            continue
+        if pool_name in existing_pools:
+            continue
+        if pool_name not in new_pool_candidates:
+            new_pool_candidates[pool_name] = card
 
-if new_pool_candidates:
-    world_between = pool_categories.setdefault('worldBetween', {
-        "name": "世界之间系列",
-        "icon": "🌟",
-        "subcategories": {}
-    })
-    subcategories = world_between.setdefault('subcategories', {})
+    newly_added_pools = []
 
-    collapsed_category = subcategories.setdefault('collapsed', {
-        "name": "崩坍系列",
-        "pools": []
-    })
-    birthday_category = subcategories.setdefault('birthday', {
-        "name": "生日系列",
-        "pools": []
-    })
-    limited_category = subcategories.setdefault('limited', {
-        "name": "限定",
-        "pools": []
-    })
+    if new_pool_candidates:
+        world_between = pool_categories.setdefault("worldBetween", {
+            "name": "世界之间系列",
+            "icon": "🌟",
+            "subcategories": {}
+        })
+        subcategories = world_between.setdefault("subcategories", {})
 
-    collapsed_pools = collapsed_category.setdefault('pools', [])
-    birthday_pools = birthday_category.setdefault('pools', [])
-    limited_pools = limited_category.setdefault('pools', [])
+        collapsed_category = subcategories.setdefault("collapsed", {
+            "name": "崩坍系列",
+            "pools": []
+        })
+        birthday_category = subcategories.setdefault("birthday", {
+            "name": "生日系列",
+            "pools": []
+        })
+        limited_category = subcategories.setdefault("limited", {
+            "name": "限定",
+            "pools": []
+        })
 
-    for pool_name, card in new_pool_candidates.items():
-        target_list = None
+        collapsed_pools = collapsed_category.setdefault("pools", [])
+        birthday_pools = birthday_category.setdefault("pools", [])
+        limited_pools = limited_category.setdefault("pools", [])
 
-        if card.get('所属世界') == "崩坍之界":
-            target_list = collapsed_pools
-        elif card.get('板块') == "特别纪念":
-            target_list = birthday_pools
-        else:
-            if "活动" in pool_name or "奇遇" in pool_name:
-                continue
-            target_list = limited_pools
+        for pool_name, card in new_pool_candidates.items():
+            target_list = None
+            if card.get("所属世界") == "崩坍之界":
+                target_list = collapsed_pools
+            elif card.get("板块") == "特别纪念":
+                target_list = birthday_pools
+            else:
+                if "活动" in pool_name or "奇遇" in pool_name:
+                    continue
+                target_list = limited_pools
 
-        if target_list is not None and pool_name not in target_list:
-            target_list.append(pool_name)
-            newly_added_pools.append(pool_name)
-            existing_pools.add(pool_name)
+            if target_list is not None and pool_name not in target_list:
+                target_list.append(pool_name)
+                newly_added_pools.append(pool_name)
+                existing_pools.add(pool_name)
 
-if newly_added_pools:
-    with open(pool_categories_path, 'w', encoding='utf-8') as f:
-        json.dump(pool_categories, f, ensure_ascii=False, indent=2)
-    print(f"检测到新的卡池并已更新: {', '.join(newly_added_pools)}", flush=True)
-else:
-    print("未检测到新的卡池。", flush=True)
+    if newly_added_pools:
+        with open(POOL_CATEGORIES_PATH, "w", encoding="utf-8") as f:
+            json.dump(pool_categories, f, ensure_ascii=False, indent=2)
+        print(f"检测到新的卡池并已更新: {', '.join(newly_added_pools)}", flush=True)
+    else:
+        print("未检测到新的卡池。", flush=True)
 
-# 保存到文件
-with open('src/assets/cards.json', 'w', encoding='utf-8') as f:
-    json.dump(cards, f, ensure_ascii=False, indent=2)
+    # ------------ 保存卡片数据 ------------
+    with open(CARDS_JSON_PATH, "w", encoding="utf-8") as f:
+        json.dump(cards, f, ensure_ascii=False, indent=2)
+    print(f"✅ 共抓取 {len(cards)} 张卡片信息并保存完成。", flush=True)
 
-print(f"共抓取 {len(cards)} 张卡片信息并保存完成。", flush=True)
+if __name__ == "__main__":
+    main()

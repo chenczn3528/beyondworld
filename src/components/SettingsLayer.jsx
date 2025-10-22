@@ -450,14 +450,65 @@ const SettingsLayer = ({
                 </div>
             )}
 
-            <div className="absolute flex flex-col items-end"
-                 style={{right: `${baseSize * 12}px`, bottom: `${baseSize * 12}px`, fontSize: baseSize * 7}}>
-                <label style={{color: 'red', fontWeight: 800, whiteSpace: 'nowrap'}}>重要提示：</label>
-                <label style={{whiteSpace: 'nowrap'}}>手机请竖屏，平板请横屏</label>
-                <label style={{whiteSpace: 'nowrap'}}>频繁旋转手机或平板可能会卡住</label>
-                <label style={{whiteSpace: 'nowrap'}}>关掉重开或刷新可解决</label>
-                <label style={{color: "yellow", whiteSpace: 'nowrap'}}>旋转屏幕后最好刷新一下</label>
-                <label style={{whiteSpace: 'nowrap'}}>数据来源：世界之外WIKI</label>
+            <div
+                className="absolute flex flex-col items-end"
+                style={{
+                    right: `${baseSize * 12}px`,
+                    bottom: `${baseSize * 1}px`,
+                    maxWidth: `${baseSize * 110}px`,
+                    marginBottom: `${baseSize * 4}px`,
+                    zIndex: showDetailedImage ? 2 : 6,
+                    pointerEvents: 'auto'
+                }}
+            >
+                <div
+                    style={{
+                        backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                        borderRadius: `${baseSize * 3}px`,
+                        padding: `${baseSize * 5}px ${baseSize * 6}px`,
+                        color: 'white',
+                        lineHeight: 1.4,
+                        boxShadow: '0 8px 20px rgba(0, 0, 0, 0.35)'
+                    }}
+                >
+                    <p style={{ margin: 0, fontSize: `${baseSize * 4.5}px` }}><a style={{color: '#f87171', fontWeight: 800}}>重要提示：</a>手机请竖屏，平板请横屏。频繁旋转手机或平板可能会卡住，关掉重开或刷新可解决。旋转屏幕后最好刷新一下。</p>
+
+                    <div
+                        style={{
+                            borderTop: `1px solid rgba(255, 255, 255, 0.15)`,
+                            margin: `${baseSize * 3}px 0`,
+                            opacity: 0.8
+                        }}
+                    />
+
+                    <div style={{ fontSize: `${baseSize * 4}px`, color: '#d1d5db' }}>
+                        <p style={{ margin: 0 }}>
+                            数据来源：
+                            <a
+                                href="https://wiki.biligame.com/world/%E9%A6%96%E9%A1%B5"
+                                target="_blank"
+                                rel="noreferrer noopener"
+                                style={{ color: '#8ab4ff', textDecoration: 'underline' }}
+                            >
+                                世界之外WIKI
+                            </a>
+                            （由玩家自发建立并维护）
+                        </p>
+                        <p style={{ margin: `${baseSize * 1.5}px 0 0 0` }}>
+                            素材保持原样使用，遵循
+                            <a
+                                href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans"
+                                target="_blank"
+                                rel="noreferrer noopener"
+                                style={{ color: '#8ab4ff', textDecoration: 'underline', margin: `0 ${baseSize * 1.5}px` }}
+                            >
+                                CC BY-NC-SA 4.0 协议
+                            </a>
+                            。
+                        </p>
+                        <p style={{ margin: `${baseSize * 1.5}px 0 0 0` }}>图片、音频及相关素材版权归原游戏官方所有，本站仅用于学习与非商业展示用途。</p>
+                    </div>
+                </div>
             </div>
         </div>
     );
