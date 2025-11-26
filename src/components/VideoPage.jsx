@@ -48,7 +48,7 @@ const VideoPage = ({
     const videoButtonStyle = {
         color: 'white',
         textShadow: '0 0 2px gray, 0 0 4px gray',
-        fontSize: `${baseSize * 6}px`,
+        fontSize: `${baseSize * 8}px`,
         backgroundColor: 'rgba(255,255,255,0.2)',
         padding: `${baseSize * 1}px ${baseSize * 2}px`,
         borderRadius: `${baseSize * 0.8}px`,
@@ -89,7 +89,7 @@ const VideoPage = ({
                     }}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <div className="flex items-center gap-[1vmin] flex-wrap" style={{gap: `${baseSize * 1}px`}}>
+                    <div className="flex items-center gap-[1vmin] flex-wrap" style={{gap: `${baseSize * 2}px`}}>
                         {videos.map((video, idx) => (
                             <button
                                 key={`${video.field || video.label || idx}`}
@@ -120,14 +120,14 @@ const VideoPage = ({
                                 }}
                                 onClick={() => setShowAuthorInfo((prev) => !prev)}
                             >
-                                <InfoIcon size={baseSize * 6} color="white"/>
+                                <InfoIcon size={baseSize * 8} color="white"/>
                             </button>
                             {showAuthorInfo && (
                                 <div
                                     style={{
                                         position: 'absolute',
                                         top: 0,
-                                        left: `${baseSize * 12}px`,
+                                        left: `${baseSize * 16}px`,
                                         backgroundColor: 'rgba(0,0,0,0.6)',
                                         color: 'white',
                                         padding: `${baseSize * 1}px ${baseSize * 2}px`,
