@@ -46,6 +46,8 @@ const GalleryFullImage = (
     const [showInformation, setShowInformation] = useState(true);
     const [showMeet, setShowMeet] = useState(false);
     const [activeVideoUrl, setActiveVideoUrl] = useState(null);
+    const [videoList, setVideoList] = useState([]);
+    const [defaultVideoIndex, setDefaultVideoIndex] = useState(0);
     const [videoPageZIndex, setVideoPageZIndex] = useState(-1);
 
     const attributes = ['思维', '魅力', '体魄', '感知', '灵巧'];
@@ -69,36 +71,29 @@ const GalleryFullImage = (
             author: card?.[option.authorField],
         }))
         .filter(({ url }) => url);
-    const videoButtonStyle = {
-        ...button_style,
-        fontSize: `${fontsize * 0.9}px`,
-        padding: `${fontsize * 0.4}px ${fontsize * 0.8}px`,
-        marginRight: 0,
-        whiteSpace: 'nowrap',
-    };
-    const videoAuthorStyle = {
-        color: 'white',
-        fontSize: `${fontsize * 0.8}px`,
-        textShadow: '0 0 2px black, 0 0 4px black',
-        marginTop: `${fontsize * 0.2}px`,
+    const openVideoPage = (index = 0) => {
+        if (!availableVideos.length) return;
+        const clamped = Math.max(0, Math.min(index, availableVideos.length - 1));
+        setVideoList(availableVideos);
+        setDefaultVideoIndex(clamped);
+        setActiveVideoUrl(availableVideos[clamped].url);
+        setVideoPageZIndex(700);
     };
 
     useEffect(() => {
         if (!showGalleryFullImage) {
             setActiveVideoUrl(null);
+            setVideoList([]);
+            setDefaultVideoIndex(0);
             setVideoPageZIndex(-1);
         }
     }, [showGalleryFullImage]);
 
-    const handleVideoButtonClick = (url) => {
-        if (!url) return;
-        setActiveVideoUrl(url);
-        setVideoPageZIndex(700);
-    };
-
     const handleVideoPageState = (nextZ) => {
         if (nextZ === -1) {
             setActiveVideoUrl(null);
+            setVideoList([]);
+            setDefaultVideoIndex(0);
             setVideoPageZIndex(-1);
         } else {
             setVideoPageZIndex(nextZ);
@@ -293,37 +288,21 @@ const GalleryFullImage = (
                                 >相会</button>
 
                                 {showVideoButtons && availableVideos.length > 0 && (
-                                    <div
-                                        className="absolute flex flex-col items-end"
+                                    <button
+                                        className="absolute"
                                         style={{
-                                            right: `${fontsize * 3}px`,
-                                            bottom: `${fontsize * 14}px`,
-                                            gap: `${fontsize * 0.7}px`,
+                                            ...button_style,
+                                            position: 'absolute',
+                                            top: `${fontsize * 2}px`,
+                                            right: `${fontsize * 8}px`,
+                                        }}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            openVideoPage(0);
                                         }}
                                     >
-                                        {availableVideos.map(({ field, label, url, author }) => (
-                                            <div
-                                                key={field}
-                                                className="flex flex-col items-end"
-                                                style={{ alignItems: 'flex-end' }}
-                                            >
-                                                <button
-                                                    style={videoButtonStyle}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleVideoButtonClick(url);
-                                                    }}
-                                                >
-                                                    {label}
-                                                </button>
-                                                {author && (
-                                                    <span style={videoAuthorStyle}>
-                                                        作者：{author}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
+                                        视频
+                                    </button>
                                 )}
 
                                 {/*右下角按钮*/}
@@ -352,6 +331,8 @@ const GalleryFullImage = (
                         showPageZIndex={videoPageZIndex}
                         setShowPageZIndex={handleVideoPageState}
                         video_url={activeVideoUrl}
+                        videos={videoList}
+                        defaultIndex={defaultVideoIndex}
                     />
                 )}
             </>
