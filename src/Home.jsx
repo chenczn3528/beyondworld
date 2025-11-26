@@ -111,6 +111,7 @@ const Home = ({isPortrait, openAssetTest}) => {
     const [typeChoice, setTypeChoice] = useLocalStorageState("bw_typeChoice", ["全部"]);
 
     const [musicID, setMusicID] = useLocalStorageState("bw_musicID", songsList[0]["id"].slice(0,10))
+    const showVideoButtons = true;
 
 
     // 清除缓存数据
@@ -889,6 +890,8 @@ const Home = ({isPortrait, openAssetTest}) => {
                 showGalleryFullImage={showGalleryFullImage}
                 setShowGalleryFullImage={setShowGalleryFullImage}
                 fontsize={fontsize}
+                showVideoButtons={showVideoButtons}
+                isPortrait={isPortrait}
             />
 
             <MusicPage
@@ -899,7 +902,6 @@ const Home = ({isPortrait, openAssetTest}) => {
                 musicID={musicID}
                 setMusicID={setMusicID}
             />
-
 
             {showFilterPage && (
                 <FilterPage

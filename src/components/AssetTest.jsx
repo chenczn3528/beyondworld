@@ -488,6 +488,7 @@ const AssetTest = ({ onClose }) => {
           <p style={{ margin: '4px 0' }}>统计信息: {JSON.stringify(stats, null, 2)}</p>
         </div>
       </div>
+
     </div>
   );
 };

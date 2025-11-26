@@ -121,7 +121,6 @@ const SettingsLayer = ({
             className="absolute w-full h-full"
             style={{filter: showDetailedImage ? 'blur(10px)' : 'none', transition: 'filter 0.3s ease'}}
         >
-
             {/*主页显示卡片轮播图*/}
             <div
                 className="absolute flex justify-center"

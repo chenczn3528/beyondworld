@@ -1,10 +1,11 @@
-import React, { useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import StarIcon from "../icons/StarIcon.jsx";
 import LeftIcon from "../icons/LeftIcon.jsx";
 import CardMeet from "./CardMeet.jsx";
 import useCardImageIndex from "../hooks/useCardImageIndex.js";
 import FadeImage from "./FadeImage.jsx";
 import { Asset } from './Asset.jsx';
+import VideoPage from "./VideoPage.jsx";
 
 const GalleryFullImage = (
 {
@@ -13,6 +14,8 @@ const GalleryFullImage = (
     showGalleryFullImage,
     setShowGalleryFullImage,
     fontsize,
+    showVideoButtons = false,
+    isPortrait,
 }) => {
 
     const { getImageIndex, setImageIndex } = useCardImageIndex();
@@ -42,6 +45,8 @@ const GalleryFullImage = (
 
     const [showInformation, setShowInformation] = useState(true);
     const [showMeet, setShowMeet] = useState(false);
+    const [activeVideoUrl, setActiveVideoUrl] = useState(null);
+    const [videoPageZIndex, setVideoPageZIndex] = useState(-1);
 
     const attributes = ['思维', '魅力', '体魄', '感知', '灵巧'];
     const button_style = {
@@ -51,6 +56,54 @@ const GalleryFullImage = (
         fontSize: `${fontsize}px`,
         background: '#ffffff20',
     }
+
+    const videoOptions = [
+        { field: '重逢视频', label: '重逢视频', authorField: '重逢视频作者' },
+        { field: '满花视频', label: '满花视频', authorField: '满花视频作者' },
+        { field: '抽卡视频', label: '抽卡视频', authorField: '抽卡视频作者' },
+    ];
+    const availableVideos = videoOptions
+        .map((option) => ({
+            ...option,
+            url: card?.[option.field],
+            author: card?.[option.authorField],
+        }))
+        .filter(({ url }) => url);
+    const videoButtonStyle = {
+        ...button_style,
+        fontSize: `${fontsize * 0.9}px`,
+        padding: `${fontsize * 0.4}px ${fontsize * 0.8}px`,
+        marginRight: 0,
+        whiteSpace: 'nowrap',
+    };
+    const videoAuthorStyle = {
+        color: 'white',
+        fontSize: `${fontsize * 0.8}px`,
+        textShadow: '0 0 2px black, 0 0 4px black',
+        marginTop: `${fontsize * 0.2}px`,
+    };
+
+    useEffect(() => {
+        if (!showGalleryFullImage) {
+            setActiveVideoUrl(null);
+            setVideoPageZIndex(-1);
+        }
+    }, [showGalleryFullImage]);
+
+    const handleVideoButtonClick = (url) => {
+        if (!url) return;
+        setActiveVideoUrl(url);
+        setVideoPageZIndex(700);
+    };
+
+    const handleVideoPageState = (nextZ) => {
+        if (nextZ === -1) {
+            setActiveVideoUrl(null);
+            setVideoPageZIndex(-1);
+        } else {
+            setVideoPageZIndex(nextZ);
+        }
+    };
 
     const getButtonStyle = (index) => ({
       ...button_style,
@@ -124,138 +177,184 @@ const GalleryFullImage = (
 
     return (
         showGalleryFullImage && (
-            <div
-                style={{backgroundColor: 'black'}}
-                className="absolute w-full h-full z-[500]"
-            >
-                <CardMeet
-                    showMeet={showMeet}
-                    setShowMeet={setShowMeet}
-                    card={card}
-                    fontsize={fontsize}
-                />
-
+            <>
                 <div
-                    style={{
-                        filter: showMeet ? 'blur(10px)' : 'none',
-                        transition: 'filter 0.3s ease',
-                    }}
-                    className="relative w-full h-full flex"
-                    onClick={() => setShowInformation(!showInformation)}
+                    style={{backgroundColor: 'black'}}
+                    className="absolute w-full h-full z-[500]"
                 >
-                    <div >
-                        <FadeImage
-                            cardSrc={cardSrc}
-                            cardSrcset={cardSrcset}
-                            isRotated={isMomentRotated}
-                            baseSize={baseSize}
-                        />
-                    </div>
+                    <CardMeet
+                        showMeet={showMeet}
+                        setShowMeet={setShowMeet}
+                        card={card}
+                        fontsize={fontsize}
+                    />
 
-                    {showInformation && (
-                        <div className="absolute w-full h-full">
-                            {/*角色名 世界*/}
-                            <div className="absolute flex items-center"
-                                 style={{
-                                     color: 'white',
-                                     textShadow: '0 0 1px gray, 0 0 2px gray',
-                                     marginLeft: `${fontsize * 1.2}px`,
-                                     bottom: `${fontsize * 11.3}px`,
-                                     left: `${fontsize * 2}px`,
-                                 }}>
-                                <label
-                                    style={{
-                                        fontSize: `${fontsize * 1.5}px`,
-                                        fontWeight: 600,
-                                        marginRight: `${fontsize}px`,}}
-                                >
-                                    {card.主角}
-                                </label>
-                                <StarIcon color="lightgray" size={fontsize}/>
-                                <label style={{fontSize: `${fontsize}px`, fontStyle: "italic"}}>{card.世界}</label>
-                            </div>
+                    <div
+                        style={{
+                            filter: showMeet ? 'blur(10px)' : 'none',
+                            transition: 'filter 0.3s ease',
+                        }}
+                        className="relative w-full h-full flex"
+                        onClick={() => setShowInformation(!showInformation)}
+                    >
+                        <div >
+                            <FadeImage
+                                cardSrc={cardSrc}
+                                cardSrcset={cardSrcset}
+                                isRotated={isMomentRotated}
+                                baseSize={baseSize}
+                            />
+                        </div>
 
-                            {/*稀有度 卡名*/}
-                            <div className="absolute flex items-center" style={{bottom: `${fontsize * 6.5}px`,left: `${fontsize * 2}px`}}>
-                                <Asset
-                                    src={rarityMap[card.稀有度]}
-                                    type="image"
-                                    style={{height: `${fontsize * 5}px`, width: 'auto', marginRight: `${fontsize / 2}px`,}}
-                                />
-                                <label
+                        {showInformation && (
+                            <div className="absolute w-full h-full">
+                                {/*角色名 世界*/}
+                                <div className="absolute flex items-center"
+                                     style={{
+                                         color: 'white',
+                                         textShadow: '0 0 1px gray, 0 0 2px gray',
+                                         marginLeft: `${fontsize * 1.2}px`,
+                                         bottom: `${fontsize * 11.3}px`,
+                                         left: `${fontsize * 2}px`,
+                                     }}>
+                                    <label
+                                        style={{
+                                            fontSize: `${fontsize * 1.5}px`,
+                                            fontWeight: 600,
+                                            marginRight: `${fontsize}px`,}}
+                                    >
+                                        {card.主角}
+                                    </label>
+                                    <StarIcon color="lightgray" size={fontsize}/>
+                                    <label style={{fontSize: `${fontsize}px`, fontStyle: "italic"}}>{card.世界}</label>
+                                </div>
+
+                                {/*稀有度 卡名*/}
+                                <div className="absolute flex items-center" style={{bottom: `${fontsize * 6.5}px`,left: `${fontsize * 2}px`}}>
+                                    <Asset
+                                        src={rarityMap[card.稀有度]}
+                                        type="image"
+                                        style={{height: `${fontsize * 5}px`, width: 'auto', marginRight: `${fontsize / 2}px`,}}
+                                    />
+                                    <label
+                                        style={{
+                                            color: 'white',
+                                            fontStyle: "italic",
+                                            fontSize: `${fontsize * 2.3}px`,
+                                            fontWeight: 800,
+                                            textShadow: '0 0 2px gray, 0 0 4px gray',
+                                        }}
+                                    >
+                                        {card.卡名}
+                                    </label>
+                                </div>
+
+                                {/*各属性的值*/}
+                                <div className="absolute flex flex-row" style={{bottom: `${fontsize * 2.5}px`,left: `${fontsize * 3}px`}}>
+                                    {attributes.map(attr => (
+                                        <div key={attr} className="flex flex-col items-center" style={{marginRight: `${fontsize}px`,}}>
+                                            <Asset
+                                                src={`60px-${attr}.png`}
+                                                type="image"
+                                                style={{width: `${fontsize * 2}px`}}
+                                            />
+                                            <label
+                                                style={{
+                                                    color: card.属性 === attr ? 'gold' : 'white',
+                                                    fontWeight: 500,
+                                                    fontSize: `${fontsize}px`,
+                                                    textShadow: '0 0 2px gray, 0 0 4px gray',
+                                                }}
+                                            >
+                                                {card[attr]}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/*返回按钮*/}
+                                <button className="absolute w-auto flex items-center justify-center"
+                                    onClick={(e) => {e.stopPropagation();setShowGalleryFullImage(false)}}
                                     style={{
-                                        color: 'white',
-                                        fontStyle: "italic",
-                                        fontSize: `${fontsize * 2.3}px`,
-                                        fontWeight: 800,
-                                        textShadow: '0 0 2px gray, 0 0 4px gray',
+                                        background: 'transparent',
+                                        border: 'none',
+                                        padding: 0,
+                                        top: `${fontsize}px`,
+                                        left: `${fontsize}px`,
                                     }}
                                 >
-                                    {card.卡名}
-                                </label>
-                            </div>
+                                    <LeftIcon size={baseSize * 24} color="white"/>
+                                </button>
 
-                            {/*各属性的值*/}
-                            <div className="absolute flex flex-row" style={{bottom: `${fontsize * 2.5}px`,left: `${fontsize * 3}px`}}>
-                                {attributes.map(attr => (
-                                    <div key={attr} className="flex flex-col items-center" style={{marginRight: `${fontsize}px`,}}>
-                                        <Asset
-                                            src={`60px-${attr}.png`}
-                                            type="image"
-                                            style={{width: `${fontsize * 2}px`}}
-                                        />
-                                        <label
-                                            style={{
-                                                color: card.属性 === attr ? 'gold' : 'white',
-                                                fontWeight: 500,
-                                                fontSize: `${fontsize}px`,
-                                                textShadow: '0 0 2px gray, 0 0 4px gray',
-                                            }}
-                                        >
-                                            {card[attr]}
-                                        </label>
+                                {/*相会*/}
+                                <button className="absolute w-auto flex items-center justify-center"
+                                    style={{...button_style, top: `${fontsize * 2}px`, right: `${fontsize * 3}px`,}}
+                                    onClick={(e) => {e.stopPropagation();setShowMeet(true)}}
+                                >相会</button>
+
+                                {showVideoButtons && availableVideos.length > 0 && (
+                                    <div
+                                        className="absolute flex flex-col items-end"
+                                        style={{
+                                            right: `${fontsize * 3}px`,
+                                            bottom: `${fontsize * 14}px`,
+                                            gap: `${fontsize * 0.7}px`,
+                                        }}
+                                    >
+                                        {availableVideos.map(({ field, label, url, author }) => (
+                                            <div
+                                                key={field}
+                                                className="flex flex-col items-end"
+                                                style={{ alignItems: 'flex-end' }}
+                                            >
+                                                <button
+                                                    style={videoButtonStyle}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleVideoButtonClick(url);
+                                                    }}
+                                                >
+                                                    {label}
+                                                </button>
+                                                {author && (
+                                                    <span style={videoAuthorStyle}>
+                                                        作者：{author}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
+                                )}
 
-                            {/*返回按钮*/}
-                            <button className="absolute w-auto flex items-center justify-center"
-                                onClick={(e) => {e.stopPropagation();setShowGalleryFullImage(false)}}
-                                style={{
-                                    background: 'transparent',
-                                    border: 'none',
-                                    padding: 0,
-                                    top: `${fontsize}px`,
-                                    left: `${fontsize}px`,
-                                }}
-                            >
-                                <LeftIcon size={baseSize * 24} color="white"/>
-                            </button>
-
-                            {/*相会*/}
-                            <button className="absolute w-auto flex items-center justify-center"
-                                style={{...button_style, top: `${fontsize * 2}px`, right: `${fontsize * 3}px`,}}
-                                onClick={(e) => {e.stopPropagation();setShowMeet(true)}}
-                            >相会</button>
-
-                            {/*右下角按钮*/}
-                            <div
-                                className="absolute flex flex-col items-end justify-center"
-                                style={{right: `${fontsize * 3}px`, bottom: `${fontsize * 2}px`,}}
-                            >
-                                {/*初始、重逢、无色卡面（瞬：初始、初始（竖）、重逢等）*/}
+                                {/*右下角按钮*/}
                                 <div
-                                    className="flex flex-row mt-[1vmin]"
-                                    style={{flexWrap: 'wrap', gap: '0.5vmin'}}
+                                    className="absolute flex flex-col items-end justify-center"
+                                    style={{right: `${fontsize * 3}px`, bottom: `${fontsize * 2}px`,}}
                                 >
-                                    {renderImageButtons()}
+                                    {/*初始、重逢、无色卡面（瞬：初始、初始（竖）、重逢等）*/}
+                                    <div
+                                        className="flex flex-row mt-[1vmin]"
+                                        style={{flexWrap: 'wrap', gap: '0.5vmin'}}
+                                    >
+                                        {renderImageButtons()}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
+
                 </div>
 
-            </div>
+                {activeVideoUrl && (
+                    <VideoPage
+                        baseSize={baseSize}
+                        isPortrait={isPortrait}
+                        showPageZIndex={videoPageZIndex}
+                        setShowPageZIndex={handleVideoPageState}
+                        video_url={activeVideoUrl}
+                    />
+                )}
+            </>
         )
     );
 };
