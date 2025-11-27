@@ -123,15 +123,22 @@ const VideoPage = ({
                             >
                                 <InfoIcon size={baseSize * 8} color="white"/>
                             </button>
-                            <span
+                            <button
                                 style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    padding: 0,
                                     color: 'white',
                                     fontSize: `${baseSize * 7}px`,
                                     textShadow: '0 0 2px black, 0 0 4px black',
+                                    cursor: 'pointer',
+                                }}
+                                onClick={() => {
+                                    if (sourceUrl) window.open(sourceUrl, '_blank');
                                 }}
                             >
                                 作者：{currentAuthor}
-                            </span>
+                            </button>
                         </div>
                     )}
                 </div>
