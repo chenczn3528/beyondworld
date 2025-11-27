@@ -50,81 +50,137 @@ const GalleryPage = ({
         setFinalCards(sortCards(filtered, orderChoice));
     }, [selectedRole, sortedCards, orderChoice, cards]);
 
-    const [scrollT, setScrollT] = useState(0);
-    const timeoutRef = useRef(null);
+    const [position, setPosition] = useState(0);
+    const positionRef = useRef(0);
+    positionRef.current = position;
+    const targetPositionRef = useRef(0);
+    const animationRef = useRef(null);
+    const snapTimeoutRef = useRef(null);
 
-    const paddingCount = 5; // 前后各留5张空白卡片
-    const targetIndex = 1; // 希望第几张显示在视觉焦点位（第三张）
+    const maxIndex = Math.max(finalCards.length - 1, 0);
+    const clampPosition = (value) => {
+        if (!Number.isFinite(value)) return 0;
+        return Math.max(0, Math.min(maxIndex, value));
+    };
 
-    const totalSlots = 300;
+    const animatePosition = () => {
+        const current = positionRef.current;
+        const target = targetPositionRef.current;
+        const diff = target - current;
 
-    const clippedT = Math.max(0, Math.min(1, scrollT));
-    const rawIndex = Math.round(clippedT * (totalSlots - 1)) - paddingCount;
-    const currentCardIndex = rawIndex + 1; // ✅ 不再 +1
+        if (Math.abs(diff) < 0.001) {
+            positionRef.current = target;
+            setPosition(target);
+            animationRef.current = null;
+            return;
+        }
 
-    // 滑动定位
-    const SCROLL_T_MIN = -0.2;
-    const SCROLL_T_MAX = 1.1;
+        const next = current + diff * 0.15;
+        positionRef.current = next;
+        setPosition(next);
+        animationRef.current = requestAnimationFrame(animatePosition);
+    };
 
-    // ======================================= 滚动相关
-    const scrollToIndex = (index) => {
-        const clampedIndex = Math.max(0, Math.min(finalCards.length - 1, index)); // 防越界
-        const targetSlot = clampedIndex + paddingCount;
-        const tValue = (targetSlot - targetIndex) / (totalSlots - 1);
-        setScrollT(Math.max(SCROLL_T_MIN, Math.min(SCROLL_T_MAX, tValue)));
+    const setPositionWithInertia = (value, immediate = false) => {
+        const clamped = clampPosition(value);
+        targetPositionRef.current = clamped;
+
+        if (immediate) {
+            if (animationRef.current) {
+                cancelAnimationFrame(animationRef.current);
+                animationRef.current = null;
+            }
+            positionRef.current = clamped;
+            setPosition(clamped);
+            return;
+        }
+
+        if (!animationRef.current) {
+            animationRef.current = requestAnimationFrame(animatePosition);
+        }
+    };
+
+    const snapToNearest = () => {
+        const nearest = Math.round(targetPositionRef.current);
+        setPositionWithInertia(nearest);
+    };
+
+    const scheduleSnap = () => {
+        if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current);
+        snapTimeoutRef.current = setTimeout(() => {
+            snapToNearest();
+        }, 250);
     };
 
     useEffect(() => {
-        const container = document.querySelector('#gallery-scroll-container');
-
-        if (!container) return;
-
-        container.addEventListener("wheel", handleWheel, { passive: false });
-        container.addEventListener("touchmove", handleTouchMove, { passive: false });
-
         return () => {
-            container.removeEventListener("wheel", handleWheel);
-            container.removeEventListener("touchmove", handleTouchMove);
+            if (animationRef.current) cancelAnimationFrame(animationRef.current);
+            if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current);
         };
-    }, [scrollT]);
+    }, []);
+
+    const scrollToIndex = (index, smooth = false) => {
+        const clampedIndex = clampPosition(index);
+        setPositionWithInertia(clampedIndex, !smooth);
+    };
 
     useEffect(() => {
-        const realLength = finalCards.length;
-        if (currentCardIndex < -1) {
-            setTimeout(() => scrollToIndex(0), 150);
-        } else if (currentCardIndex >= realLength) {
-            setTimeout(() => scrollToIndex(realLength - 1), 150);
-        } else {
-            setGalleryCard(finalCards[currentCardIndex]);
-        }
-    }, [scrollT]);
+        targetPositionRef.current = clampPosition(targetPositionRef.current);
+        positionRef.current = targetPositionRef.current;
+        setPosition(targetPositionRef.current);
+    }, [finalCards.length]);
 
     const handleWheel = (e) => {
-        // e.preventDefault();
-
-        // ✅ 修正滚动方向判断
-        const delta = e.deltaY > 0 ? 0.02 : -0.02;
-
-        const newScroll = scrollT + delta * 0.1;
-
-        // 防止超出限制区间
-        if ((newScroll < SCROLL_T_MIN && delta < 0) || (newScroll > SCROLL_T_MAX && delta > 0)) return;
-
-        const clipped = Math.max(SCROLL_T_MIN, Math.min(SCROLL_T_MAX, newScroll));
-        setScrollT(clipped);
-
-        clearTimeout(timeoutRef.current);
-        const approxIndex = Math.floor(Math.max(0, Math.min(1, clipped)) * (totalSlots - 1));
-
-        const alignedIndex = approxIndex - paddingCount;
-        timeoutRef.current = setTimeout(() => {
-            scrollToIndex(alignedIndex);
-        }, 2000);
+        const delta = (e.deltaY / 200) * (window.innerWidth <= 600 ? 0.8 : 1);
+        const base = targetPositionRef.current;
+        const newPos = clampPosition(base + delta);
+        setPositionWithInertia(newPos);
+        scheduleSnap();
     };
 
     useEffect(() => {
-        if (!showGallery) return; // 不显示时不绑定
+        if (showGallery) {
+            scrollToIndex(0, true);
+        }
+    }, [showGallery]);
 
+    const touchStartRef = useRef(null);
+    const handleTouchStart = (e) => {
+        const isVertical = window.innerWidth <= 600;
+        const startPos = isVertical ? e.touches[0].clientY : e.touches[0].clientX;
+
+        touchStartRef.current = startPos;
+    };
+
+    const touchVelocityRef = useRef(0);
+    const handleTouchMove = (e) => {
+        if (!touchStartRef.current) return;
+
+        const isVertical = window.innerWidth <= 600;
+        const currentPos = isVertical ? e.touches[0].clientY : e.touches[0].clientX;
+        const delta = touchStartRef.current - currentPos;
+        const step = (isVertical ? delta / 180 : delta / 320);
+
+        const newPos = clampPosition(targetPositionRef.current + step);
+        setPositionWithInertia(newPos);
+
+        touchVelocityRef.current = step;
+        touchStartRef.current = currentPos;
+    };
+
+    const handleTouchEnd = () => {
+        const momentum = touchVelocityRef.current * 8;
+        if (momentum) {
+            setPositionWithInertia(targetPositionRef.current + momentum);
+            touchVelocityRef.current = 0;
+        }
+        scheduleSnap();
+        touchStartRef.current = null;
+    };
+
+    const divRef = useRef(null); // 获取当前绑定的容器的尺寸
+    useEffect(() => {
+        if (!showGallery) return;
         const container = divRef.current;
         if (!container) return;
 
@@ -133,100 +189,31 @@ const GalleryPage = ({
             handleWheel(e);
         };
 
-        container.addEventListener('wheel', wheelHandler, { passive: false });
-
-        return () => {
-            container.removeEventListener('wheel', wheelHandler);
-        };
-    }, [showGallery]);
-
-    useEffect(() => {
-        scrollToIndex(0); // ✅ 初始加载时将第0号卡片放到参考位置（第3张）
-    }, [showGallery]);
-
-    const touchStartRef = useRef(null);
-    const initialTouchRef = useRef(null); // 用来记录 touchstart 时的原始位置
-    const scrollTRef = useRef(0);
-    scrollTRef.current = scrollT;
-
-    const handleTouchStart = (e) => {
-        const isVertical = window.innerWidth <= 600;
-        const startPos = isVertical ? e.touches[0].clientY : e.touches[0].clientX;
-
-        touchStartRef.current = startPos;
-        initialTouchRef.current = startPos; // 用来和 touchend 对比判断方向
-    };
-
-    const handleTouchMove = (e) => {
-        if (!touchStartRef.current) return;
-
-        const isVertical = window.innerWidth <= 600;
-        const currentPos = isVertical ? e.touches[0].clientY : e.touches[0].clientX;
-        const delta = touchStartRef.current - currentPos;
-
-        const scrollStep = 0.00005;
-        let newScroll = scrollTRef.current + delta * scrollStep;
-
-        if (newScroll < SCROLL_T_MIN) newScroll = SCROLL_T_MIN;
-        if (newScroll > SCROLL_T_MAX) newScroll = SCROLL_T_MAX;
-
-        if (scrollTRef.current !== newScroll) {
-            setScrollT(newScroll);
-        }
-        touchStartRef.current = currentPos;
-    };
-
-    const handleTouchEnd = (e) => {
-        const isVertical = window.innerWidth <= 600;
-        const endPos = isVertical ? e.changedTouches[0].clientY : e.changedTouches[0].clientX;
-        const delta = endPos - initialTouchRef.current;
-
-        const threshold = 30; // 滑动阈值，避免误触
-        let targetIndex = currentCardIndex;
-
-        if (delta > threshold) {
-            targetIndex = currentCardIndex - 1; // 右滑
-        } else if (delta < -threshold) {
-            targetIndex = currentCardIndex + 1; // 左滑
-        }
-
-        // 限制范围
-        targetIndex = Math.max(0, Math.min(finalCards.length - 1, targetIndex));
-        scrollToIndex(targetIndex);
-    };
-
-    const divRef = useRef(null); // 获取当前绑定的容器的尺寸
-    useEffect(() => {
-        const container = divRef.current;
-            if (!container) return;
-
         container.addEventListener('touchstart', handleTouchStart, { passive: true });
         container.addEventListener('touchmove', handleTouchMove, { passive: false });
         container.addEventListener('touchend', handleTouchEnd, { passive: true });
+        container.addEventListener('wheel', wheelHandler, { passive: false });
 
         return () => {
             container.removeEventListener('touchstart', handleTouchStart);
             container.removeEventListener('touchmove', handleTouchMove);
             container.removeEventListener('touchend', handleTouchEnd);
+            container.removeEventListener('wheel', wheelHandler);
         };
-    }, [currentCardIndex]);
+    }, [showGallery]);
 
     // ======================================= 获取当前展示的卡
-    const getDisplayCardIndex = () => {
-        if (currentCardIndex < 0) return 0;
-        if (currentCardIndex >= finalCards.length) return finalCards.length - 1;
-        return currentCardIndex;
-    };
+    const currentCardIndex = finalCards.length
+        ? Math.max(0, Math.min(finalCards.length - 1, Math.round(position)))
+        : 0;
+    const displayCard = finalCards[currentCardIndex];
 
-    const displayCard = finalCards[getDisplayCardIndex()];
-    console.log(displayCard)
-    // ==================== 设置点击进入大图的初始化
     useEffect(() => {
         if (finalCards.length > 0) {
             const targetCard = finalCards[currentCardIndex] || finalCards[0];
             setGalleryCard(targetCard);
         }
-    }, [scrollT, orderChoice, selectedRole, finalCards, currentCardIndex]);
+    }, [position, orderChoice, selectedRole, finalCards, currentCardIndex]);
 
     useEffect(() => {
         if (finalCards.length > 0 && !galleryCard) {
@@ -273,13 +260,9 @@ const GalleryPage = ({
     };
 
     const defaultWhiteImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGUlEQVR42mNgGAWjgP///xkYGBgAADEMAQEGAP8GC04EtW8gAAAAAElFTkSuQmCC";
-    const startX = 30;
-    const startY = -5;
-    const curveFactor = 10;
-    const baseSpacing = 35;
-    const a = -0.7; // 控制曲率，必须为负值
-    const maxDistance = 12; // 最多影响几张卡，超过则固定缩小
-    const rad = (-80 * Math.PI) / 180;
+    const wheelSpacing = baseSize * 30;
+    const visibleRange = 8;
+    const arcRotationRad = (-25 * Math.PI) / 180;
 
     const rarityMap = {
         刹那: 'instant.png',
@@ -291,10 +274,10 @@ const GalleryPage = ({
     };
 
     const [showOrderChoiceView, setShowOrderChoiceView] = useState(false);
-    const position = [
-        {bottom:`${baseSize * 50}px`, left: `${baseSize * 16}px`},
-        {bottom:`${baseSize * 50}px`, left: `${baseSize * 58}px`}
-    ]
+    const orderSelectPanelPosition = [
+        { bottom: `${baseSize * 36}px`, left: `${baseSize * 70}px` },
+        { bottom: `${baseSize * 36}px`, left: `${baseSize * 112}px` },
+    ];
 
     return (
         showGallery && (
@@ -347,7 +330,7 @@ const GalleryPage = ({
                     <GalleryTypeSelectPage
                         baseSize={baseSize}
                         onClose={setShowOrderChoiceView}
-                        position={position}
+                        position={orderSelectPanelPosition}
                         orderChoice={orderChoice}
                         setOrderChoice={setOrderChoice}
                     />
@@ -370,6 +353,7 @@ const GalleryPage = ({
                             left: `${baseSize * 12}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
+                            textShadow: `0 0 ${baseSize}px black, 0 0 ${baseSize * 2}px black`,
                         }}
                         onClick={(e) => {
                             e.stopPropagation();
@@ -392,6 +376,7 @@ const GalleryPage = ({
                             left: `${baseSize * 12}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
+                            textShadow: `0 0 ${baseSize}px black, 0 0 ${baseSize * 2}px black`,
                         }}
                         onClick={(e) => {
                             e.stopPropagation();
@@ -480,164 +465,148 @@ const GalleryPage = ({
 
                 </div>
 
-                {/*阴影*/}
-                <div>
-                    {Array.from({length: totalSlots}).map((_, i) => {
-                        const centerIndex = scrollT * (totalSlots - 1); // 当前视觉焦点的位置（非整数）
-                        const relativeIndex = i - centerIndex; // 焦点图卡的 relativeIndex === 0，即抛物线顶点
+                {/*滚轮小图*/}
+                <div className="absolute inset-0 pointer-events-none">
+                    {finalCards.map((card, index) => {
+                        const offset = index - position;
+                        if (Math.abs(offset) > visibleRange) return null;
 
-                        const dynamicSpacing = baseSpacing * (1 + 0.8 * Math.exp(-Math.abs(relativeIndex))); // h = 1
-                        const x0 = relativeIndex * dynamicSpacing;
+                        const scale = Math.max(0.7, 1 - Math.abs(offset) * 0.08);
+                        const opacity = Math.max(0.55, 1 - Math.abs(offset) * 0.04);
+                        const rotateZ = -offset * 2;
+                        const isActive = Math.round(position) === index;
+                        const depth = Math.max(0, visibleRange - Math.abs(offset));
+                        const zIndex = Math.round(depth * 10);
+                        const borderWidth = baseSize * 0.8;
+                        const borderColor = 'rgba(255,255,255,0.9)';
+                        const thumbShadow = isActive
+                            ? `0 0 ${baseSize * 4}px rgba(255,255,255,0.35)`
+                            : `0 0 ${baseSize * 2}px rgba(0,0,0,0.35)`;
 
-                        // 抛物线函数，顶点在 relativeIndex === 0
-                        const curveValue = a * (relativeIndex) ** 2;
-                        const y0 = curveFactor * curveValue;
+                        const thumbIndex = card['稀有度'] === '瞬'
+                            ? 0
+                            : imageIndexes[card.卡名] ?? getImageIndex(card.卡名);
+                        const thumbSrc = card["图片信息"]?.[thumbIndex]?.src || defaultWhiteImage;
 
-                        // scale，离中心越远越小
-                        const normalizedDist = Math.min(1, Math.abs(relativeIndex - 1) / maxDistance);
-                        const scale = 1 - 0.7 * normalizedDist; // 最大为1，最小为0.6（你可调）
 
-                        // 坐标
-                        const rawX = startX + x0;
-                        const rawY = startY + y0;
-                        const x = rawX * Math.cos(rad) + rawY * Math.sin(rad);
-                        const y = -rawX * Math.sin(rad) + rawY * Math.cos(rad);
-                        return (
-                            <div key={i}>
+                        // 计算 t，决定卡片在曲线上的位置
+                        const anchorT = 0.18;
+                        const spread = 0.1;
+                        let t = anchorT + offset * spread;
+                        t = Math.max(0, Math.min(1, t));  // clamp
 
-                                <div
-                                    style={{
-                                        position: "absolute",
-                                        left: `${(x - 480) * baseSize}px`,
-                                        top: `${y * baseSize}px`,
-                                        width: `${baseSize * 500 * scale}px`,
-                                        borderRadius: "0%", // 可选，加上更像扩散雾
-                                        background: "rgba(0,0,0,0.01)", // 有背景才能产生阴影
-                                        boxShadow: `0 0 ${baseSize * 60}px ${baseSize * 60}px rgba(23, 25, 33, 0.4)`,
-                                        pointerEvents: "none",
-                                        transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
-                                        zIndex: 0,
-                                    }}
-                                />
-                            </div>
+                        // ===== 往下凸的单段曲线（正确方向） =====
+                        const P0 = { x: baseSize * 40,  y: baseSize * 40 };  // 左上
+                        const P1 = { x: baseSize * 100, y: baseSize * 240 };  // ⭐ 中段最低
+                        const P2 = { x: baseSize * 380, y: baseSize * 180 };  // 右下
 
-                        );
-                    })}
-                </div>
+                        const u = t;
 
-                {/*小图*/}
-                <div className="relative w-full h-full">
+                        // 二阶贝塞尔
+                        let curveX =
+                        (1 - u) * (1 - u) * P0.x +
+                        2 * (1 - u) * u * P1.x +
+                        u * u * P2.x;
 
-                    {Array.from({length: totalSlots}).map((_, i) => {
-                        const centerIndex = scrollT * (totalSlots - 1); // 当前视觉焦点的位置（非整数）
-                        const relativeIndex = i - centerIndex; // 焦点图卡的 relativeIndex === 0，即抛物线顶点
+                        let curveY =
+                        (1 - u) * (1 - u) * P0.y +
+                        2 * (1 - u) * u * P1.y +
+                        u * u * P2.y;
 
-                        const dynamicSpacing = baseSpacing * (1 + 0.8 * Math.exp(-Math.abs(relativeIndex))); // h = 1
-                        const x0 = relativeIndex * dynamicSpacing;
+                        // 抖动效果
+                        const xo = Math.sign(offset) * Math.log2(1 + Math.abs(offset)) * baseSize * 0.7;
+                        const yo = Math.sin(offset * 0.3) * baseSize * 0.7;
 
-                        // 抛物线函数，顶点在 relativeIndex === 0
-                        const curveValue = a * (relativeIndex) ** 2;
-                        const y0 = curveFactor * curveValue;
+                        // 最终位置
+                        const finalX = curveX + xo;
+                        const finalY = curveY + yo;
+                        
 
-                        // scale，离中心越远越小
-                        const normalizedDist = Math.min(1, Math.abs(relativeIndex - 1) / maxDistance);
-                        const scale = 1 - 0.7 * normalizedDist; // 最大为1，最小为0.6（你可调）
-
-                        // 坐标
-                        const rawX = startX + x0;
-                        const rawY = startY + y0;
-                        const x = rawX * Math.cos(rad) + rawY * Math.sin(rad);
-                        const y = -rawX * Math.sin(rad) + rawY * Math.cos(rad);
-
-                        const cardIndex = i - paddingCount;
-                        const isRealImage = cardIndex >= 0 && cardIndex < finalCards.length;
-                        const card = isRealImage ? finalCards[cardIndex] : null;
-
-                        const imageIndex = isRealImage
-                            ? imageIndexes[card.卡名] ?? getImageIndex(card.卡名)
-                            : null;
-                        // 瞬卡缩略图固定显示初始（索引0），不随选择变化
-                        const displayIndex = isRealImage && card['稀有度'] === '瞬' ? 0 : imageIndex;
-
-                        const imageSrc = isRealImage
-                            ? card["图片信息"]?.[displayIndex]?.src || defaultWhiteImage
-                            : defaultWhiteImage;
-
-                        const imageAttr = isRealImage ? card["属性"] : null;
-                        const imageCardName = isRealImage ? card["卡名"] : null;
-                        const imageRarity = isRealImage ? card['稀有度'] : null;
 
                         return (
-                            <div key={i}>
+                            <button
+                                key={`${card.卡名}-${index}`}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    scrollToIndex(index, true);
+                                }}
+                                className="edge-blur-mask"
+                                style={{
+                                    pointerEvents: 'auto',
+                                    position: 'absolute',
+                                    left: `${finalX}px`,
+                                    top: `${finalY}px`,
+                                    zIndex,
+                                    transformOrigin: 'center',
+                                    transform: `translate(-50%, -50%) scale(${scale}) rotate(${rotateZ}deg)`,
+                                    opacity,
+                                    transition: 'opacity 0.2s linear',
+                                    border: `${borderWidth}px solid ${borderColor}`,
+                                    borderRadius: `${baseSize * 2}px`,
+                                    overflow: 'hidden',
+                                    background: 'transparent',
+                                    lineHeight: 0,
+                                    padding: 0,
+                                    boxShadow: thumbShadow,
+                                }}
+                            >
                                 <img
-                                    src={imageSrc}
-                                    onClick={(e) => {
-                                        if (isRealImage) scrollToIndex(cardIndex);
-                                        e.stopPropagation();
-                                    }}
-                                    className="edge-blur-mask"
+                                    src={thumbSrc}
+                                    alt={card.卡名}
                                     style={{
-                                        position: "absolute",
-                                        left: `${x * baseSize}px`,
-                                        top: `${y * baseSize}px`,
-                                        width: `${baseSize * 80 * scale}px`,
-                                        height: `${baseSize * 80 * scale * 9 / 16}px`,
-                                        objectFit: "contain",
-                                        cursor: isRealImage ? "pointer" : "default",
-                                        pointerEvents: isRealImage ? "auto" : "none",
-                                        transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
-                                        zIndex: totalSlots - i,
+                                        width: `${baseSize * 70}px`,
+                                        height: `${baseSize * 70 * 9 / 16}px`,
+                                        objectFit: 'cover',
+                                        display: 'block',
+                                        filter: card.owned === false ? 'grayscale(100%)' : 'none',
                                     }}
                                 />
-                                {imageAttr && (
-                                    <div>
-                                        <Asset
-                                            src={`60px-${imageAttr}.png`}
-                                            type="image"
-                                            className="absolute"
-                                            style={{
-                                                width: `${baseSize * 8 * scale}px`,
-                                                left: `${(x + 1) * baseSize}px`,
-                                                top: `${(y + 1) * baseSize}px`,
-                                                zIndex: totalSlots - i,
-                                                transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
-                                            }}
-                                        />
-
-                                        <label
-                                            className="absolute"
-                                            style={{
-                                                fontSize: `${baseSize * 5 * scale}px`,
-                                                color: 'white',
-                                                textShadow: `0 0 ${baseSize}px gray, 0 0 ${baseSize * 2}px gray`,
-                                                transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
-                                                zIndex: totalSlots - i,
-                                                left: `${(x + 2) * baseSize}px`,
-                                                top: `${y * baseSize + 340 / 9 * scale * baseSize}px`,
-                                            }}
-                                        >
-                                            {imageCardName}
-                                        </label>
-
-                                        <Asset
-                                            src={rarityMap[imageRarity]}
-                                            type="image"
-                                            className="absolute"
-                                            style={{
-                                                width: `${baseSize * 20 * scale}px`,
-                                                left: `${x * baseSize + 540 / 9 * scale * baseSize}px`,
-                                                top: `${y * baseSize}px`,
-                                                zIndex: totalSlots - i,
-                                                transition: "left 0.3s ease, top 0.3s ease, opacity 0.3s ease",
-                                            }}
-                                        />
+                                {card.owned === false && (
+                                    <div
+                                        className="absolute inset-0 flex items-center justify-center"
+                                        style={{backgroundColor: '#00000080'}}
+                                    >
+                                        <LockIcon color="white" size={baseSize * 8}/>
                                     </div>
                                 )}
-                            </div>
-
+                                <div
+                                    className="absolute flex items-center"
+                                    style={{
+                                        bottom: `${baseSize * 2}px`,
+                                        left: `${baseSize * 2}px`,
+                                        gap: `${baseSize}px`,
+                                    }}
+                                >
+                                    <Asset
+                                        src={`60px-${card.属性}.png`}
+                                        type="image"
+                                        style={{width: `${baseSize * 8}px`, pointerEvents: 'none'}}
+                                    />
+                                    <label
+                                        style={{
+                                            fontSize: `${baseSize * 6}px`,
+                                            color: 'white',
+                                            textShadow: '0 0 2px black, 0 0 4px black',
+                                            pointerEvents: 'none',
+                                        }}
+                                    >
+                                        {card.卡名}
+                                    </label>
+                                </div>
+                                <Asset
+                                    src={rarityMap[card.稀有度]}
+                                    type="image"
+                                    style={{
+                                        position: 'absolute',
+                                        right: `${baseSize * 2}px`,
+                                        top: `${baseSize * 2}px`,
+                                        width: `${baseSize * 18}px`,
+                                        pointerEvents: 'none',
+                                    }}
+                                />
+                            </button>
                         );
                     })}
-
                 </div>
 
             </div>

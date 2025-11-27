@@ -12,11 +12,9 @@ const VideoPage = ({
     defaultIndex = 0,
 }) => {
     const [currentIndex, setCurrentIndex] = useState(() => (videos.length ? Math.min(defaultIndex, videos.length - 1) : 0));
-    const [showAuthorInfo, setShowAuthorInfo] = useState(false);
 
     useEffect(() => {
         setCurrentIndex(videos.length ? Math.min(Math.max(defaultIndex, 0), videos.length - 1) : 0);
-        setShowAuthorInfo(false);
     }, [defaultIndex, videos.length]);
 
     const currentVideo = videos[currentIndex] || null;
@@ -99,7 +97,6 @@ const VideoPage = ({
                                 }}
                                 onClick={() => {
                                     setCurrentIndex(idx);
-                                    setShowAuthorInfo(false);
                                 }}
                             >
                                 {video.label}
