@@ -36,7 +36,7 @@ const VideoPage = ({
                 const bvid = segments.find((seg) => seg.startsWith("BV"));
                 if (bvid) {
                     const page = searchParams.get("p") || "1";
-                    return `https://player.bilibili.com/player.html?bvid=${bvid}&page=${page}&autoplay=0&preload=auto&quality=1080p&isOutside=true`;
+                    return `https://player.bilibili.com/player.html?bvid=${bvid}&autoplay=0&p=${page}&preload=auto&quality=1080p&isOutside=true`;
                 }
             }
         } catch (err) {
@@ -107,39 +107,31 @@ const VideoPage = ({
                         ))}
                     </div>
                     {currentAuthor && (
-                        <div className="relative flex items-center">
+                        <div className="flex items-center gap-[1vmin]" style={{gap: `${baseSize * 2}px`}}>
                             <button
                                 style={{
-                                    ...videoButtonStyle,
+                                    background: 'transparent',
+                                    border: 'none',
+                                    padding: 0,
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    padding: `${baseSize * 2}px`,
-                                    backgroundColor: 'transparent',
-                                    border: 'none',
                                 }}
-                                onClick={() => setShowAuthorInfo((prev) => !prev)}
+                                onClick={() => {
+                                    if (sourceUrl) window.open(sourceUrl, '_blank');
+                                }}
                             >
                                 <InfoIcon size={baseSize * 8} color="white"/>
                             </button>
-                            {showAuthorInfo && (
-                                <div
-                                    style={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: `${baseSize * 16}px`,
-                                        backgroundColor: 'rgba(0,0,0,0.6)',
-                                        color: 'white',
-                                        padding: `${baseSize * 1}px ${baseSize * 2}px`,
-                                        borderRadius: `${baseSize * 0.8}px`,
-                                        whiteSpace: 'nowrap',
-                                        fontSize: `${baseSize * 6}px`,
-                                        textShadow: '0 0 2px black, 0 0 4px black',
-                                    }}
-                                >
-                                    作者：{currentAuthor}
-                                </div>
-                            )}
+                            <span
+                                style={{
+                                    color: 'white',
+                                    fontSize: `${baseSize * 7}px`,
+                                    textShadow: '0 0 2px black, 0 0 4px black',
+                                }}
+                            >
+                                作者：{currentAuthor}
+                            </span>
                         </div>
                     )}
                 </div>
