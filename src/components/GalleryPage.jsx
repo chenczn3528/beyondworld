@@ -159,7 +159,8 @@ const GalleryPage = ({
         const isVertical = window.innerWidth <= 600;
         const currentPos = isVertical ? e.touches[0].clientY : e.touches[0].clientX;
         const delta = touchStartRef.current - currentPos;
-        const step = (isVertical ? delta / 180 : delta / 320);
+        // Increase swipe sensitivity so sliding across the screen moves more thumbnails
+        const step = (isVertical ? delta / 120 : delta / 220);
 
         const newPos = clampPosition(targetPositionRef.current + step);
         setPositionWithInertia(newPos);
