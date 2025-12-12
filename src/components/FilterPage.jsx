@@ -7,7 +7,6 @@ import FilterRoleCard from "./FilterRoleCard.jsx";
 import FilterAttrCard from "./FilterAttrCard.jsx";
 import GalleryTypeSelectPage from "./GalleryTypeSelectPage.jsx";
 import {sortCards} from "../utils/cardSort.js";
-import {Lock} from "lucide-react";
 import LockIcon from "../icons/LockIcon.jsx";
 import { Asset } from './Asset.jsx';
 
@@ -54,6 +53,7 @@ const FilterPage = ({
 
     // 是否展示所有卡片，选项：全部，已拥有，未拥有
     const [ownChoice, setOwnChoice] = useState("已拥有");
+    const [lockInfoCard, setLockInfoCard] = useState(null);
 
     const roleMap = {0: '顾时夜', 1: '易遇', 3: '夏萧因', 2: '柏源', 4: '全部'};
     const rarityOrderMap = ['稀有度', '主属性数值', '全部', '思维', '魅力', '体魄', '感知', '灵巧'];
@@ -205,7 +205,34 @@ const FilterPage = ({
                                             className="absolute top-[0] left-[0] flex justify-center items-center"
                                             style={{backgroundColor: '#00000060', height: `${baseSize * 30}px`,  width: `${baseSize * 30 * 16 / 9}px`}}
                                         >
-                                            <LockIcon color="white" size={baseSize * 8} />
+                                            <div className="relative flex items-center justify-center w-full h-full px-4">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        playClickSound();
+                                                        setLockInfoCard(prev => prev === card.卡名 ? null : card.卡名);
+                                                    }}
+                                                    style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
+                                                >
+                                                    <LockIcon color="white" size={baseSize * 8}/>
+                                                </button>
+                                                {lockInfoCard === card.卡名 && (
+                                                    <div className="absolute text-white text-center w-full px-4"
+                                                         style={{
+                                                             bottom: `${baseSize * 2}px`,
+                                                             fontSize: `${baseSize * 4}px`,
+                                                             lineHeight: 1,
+                                                             backgroundColor: '#00000090',
+                                                             padding: `${baseSize * 1.5}px`,
+                                                             borderRadius: `${baseSize * 1}px`,
+                                                             whiteSpace: 'nowrap',
+                                                             overflow: 'hidden',
+                                                             textOverflow: 'ellipsis'
+                                                         }}>
+                                                        {card.获取途径 || '暂无获取信息'}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     )}
 

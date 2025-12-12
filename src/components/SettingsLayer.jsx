@@ -20,21 +20,19 @@ const SettingsLayer = ({
     setHasShownSummary,
     setShowSummary,
     clearLocalData,
-    toggleMusic,
-    isMusicPlaying,
     handleStartDraw,
     setShowCardPoolFilter,
     showDetailedImage,
     setShowDetailedImage,
     setDetailedImage,
     setShowGallery,
-    fontsize,
     galleryHistory,
-    showMusicPageZIndex,
     setShowMusicPageZIndex,
     selectedPools,
     cardData,
     openAssetTest,
+    simulateProbability,
+    simulationResult,
 }) => {
 
     const filtered_cardData = cardData.filter(card => card.稀有度 === '世界' || card.稀有度 === '刹那');
@@ -144,7 +142,7 @@ const SettingsLayer = ({
             {/*抽卡按钮*/}
             <div
                 className="absolute flex justify-center gap-[4vmin]"
-                style={{zIndex: showDetailedImage ? 2 : 4, bottom: `${baseSize * 12}px`, left: `${baseSize * 12}px`, right: `${fontsize * 2}px`}}>
+                style={{zIndex: showDetailedImage ? 2 : 4, bottom: `${baseSize * 12}px`, left: `${baseSize * 12}px`, right: `${baseSize * 2}px`}}>
                 <button
                     style={{
                         fontSize: `${baseSize * 7}px`,
@@ -192,7 +190,7 @@ const SettingsLayer = ({
                 <div className="flex items-start justify-start gap-[1vmin]">
                     <button
                         style={{
-                            fontSize: `${baseSize * 7}px`,
+                            fontSize: `${baseSize * 6.5}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -208,7 +206,7 @@ const SettingsLayer = ({
 
                     <button
                         style={{
-                            fontSize: `${baseSize * 7}px`,
+                            fontSize: `${baseSize * 6.5}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -226,7 +224,7 @@ const SettingsLayer = ({
                         style={{
                             // visibility: 'hidden',
                             marginLeft: '2vmin',
-                            fontSize: `${baseSize * 7}px`,
+                            fontSize: `${baseSize * 6.5}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -244,7 +242,7 @@ const SettingsLayer = ({
                     <button
                         style={{
                             marginLeft: '4vmin',
-                            fontSize: `${baseSize * 7}px`,
+                            fontSize: `${baseSize * 6.5}px`,
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             color: 'white',
                             zIndex: showDetailedImage ? 2 : 4
@@ -255,12 +253,24 @@ const SettingsLayer = ({
                     </button>
                 </div>
 
-                {/*素材测试*/}
-                <button className='absolute'
-                        style={{fontSize: `${baseSize * 7}px`, top: `${baseSize * 22}px`, backgroundColor: 'rgba(255,255,255,0.4)', color: 'white', zIndex: showDetailedImage ? 2 : 4}} 
+                {/*素材测试 & 概率模拟*/}
+                <div className='absolute flex gap-[2vmin]'
+                     style={{top: `${baseSize * 22}px`, left: `${baseSize * 12}px`, zIndex: showDetailedImage ? 2 : 4}}>
+                    <button
+                        style={{fontSize: `${baseSize * 6.5}px`, backgroundColor: 'rgba(255,255,255,0.4)', color: 'white'}}
                         onClick={() => openAssetTest && openAssetTest()}>
                         动画缓存
-                </button>
+                    </button>
+                    <button
+                        style={{fontSize: `${baseSize * 6.5}px`, backgroundColor: 'rgba(255,255,255,0.2)', color: 'white'}}
+                        onClick={() => {
+                            playClickSound();
+                            if (simulateProbability) simulateProbability();
+                        }}
+                    >
+                        概率模拟
+                    </button>
+                </div>
 
                 {/* 保底显示 */}
                 <div className="flex flex-col">
@@ -315,6 +325,24 @@ const SettingsLayer = ({
                             '0' : (totalDrawCount / totalFiveStarCount).toFixed(2)}
                         </label>
                     </div>
+
+                    {simulationResult && (
+                        <div
+                            className="flex items-center justify-end"
+                            style={{
+                                fontSize: `${baseSize * 5.5}px`,
+                                color: 'white',
+                                textShadow: '0 0 10px gold',
+                                marginTop: `${baseSize * 0.5}px`,
+                                whiteSpace: 'nowrap'
+                            }}
+                        >
+                            <label className="text-shadow" style={{whiteSpace: 'nowrap'}}>
+                                {simulationResult}
+                            </label>
+                        </div>
+                    )}
+
 
                     {/*保底显示*/}
                     <div

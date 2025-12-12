@@ -51,7 +51,7 @@ export function getAvailablePools(cardData) {
   const allWorldPools = Object.keys(poolCountMap).filter((pool) => poolCountMap[pool] > 0);
 
   const permanentPools = allWorldPools.filter(
-    (pool) => pool === "世界之间" || pool.includes("累充")
+    (pool) => pool === "世界之间"
   );
 
   const availablePools = allWorldPools.filter(

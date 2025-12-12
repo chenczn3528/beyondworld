@@ -1,5 +1,6 @@
 import React, {useEffect, useState, useRef, useMemo} from 'react';
 import cardData from './assets/cards.json';
+import poolCategories from './assets/poolCategories.json';
 import songsList from './assets/songs_list.json'
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import useLocalStorageState from "./hooks/useLocalStorageState.js";
@@ -67,6 +68,16 @@ const Home = ({isPortrait, openAssetTest}) => {
         () => getAvailablePools(cardData),
         [cardData]
     );
+    const chargePoolSet = useMemo(() => {
+        const entries = poolCategories?.recharge?.cards || [];
+        const pools = new Set();
+        entries.forEach(entry => {
+            const card = cardData.find(item => item.卡名 === entry.name);
+            const pool = card?.获取途径 || entry.pool;
+            if (pool) pools.add(pool);
+        });
+        return pools;
+    }, [cardData]);
     const allPools = [...permanentPools, ...availablePools];
 
 
@@ -112,6 +123,7 @@ const Home = ({isPortrait, openAssetTest}) => {
 
     const [musicID, setMusicID] = useLocalStorageState("bw_musicID", songsList[0]["id"].slice(0,10))
     const showVideoButtons = true;
+    const [simulationResult, setSimulationResult] = useState("");
 
 
     // 清除缓存数据
@@ -497,11 +509,11 @@ const Home = ({isPortrait, openAssetTest}) => {
         let rarity;
 
         const isAllRoles = selectedRole.includes('随机');
-        const isSingleTarget = !isAllRoles;
+        const isGuaranteedMode = useSoftGuarantee && !onlySelectedRoleCard && !isAllRoles;
 
         let forceGuaranteeMode = null;
 
-        if (!onlySelectedRoleCard && useSoftGuarantee && isSingleTarget) {
+        if (isGuaranteedMode) {
           forceGuaranteeMode = localSoftPityFailed ? 'hard' : 'soft';
         }
 
@@ -531,10 +543,12 @@ const Home = ({isPortrait, openAssetTest}) => {
           currentPity = 0;
           currentFourStarCounter = 0;
 
-          if (!onlySelectedRoleCard && useSoftGuarantee && isSingleTarget) {
-            const limitedPools = selectedPools.filter(pool => pool !== "世界之间" && !pool.includes("累充"));
-            if(limitedPools.length > 0){
-                const gotTarget = result.card && selectedRole.includes(result.card.主角) && limitedPools.includes(result.card.获取途径);
+          if (isGuaranteedMode) {
+            const limitedPools = selectedPools.filter(pool => pool !== "世界之间" && !chargePoolSet.has(pool));
+            const chargeSelectedPools = selectedPools.filter(pool => chargePoolSet.has(pool));
+            if(limitedPools.length > 0 || chargeSelectedPools.length > 0){
+                const targetPools = limitedPools.length > 0 ? limitedPools : chargeSelectedPools;
+                const gotTarget = result.card && selectedRole.includes(result.card.主角) && targetPools.includes(result.card.获取途径);
                 localSoftPityFailed = !gotTarget;
             } else {
                 const gotTarget = result.card && selectedRole.includes(result.card.主角) && permanentPools.includes(result.card.获取途径);
@@ -584,12 +598,14 @@ const Home = ({isPortrait, openAssetTest}) => {
 
       const isAllPools = selectedPools.includes('全部');
       const isAllRoles = selectedRole.includes('随机');
-      const limitedPools = selectedPools.filter(pool => pool !== "世界之间" && !pool.includes("累充"));
-      const permanentPools = selectedPools.filter(pool => pool == "世界之间" || pool.includes("累充"));
+      const limitedPools = selectedPools.filter(pool => pool !== "世界之间" && !chargePoolSet.has(pool));
+      const chargeSelectedPools = selectedPools.filter(pool => chargePoolSet.has(pool));
+      const selectedPermanentPools = selectedPools.filter(pool => pool === "世界之间");
       const excludedKeywords = ["崩坍", "累充", "活动", "奇遇瞬间"];
+      const allowPaidCards = includeMoneyCard || chargeSelectedPools.length > 0;
 
       const applyPaidFilter = (list) => {
-        if (includeMoneyCard) return list;
+        if (allowPaidCards) return list;
         return list.filter(card => !excludedKeywords.some(keyword => card.获取途径.includes(keyword)));
       };
 
@@ -609,6 +625,11 @@ const Home = ({isPortrait, openAssetTest}) => {
               limitedPools.includes(card.获取途径) &&
               selectedRole.includes(card.主角)
             );
+          } else if (chargeSelectedPools.length > 0) {
+            result = selectWithRoleAndPool(card =>
+              chargeSelectedPools.includes(card.获取途径) &&
+              selectedRole.includes(card.主角)
+            );
           } else {
             result = selectWithRoleAndPool(card =>
               selectedPools.includes(card.获取途径) &&
@@ -618,12 +639,17 @@ const Home = ({isPortrait, openAssetTest}) => {
         } else if (forceGuaranteeMode === 'soft') {
           if (limitedPools.length > 0) {
             result = selectWithRoleAndPool(card =>
-              permanentPools.includes(card.获取途径) ||
+              selectedPermanentPools.includes(card.获取途径) ||
               (limitedPools.includes(card.获取途径) && !selectedRole.includes(card.主角))
+            );
+          } else if (chargeSelectedPools.length > 0) {
+            result = selectWithRoleAndPool(card =>
+              selectedPermanentPools.includes(card.获取途径) ||
+              (chargeSelectedPools.includes(card.获取途径) && !selectedRole.includes(card.主角))
             );
           } else {
             result = selectWithRoleAndPool(card =>
-              permanentPools.includes(card.获取途径) &&
+              selectedPermanentPools.includes(card.获取途径) &&
               !selectedRole.includes(card.主角)
             );
           }
@@ -638,6 +664,11 @@ const Home = ({isPortrait, openAssetTest}) => {
               selectedRole.includes(card.主角) &&
               limitedPools.includes(card.获取途径)
             );
+          } else if (chargeSelectedPools.length > 0) {
+            result = selectWithRoleAndPool(card =>
+              selectedRole.includes(card.主角) &&
+              chargeSelectedPools.includes(card.获取途径)
+            );
           } else {
             result = selectWithRoleAndPool(card =>
               selectedRole.includes(card.主角) &&
@@ -648,6 +679,10 @@ const Home = ({isPortrait, openAssetTest}) => {
           if (limitedPools.length > 0) {
             result = selectWithRoleAndPool(card =>
               limitedPools.includes(card.获取途径)
+            );
+          } else if (chargeSelectedPools.length > 0) {
+            result = selectWithRoleAndPool(card =>
+              chargeSelectedPools.includes(card.获取途径)
             );
           } else {
             result = selectWithRoleAndPool(card =>
@@ -745,7 +780,11 @@ const Home = ({isPortrait, openAssetTest}) => {
           pool = altPool;
           rarity = altRarity;
         }
-        const chosen = pool[Math.floor(Math.random() * pool.length)];
+        const chargeCandidates = chargeSelectedPools.length > 0
+          ? pool.filter(card => chargePoolSet.has(card.获取途径))
+          : [];
+        const finalCandidates = chargeCandidates.length > 0 ? chargeCandidates : pool;
+        const chosen = finalCandidates[Math.floor(Math.random() * finalCandidates.length)];
         return { card: chosen, rarity };
       } else if (rarity === '月' || rarity === '瞬') {
         pool = buildFourStarPool(rarity);
@@ -787,6 +826,86 @@ const Home = ({isPortrait, openAssetTest}) => {
       if (pool.length === 0) return { card: null, rarity };
       const chosen = pool[Math.floor(Math.random() * pool.length)];
       return { card: chosen, rarity };
+    };
+
+    const simulateProbability = (defaultDraws = 10000) => {
+      const drawInput = window.prompt('模拟抽卡次数（默认140）', String(defaultDraws));
+      const drawCount = Math.max(1, parseInt(drawInput || String(defaultDraws), 10));
+      setSimulationResult('模拟中...');
+
+      setTimeout(() => {
+        let pity = 0;
+        let fourCounter = 0;
+        let localSoft = softPityFailed;
+        let totalFiveStar = 0;
+        const runResults = [];
+
+        for (let i = 0; i < drawCount; i += 1) {
+          const isAllRoles = selectedRole.includes('随机');
+          const isGuaranteedMode = useSoftGuarantee && !onlySelectedRoleCard && !isAllRoles;
+          let forceMode = null;
+          if (isGuaranteedMode) {
+            forceMode = localSoft ? 'hard' : 'soft';
+          }
+
+          const hasHighBefore = runResults.filter((rarity) =>
+            rarity === '月' || rarity === '瞬' || rarity === '世界' || rarity === '刹那'
+          ).length > 0;
+          const isTenDrawGuarantee = ((i + 1) % 10 === 0) && !hasHighBefore;
+
+          const result = getRandomCard(
+            pity,
+            fourCounter,
+            selectedRole,
+            onlySelectedRoleCard,
+            includeThreeStar,
+            includeThreeStarM,
+            selectedPools,
+            cardData,
+            forceMode,
+            isTenDrawGuarantee
+          );
+
+          const { rarity } = result;
+          runResults.push(rarity);
+
+          if (rarity === '世界' || rarity === '刹那') {
+            totalFiveStar += 1;
+            pity = 0;
+            fourCounter = 0;
+
+            if (isGuaranteedMode) {
+              const limitedPools = selectedPools.filter((pool) => pool !== '世界之间' && !chargePoolSet.has(pool));
+              const chargeSelectedPools = selectedPools.filter((pool) => chargePoolSet.has(pool));
+              let targetPools = [];
+              if (limitedPools.length > 0 || chargeSelectedPools.length > 0) {
+                targetPools = limitedPools.length > 0 ? limitedPools : chargeSelectedPools;
+                const gotTarget = result.card
+                  && selectedRole.includes(result.card.主角)
+                  && targetPools.includes(result.card.获取途径);
+                localSoft = !gotTarget;
+              } else {
+                const gotTarget = result.card
+                  && selectedRole.includes(result.card.主角)
+                  && permanentPools.includes(result.card.获取途径);
+                localSoft = !gotTarget;
+              }
+            }
+          } else {
+            pity += 1;
+            if (rarity === '月' || rarity === '瞬') {
+              fourCounter = 0;
+            } else {
+              fourCounter += 1;
+            }
+          }
+        }
+
+        const averageInterval = totalFiveStar > 0 ? (drawCount / totalFiveStar).toFixed(2) : '∞';
+        setSimulationResult(
+          `模拟${drawCount} 抽：共出金 ${totalFiveStar.toFixed(2)} 张，约每 ${averageInterval} 抽出一次`
+        );
+      }, 50);
     };
 
 
@@ -881,7 +1000,7 @@ const Home = ({isPortrait, openAssetTest}) => {
                 showHistory={showHistory}
                 setShowHistory={setShowHistory}
                 history={history}
-                fontsize={fontsize}
+                fontsize={baseSize * 6.5}
             />
 
             <GalleryFullImage
@@ -995,21 +1114,20 @@ const Home = ({isPortrait, openAssetTest}) => {
                 setHasShownSummary={setHasShownSummary}
                 setShowSummary={setShowSummary}
                 clearLocalData={clearLocalData}
-                // toggleMusic={toggleMusic}
-                // isMusicPlaying={isMusicPlaying}
                 handleStartDraw={handleStartDraw} // 抽卡动画处理
                 setShowCardPoolFilter={setShowCardPoolFilter}
                 showDetailedImage={showDetailedImage}
                 setShowDetailedImage={setShowDetailedImage}
                 setDetailedImage={setDetailedImage}
                 setShowGallery={setShowGallery}
-                fontsize={fontsize}
                 galleryHistory={galleryHistory}
                 showMusicPageZIndex={showMusicPageZIndex}
                 setShowMusicPageZIndex={setShowMusicPageZIndex}
                 selectedPools={selectedPools}
                 cardData={cardData}
                 openAssetTest={openAssetTest}
+                simulateProbability={simulateProbability}
+                simulationResult={simulationResult}
             />
 
         </div>

@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import CloseIcon from "../icons/CloseIcon.jsx";
 import StarIcon from "../icons/StarIcon.jsx";
 
@@ -19,6 +19,8 @@ const CardMeet = ({ card, showMeet, setShowMeet, fontsize })=>{
         textShadow: showMeetNumber === index ? button_style.textShadow : null
     });
 
+
+    const scrollRef = useRef(null);
 
     const filteredMeets = card["相会事件"].filter(item =>
         item.content_html !== `{{{${item.title_img}}}}` && item.content_html !== "");
@@ -53,6 +55,12 @@ const CardMeet = ({ card, showMeet, setShowMeet, fontsize })=>{
 
 
 
+
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = 0;
+        }
+    }, [showMeetNumber]);
 
     return (
         showMeet && (
@@ -109,6 +117,7 @@ const CardMeet = ({ card, showMeet, setShowMeet, fontsize })=>{
                         <div
                             className="overflow-y-auto"
                             style={{marginRight: `${fontsize * 3}px`}}
+                            ref={scrollRef}
                         >
                             <div
                                 style={{fontSize: `${fontsize}px`, color: 'white'}}

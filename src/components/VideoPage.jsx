@@ -11,13 +11,17 @@ const VideoPage = ({
     videos = [],
     defaultIndex = 0,
 }) => {
-    const [currentIndex, setCurrentIndex] = useState(() => (videos.length ? Math.min(defaultIndex, videos.length - 1) : 0));
+    const filteredVideos = useMemo(() =>
+        (videos || []).filter((video) => video && video.url),
+        [videos]
+    );
+    const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
-        setCurrentIndex(videos.length ? Math.min(Math.max(defaultIndex, 0), videos.length - 1) : 0);
-    }, [defaultIndex, videos.length]);
+        setCurrentIndex(filteredVideos.length ? Math.min(Math.max(defaultIndex, 0), filteredVideos.length - 1) : 0);
+    }, [defaultIndex, filteredVideos]);
 
-    const currentVideo = videos[currentIndex] || null;
+    const currentVideo = filteredVideos[currentIndex] || null;
     const sourceUrl = currentVideo?.url || video_url || "";
     const currentAuthor = currentVideo?.author;
 
@@ -76,7 +80,7 @@ const VideoPage = ({
                 <LeftIcon size={baseSize * 24} color="white"/>
             </button>
 
-            {videos.length > 0 && (
+            {filteredVideos.length > 0 && (
                 <div
                     className="absolute flex items-center"
                     style={{
@@ -88,7 +92,7 @@ const VideoPage = ({
                     onClick={(e) => e.stopPropagation()}
                 >
                     <div className="flex items-center gap-[1vmin] flex-wrap" style={{gap: `${baseSize * 2}px`}}>
-                        {videos.map((video, idx) => (
+                        {filteredVideos.map((video, idx) => (
                             <button
                                 key={`${video.field || video.label || idx}`}
                                 style={{
@@ -99,7 +103,7 @@ const VideoPage = ({
                                     setCurrentIndex(idx);
                                 }}
                             >
-                                {video.label}
+                                {video.label || video.field || `视频${idx + 1}`}
                             </button>
                         ))}
                     </div>

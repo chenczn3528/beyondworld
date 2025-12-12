@@ -207,6 +207,57 @@ def check_cards(card: Dict[str, any]) -> Dict[str, any]:
         card["获取途径"] = "世界之间"
     return card
 
+def extract_recharge_cards(cards: List[Dict[str, any]]) -> List[Dict[str, str]]:
+    """生成累充卡池信息"""
+    recharge_cards: List[Dict[str, str]] = []
+
+    for card in cards:
+        source = card.get("来源") or ""
+        pool_name = card.get("获取途径") or ""
+        if "累充" not in source and "累充" not in pool_name:
+            continue
+        recharge_cards.append({
+            "name": card.get("卡名", ""),
+            "pool": pool_name or source,
+            "rarity": card.get("稀有度", "")
+        })
+
+    def sort_key(entry: Dict[str, str]):
+        pool = entry.get("pool", "")
+        match = re.search(r"\d+", pool)
+        number = int(match.group()) if match else 0
+        return (number, pool, entry.get("name", ""))
+
+    recharge_cards.sort(key=sort_key)
+    return recharge_cards
+
+def sync_recharge_section(pool_categories: Dict[str, any], recharge_cards: List[Dict[str, str]]) -> bool:
+    """将累充卡池写入 poolCategories.json，返回是否发生变更"""
+    if "recharge" not in pool_categories:
+        pool_categories["recharge"] = {
+            "name": "累充卡池",
+            "icon": "💎",
+            "cards": []
+        }
+        changed = True
+    else:
+        changed = False
+
+    recharge_section = pool_categories["recharge"]
+    if "name" not in recharge_section:
+        recharge_section["name"] = "累充卡池"
+        changed = True
+    if "icon" not in recharge_section:
+        recharge_section["icon"] = "💎"
+        changed = True
+
+    existing_cards = recharge_section.get("cards", [])
+    if existing_cards != recharge_cards:
+        recharge_section["cards"] = recharge_cards
+        changed = True
+
+    return changed
+
 # -----------------------------
 # 主流程：列表页 -> 每项详情 -> 组装输出
 # -----------------------------
@@ -217,8 +268,9 @@ def main():
     resp = polite_get(LIST_URL)
     soup = BeautifulSoup(resp.text, "html.parser")
     rows = soup.find_all("tr")
+    valid_rows: List[tuple] = []
 
-    for index, row in enumerate(rows):
+    for row in rows:
         if not row.has_attr("data-param1"):
             continue
 
@@ -226,6 +278,11 @@ def main():
         if not name_div:
             continue
         card_name = name_div.get_text(strip=True).split("·")[-1]
+        valid_rows.append((row, card_name))
+
+    print(f"🃏 本次共需抓取 {len(valid_rows)} 张卡片。", flush=True)
+
+    for index, (row, card_name) in enumerate(valid_rows):
 
         info_dict = wiki_detailed_info(card_name)
 
@@ -250,11 +307,21 @@ def main():
         pool_categories = {}
 
     existing_pools = set()
+    limited_filtered = False
 
     world_between = pool_categories.get("worldBetween", {})
     subcategories = world_between.get("subcategories", {})
-    for category in subcategories.values():
-        for pool_name in category.get("pools", []):
+    for key, category in subcategories.items():
+        pools = category.get("pools", [])
+        if key == "limited":
+            filtered_pools = [p for p in pools if "累充" not in p]
+            if len(filtered_pools) != len(pools):
+                category["pools"] = filtered_pools
+                pools = filtered_pools
+                limited_filtered = True
+        for pool_name in pools:
+            if key == "limited" and "累充" in pool_name:
+                continue
             existing_pools.add(pool_name)
 
     for key, value in pool_categories.items():
@@ -269,6 +336,8 @@ def main():
     for card in cards:
         pool_name = card.get("获取途径")
         if not pool_name:
+            continue
+        if "累充" in pool_name:
             continue
         if pool_name in existing_pools:
             continue
@@ -318,12 +387,22 @@ def main():
                 newly_added_pools.append(pool_name)
                 existing_pools.add(pool_name)
 
-    if newly_added_pools:
+    recharge_cards = extract_recharge_cards(cards)
+    recharge_updated = sync_recharge_section(pool_categories, recharge_cards)
+
+    if newly_added_pools or recharge_updated or limited_filtered:
         with open(POOL_CATEGORIES_PATH, "w", encoding="utf-8") as f:
             json.dump(pool_categories, f, ensure_ascii=False, indent=2)
-        print(f"检测到新的卡池并已更新: {', '.join(newly_added_pools)}", flush=True)
+        messages = []
+        if newly_added_pools:
+            messages.append(f"检测到新的卡池并已更新: {', '.join(newly_added_pools)}")
+        if recharge_updated:
+            messages.append("累充卡池信息已同步")
+        if limited_filtered:
+            messages.append("限定卡池已过滤累充奖励")
+        print("；".join(messages), flush=True)
     else:
-        print("未检测到新的卡池。", flush=True)
+        print("未检测到新的卡池，累充卡池与限定卡池均无变化。", flush=True)
 
     # ------------ 保存卡片数据 ------------
     with open(CARDS_JSON_PATH, "w", encoding="utf-8") as f:

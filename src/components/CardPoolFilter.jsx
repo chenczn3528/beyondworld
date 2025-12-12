@@ -26,53 +26,87 @@ const CardPoolFilter = ({
     poolsLoaded,
 }) => {
 
-
-
     const characters = valuesList["主角"] || [];
 
     const { availablePools, permanentPools } = useMemo(() => getAvailablePools(cardData), [cardData]);
+    const filteredLimitedPools = useMemo(
+      () => availablePools.filter(pool => !pool.includes("累充")),
+      [availablePools]
+    );
+    const [currentAvailablePools, setCurrentAvailablePools] = useState(filteredLimitedPools);
 
-    const [currentAvailablePools, setCurrentAvailablePools] = useState(availablePools);
+    const rechargeConfig = poolCategories?.recharge || {};
+    const rechargeEntries = rechargeConfig.cards || [];
 
-    // ✅ 初始化时根据 selectedPools 过滤出 limited 池
-    const [selectedLimitedPools, setSelectedLimitedPools] = useState(() => {
-      return selectedPools.filter(p => availablePools.includes(p));
-    });
+    const cardMap = useMemo(() => {
+      const map = new Map();
+      cardData.forEach(card => {
+        map.set(card.卡名, card);
+      });
+      return map;
+    }, []);
 
-    // ✅ 等 poolsLoaded 后再同步一次（只第一次）
-    useEffect(() => {
-      if (!poolsLoaded) return;
-      setSelectedLimitedPools(
-        selectedPools.filter(p => currentAvailablePools.includes(p))
+    const resolveRechargePool = (entry) => {
+      const matched = cardMap.get(entry.name);
+      return matched?.获取途径 || entry.pool;
+    };
+
+    const filteredRechargePools = useMemo(() => {
+      if (!rechargeEntries.length) return [];
+      const isRandom = selectedRole.length === 1 && selectedRole[0] === '随机';
+      const roleSet = new Set(selectedRole);
+      const entries = isRandom
+        ? rechargeEntries
+        : rechargeEntries.filter(entry => {
+            const card = cardMap.get(entry.name);
+            return card ? roleSet.has(card.主角) : true;
+          });
+      return Array.from(
+        new Set(
+          entries
+            .map(resolveRechargePool)
+            .filter(Boolean)
+        )
       );
-    }, [poolsLoaded]);
+    }, [rechargeEntries, selectedRole, cardMap]);
+
+    const [selectedLimitedPools, setSelectedLimitedPools] = useState(() =>
+      selectedPools.filter(p => filteredLimitedPools.includes(p))
+    );
+
+    const [includeRechargePools, setIncludeRechargePools] = useState(() =>
+      selectedPools.some(pool => filteredRechargePools.includes(pool))
+    );
+
+    const hasRechargeOption = filteredRechargePools.length > 0;
+
+    useEffect(() => {
+      if (!hasRechargeOption && includeRechargePools) {
+        setIncludeRechargePools(false);
+      }
+    }, [hasRechargeOption, includeRechargePools]);
 
     // ✅ 选择角色后池子变化
     useEffect(() => {
       if (!poolsLoaded) return;
 
       if (selectedRole.length === 1 && selectedRole[0] === '随机') {
-        setCurrentAvailablePools(availablePools);
-        setSelectedLimitedPools(prev =>
-          availablePools.filter(pool => prev.includes(pool))
-        );
+        setCurrentAvailablePools(filteredLimitedPools);
+        setSelectedLimitedPools(prev => filteredLimitedPools.filter(pool => prev.includes(pool)));
       } else {
-        let temp_pools = Object.keys(
+        let tempPools = Object.keys(
           getDynamicAttributeCounts(
             cardData.filter(
               card => selectedRole.includes(card.主角) && (card.稀有度 === '世界' || card.稀有度 === '刹那')
             )
           ).countByAttributes.获取途径
         );
-        temp_pools = temp_pools.filter(
-          (item) => item !== "世界之间" && !item.includes("累充")
-        );
-        setCurrentAvailablePools(temp_pools);
-        setSelectedLimitedPools(prev =>
-          temp_pools.filter(pool => prev.includes(pool))
-        );
+        tempPools = tempPools.filter((item) => item !== "世界之间" && !item.includes("累充"));
+        setCurrentAvailablePools(tempPools);
+        setSelectedLimitedPools(prev => tempPools.filter(pool => prev.includes(pool)));
       }
-    }, [selectedRole, poolsLoaded]);
+    }, [selectedRole, poolsLoaded, filteredLimitedPools, cardData]);
+
 
     const formatPoolName = (pool) => {
       if (typeof pool !== "string") return pool;
@@ -111,7 +145,7 @@ const CardPoolFilter = ({
     // ✅ 是否全选
     const isAllLimitedSelected = currentAvailablePools.every((pool) =>
       selectedLimitedPools.includes(pool)
-    );
+    ) && (!hasRechargeOption || includeRechargePools);
 
     // ✅ 切换选中池
     const toggleLimitedPool = (pool) => {
@@ -122,6 +156,13 @@ const CardPoolFilter = ({
         return Array.from(new Set(newSelected));
       });
     };
+
+    useEffect(() => {
+      if (!setIncludeMoneyCard) return;
+      if (includeMoneyCard !== includeRechargePools) {
+        setIncludeMoneyCard(includeRechargePools);
+      }
+    }, [includeMoneyCard, includeRechargePools, setIncludeMoneyCard]);
 
     // ✅ 将 selectedLimitedPools + permanentPools 合并写入父级 selectedPools
     useEffect(() => {
@@ -138,8 +179,13 @@ const CardPoolFilter = ({
               )
             );
 
-      setSelectedPools([...selectedLimitedPools, ...validPermanentPools]);
-    }, [selectedLimitedPools, selectedRole, permanentPools, cardData, poolsLoaded]);
+      const rechargePoolsToInclude = includeRechargePools ? filteredRechargePools : [];
+      setSelectedPools([
+        ...selectedLimitedPools,
+        ...rechargePoolsToInclude,
+        ...validPermanentPools,
+      ]);
+    }, [selectedLimitedPools, includeRechargePools, filteredRechargePools, selectedRole, permanentPools, cardData, poolsLoaded]);
 
 
 
@@ -245,13 +291,6 @@ const CardPoolFilter = ({
                                     checked={includeThreeStar}
                                     onChange={(e) => setIncludeThreeStar(e.target.checked)}
                                 />
-
-                                <label className="flex items-center mr-[1vmin] ml-[3vmin]">包含崩坍累充</label>
-                                <input
-                                    type="checkbox"
-                                    checked={includeMoneyCard}
-                                    onChange={(e) => setIncludeMoneyCard(e.target.checked)}
-                                />
                             </div>
 
                             {/* 保底选项 */}
@@ -301,30 +340,57 @@ const CardPoolFilter = ({
                                         onChange={(e) => {
                                             if (e.target.checked) {
                                                 setSelectedLimitedPools(currentAvailablePools);
+                                                if (hasRechargeOption) setIncludeRechargePools(true);
                                             } else {
                                                 setSelectedLimitedPools([]);
+                                                if (hasRechargeOption) setIncludeRechargePools(false);
                                             }
                                         }}
                                     />
                                 </div>
 
-                                <label style={{fontSize: `${baseSize * 5.5}px`, color: "#aaa"}}>（不勾选则仅有常驻{includeMoneyCard ? "+累充" : "" }世界卡）</label>
+                                <label style={{fontSize: `${baseSize * 5.5}px`, color: "#aaa"}}>（不勾选则仅有常驻世界卡）</label>
                                 <label style={{fontSize: `${baseSize * 5.5}px`}}>
-                                    {/* <span style={{color: "white", fontWeight: 800}}>已选卡池：</span>
-                                    <span style={{color: "#efd6a0"}}>
-                                        {selectedPools.length === permanentPools.length + currentAvailablePools.length
-                                            ? '全部'
-                                            : selectedLimitedPools.length === 0
-                                                ? includeMoneyCard ? '常驻+累充' : '常驻'
-                                                : includeMoneyCard
-                                                    ? '常驻+累充，' + selectedLimitedPools.map(formatPoolName).join('，')
-                                                    : '常驻，' + selectedLimitedPools.map(formatPoolName).join('，')}
-                                    </span> */}
+                                    {/* 预留“已选卡池”展示区域 */}
                                 </label>
                             </div>
 
                             {/* 选择活动 按钮 */}
                             <div className="flex flex-col mt-[2vmin] ml-[3vw] mr-[3vw] mb-[4vmin] gap-[3vmin]">
+                                {hasRechargeOption && (
+                                    <div className="flex flex-col gap-[1.5vmin]">
+                                        <label
+                                            style={{
+                                                fontSize: `${baseSize * 7}px`,
+                                                color: "#ffd27f",
+                                                fontWeight: 700,
+                                            }}
+                                        >
+                                            {rechargeConfig.name || '累充卡池'}
+                                        </label>
+                                        <div className="flex flex-wrap gap-[1.5vmin]">
+                                            <button
+                                                onClick={() => setIncludeRechargePools(prev => !prev)}
+                                                style={{
+                                                    backgroundColor: includeRechargePools ? "rgba(239,218,160,0.8)" : "transparent",
+                                                    color: includeRechargePools ? "#111" : "#aaa",
+                                                    boxShadow: includeRechargePools ? "0 0 5px gold, 0 0 10px gold" : "0 0 5px #111214, 0 0 10px #111214",
+                                                    fontSize: `${baseSize * 6.5}px`,
+                                                    padding: `${baseSize * 2}px ${baseSize * 4}px`,
+                                                }}
+                                            >
+                                                {rechargeConfig.name || '累充卡池'}
+                                            </button>
+                                        </div>
+                                        <label style={{fontSize: `${baseSize * 5}px`, color: "#aaa", marginBottom: 0, lineHeight: 1}}>
+                                            世界卡：{rechargeEntries.filter(entry => entry.rarity === '世界').map(entry => entry.name).join('、')}
+                                        </label>
+                                        <label style={{fontSize: `${baseSize * 5}px`, color: "#aaa", marginTop: 0, lineHeight: 1}}>
+                                            月卡：{rechargeEntries.filter(entry => entry.rarity === '月').map(entry => entry.name).join('、')}
+                                        </label>
+                                    </div>
+                                )}
+
                                 {categorizedWorldBetween.map((category) => (
                                     <div key={category.key} className="flex flex-col gap-[1.5vmin]">
                                         <label
