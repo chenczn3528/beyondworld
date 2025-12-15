@@ -9,6 +9,8 @@ import GalleryTypeSelectPage from "./GalleryTypeSelectPage.jsx";
 import {sortCards} from "../utils/cardSort.js";
 import LockIcon from "../icons/LockIcon.jsx";
 import { Asset } from './Asset.jsx';
+import { useAssetLoader } from '../hooks/useAssetLoader.js';
+import BlurIcon from "../icons/BlurIcon.jsx";
 
 const FilterPage = ({
     baseSize,
@@ -54,9 +56,47 @@ const FilterPage = ({
     // 是否展示所有卡片，选项：全部，已拥有，未拥有
     const [ownChoice, setOwnChoice] = useState("已拥有");
     const [lockInfoCard, setLockInfoCard] = useState(null);
+    const [allowLockedPreview, setAllowLockedPreview] = useState(false);
 
     const roleMap = {0: '顾时夜', 1: '易遇', 3: '夏萧因', 2: '柏源', 4: '全部'};
     const rarityOrderMap = ['稀有度', '主属性数值', '全部', '思维', '魅力', '体魄', '感知', '灵巧'];
+
+    const { loadAsset } = useAssetLoader();
+    const [backgroundImage, setBackgroundImage] = useState('images/bg_main1.jpg');
+    const backgroundBlobUrlRef = useRef(null);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        const loadBackgroundFromCache = async () => {
+            try {
+                const cachedUrl = await loadAsset('image', 'bg_main1.jpg', { onlyCached: true });
+                if (cancelled || !cachedUrl) return;
+
+                if (backgroundBlobUrlRef.current && backgroundBlobUrlRef.current !== cachedUrl) {
+                    try { URL.revokeObjectURL(backgroundBlobUrlRef.current); } catch {}
+                }
+
+                if (cachedUrl.startsWith('blob:')) {
+                    backgroundBlobUrlRef.current = cachedUrl;
+                } else {
+                    backgroundBlobUrlRef.current = null;
+                }
+                setBackgroundImage(cachedUrl);
+            } catch (error) {
+                console.warn('Failed to load bg_main1.jpg from cache, fallback to network path.', error);
+            }
+        };
+
+        loadBackgroundFromCache();
+
+        return () => {
+            cancelled = true;
+            if (backgroundBlobUrlRef.current) {
+                try { URL.revokeObjectURL(backgroundBlobUrlRef.current); } catch {}
+            }
+        };
+    }, [loadAsset]);
 
     useEffect(() => {
         let tmpCards = [];
@@ -98,12 +138,12 @@ const FilterPage = ({
     return (
         <div
             className={`absolute w-full h-full z-200 flex items-center ${state ? "fade-in" : "fade-out"}`}
-            style={{background: 'url(images/bg_main1.jpg)', backgroundSize: 'contain',}}
+            style={{backgroundImage: `url(${backgroundImage})`, backgroundSize: 'contain'}}
         >
 
             {/*左上 返回、Home*/}
             <div className="absolute z-[500] w-auto flex items-center justify-center"
-                 style={{top: `${baseSize * 6}px`, left: `${baseSize * 6}px`,}}>
+                 style={{top: `${baseSize * 6}px`, left: `${baseSize * 6}px`, gap: `${baseSize * 2}px`}}>
                 {/*返回按钮*/}
                 <button
                     onClick={(e) => {
@@ -147,6 +187,29 @@ const FilterPage = ({
                         fontWeight: 800,
                         marginLeft: `${baseSize * 6}px`,
                     }}>数量：{finalSortedCards.length - 9}</label>
+
+                <button
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: `${baseSize * 1}px`,
+                        fontSize: `${baseSize * 4.5}px`,
+                        padding: `${baseSize * 1.5}px ${baseSize * 2.5}px`,
+                        backgroundColor: allowLockedPreview ? 'rgba(34,197,94,0.35)' : 'rgba(255,255,255,0.2)',
+                        color: 'white',
+                        borderRadius: `${baseSize * 2}px`,
+                        border: `1px solid ${allowLockedPreview ? '#22c55e' : 'rgba(255,255,255,0.4)'}`,
+                        marginLeft: `${baseSize * 12}px`,
+                    }}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        playClickSound();
+                        setAllowLockedPreview(prev => !prev);
+                    }}
+                >
+                    <BlurIcon size={baseSize * 7} color={allowLockedPreview ? '#bbf7d0' : '#ffffff'} />
+                    切换为{allowLockedPreview ? '不可预览' : '可预览'}未解锁图鉴
+                </button>
             </div>
 
             {/*中间卡片*/}
@@ -166,11 +229,16 @@ const FilterPage = ({
                                     <img
                                         src={card.图片信息[0].src}
                                         onClick={()=>{
-                                            playClickSound();
-                                            if(card){
-                                                setShowGalleryFullImage(true)
-                                                setGalleryCard(card);
+                                            if (!card) {
+                                                return;
                                             }
+                                            if (card.owned === false && !allowLockedPreview) {
+                                                playClickSound();
+                                                return;
+                                            }
+                                            playClickSound();
+                                            setShowGalleryFullImage(true);
+                                            setGalleryCard(card);
                                         }}
                                         height={`${baseSize * 30}px`}
                                     />
@@ -200,7 +268,7 @@ const FilterPage = ({
                                         height={`${baseSize * 12}px`}
                                         style={{right: `${baseSize * 7}px`, pointerEvents: "none"}}
                                     />
-                                    {card.owned === false && (
+                                    {card.owned === false && !allowLockedPreview && (
                                         <div
                                             className="absolute top-[0] left-[0] flex justify-center items-center"
                                             style={{backgroundColor: '#00000060', height: `${baseSize * 30}px`,  width: `${baseSize * 30 * 16 / 9}px`}}
@@ -235,6 +303,14 @@ const FilterPage = ({
                                             </div>
                                         </div>
                                     )}
+                                    {card.owned === false && allowLockedPreview && (
+                                        <div
+                                            className="absolute top-[1px] left-[1px] text-white px-2 py-1 rounded bg-[rgba(0,0,0,0.5)]"
+                                            style={{fontSize: `${baseSize * 3}px`}}
+                                        >
+                                            已解锁预览
+                                        </div>
+                                    )}
 
                                 </>
                             ) : null}
@@ -245,27 +321,30 @@ const FilterPage = ({
 
             </div>
 
-            {/*选排序 右上角*/}
-            <button
+            {/*右上角操作区*/}
+            <div
                 className="absolute z-[500]"
                 style={{
-                    // visibility: 'hidden',
-                    marginLeft: `${baseSize * 6}px`,
-                    fontSize: `${baseSize * 6}px`,
-                    width: `${baseSize * 60}px`,
-                    top: `${baseSize * 12}px`,
+                    top: `${baseSize * 10}px`,
                     right: `${baseSize * 12}px`,
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                    color: 'white',
-                }}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    playClickSound();
-                    setShowOrderChoiceView(true);
                 }}
             >
-                {orderChoice === 2 ? "属性数值" : rarityOrderMap[orderChoice]}
-            </button>
+                <button
+                    style={{
+                        fontSize: `${baseSize * 6}px`,
+                        width: `${baseSize * 60}px`,
+                        backgroundColor: 'rgba(255,255,255,0.2)',
+                        color: 'white',
+                    }}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        playClickSound();
+                        setShowOrderChoiceView(true);
+                    }}
+                >
+                    {orderChoice === 2 ? "属性数值" : rarityOrderMap[orderChoice]}
+                </button>
+            </div>
 
             {/*右边*/}
             <label

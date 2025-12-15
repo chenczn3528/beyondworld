@@ -1,47 +1,67 @@
-// utils/playClickSound.js
-import { useAssetLoader } from '../hooks/useAssetLoader';
-
-let clickAudio;
 let assetLoader;
+const loaderWaiters = [];
+let clickAudioUrl = null;
+let clickAudioUrlPromise = null;
 
-// 初始化 Asset Loader
-const initAssetLoader = () => {
-  if (!assetLoader) {
-    // 这里需要从 React 组件外部获取 useAssetLoader
-    // 由于这是工具函数，我们需要一个不同的方法
-    return null;
-  }
-  return assetLoader;
+const notifyLoaderReady = (loader) => {
+  if (!loaderWaiters.length) return;
+  loaderWaiters.splice(0).forEach(resolve => {
+    try {
+      resolve(loader);
+    } catch {}
+  });
 };
 
-// 设置 Asset Loader（从组件中调用）
+const waitForAssetLoader = () => {
+  if (assetLoader) return Promise.resolve(assetLoader);
+  return new Promise((resolve) => {
+    loaderWaiters.push(resolve);
+  });
+};
+
 export function setAssetLoader(loader) {
   assetLoader = loader;
+  notifyLoaderReady(loader);
 }
+
+const ensureClickAudioUrl = async () => {
+  if (clickAudioUrl) {
+    return clickAudioUrl;
+  }
+  if (!assetLoader) {
+    await waitForAssetLoader();
+  }
+  if (!assetLoader) return null;
+
+  if (!clickAudioUrlPromise) {
+    clickAudioUrlPromise = assetLoader
+      .loadAsset('audio', '点击音效.mp3')
+      .then((url) => {
+        clickAudioUrlPromise = null;
+        if (url) {
+          clickAudioUrl = url;
+        }
+        return clickAudioUrl;
+      })
+      .catch((err) => {
+        clickAudioUrlPromise = null;
+        throw err;
+      });
+  }
+  return clickAudioUrlPromise;
+};
 
 export async function playClickSound() {
   try {
-    // 如果没有 Asset Loader，回退到原来的方式
-    if (!assetLoader) {
-      if (!clickAudio) {
-        clickAudio = new Audio('audios/点击音效.mp3');
-        clickAudio.volume = 1;
-      }
-      clickAudio.currentTime = 0;
-      await clickAudio.play();
+    const loader = assetLoader || await waitForAssetLoader();
+    if (!loader) {
+      console.warn('Asset loader 未初始化，无法播放点击音效');
       return;
     }
 
-    // 使用 Asset 系统加载音频
-    const audioUrl = await assetLoader.loadAsset('audio', '点击音效.mp3');
+    const audioUrl = await ensureClickAudioUrl();
     if (!audioUrl) {
-      // 回退到原来的方式
-      if (!clickAudio) {
-        clickAudio = new Audio('audios/点击音效.mp3');
-        clickAudio.volume = 1;
-      }
-      clickAudio.currentTime = 0;
-      await clickAudio.play();
+      console.warn('未能通过 Asset 系统加载点击音效');
       return;
     }
 

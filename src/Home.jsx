@@ -28,9 +28,61 @@ const Home = ({isPortrait, openAssetTest}) => {
 
     // 初始化 Asset Loader 并设置给 playClickSound
     const assetLoader = useAssetLoader();
+    const faviconOriginalHrefRef = useRef(null);
+    const faviconBlobUrlRef = useRef(null);
     useEffect(() => {
         setAssetLoader(assetLoader);
     }, [assetLoader]);
+
+    useEffect(() => {
+        if (!assetLoader) return;
+        let cancelled = false;
+
+        const updateFavicon = async () => {
+            try {
+                const iconUrl = await assetLoader.loadAsset('image', 'icon.jpg');
+                if (!iconUrl || cancelled) return;
+                const linkEl = document.querySelector("link[rel='icon']");
+                if (!linkEl) return;
+                if (!faviconOriginalHrefRef.current) {
+                    faviconOriginalHrefRef.current = linkEl.href;
+                }
+
+                if (
+                    faviconBlobUrlRef.current &&
+                    faviconBlobUrlRef.current !== iconUrl &&
+                    faviconBlobUrlRef.current.startsWith('blob:')
+                ) {
+                    try { URL.revokeObjectURL(faviconBlobUrlRef.current); } catch {}
+                }
+
+                linkEl.href = iconUrl;
+                faviconBlobUrlRef.current = iconUrl.startsWith('blob:') ? iconUrl : null;
+            } catch (err) {
+                console.warn('更新网站图标失败：', err);
+            }
+        };
+
+        updateFavicon();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [assetLoader]);
+
+    useEffect(() => {
+        return () => {
+            if (faviconBlobUrlRef.current && faviconBlobUrlRef.current.startsWith('blob:')) {
+                try { URL.revokeObjectURL(faviconBlobUrlRef.current); } catch {}
+            }
+            if (faviconOriginalHrefRef.current) {
+                const linkEl = document.querySelector("link[rel='icon']");
+                if (linkEl) {
+                    linkEl.href = faviconOriginalHrefRef.current;
+                }
+            }
+        };
+    }, []);
 
     // 加载serviceWorker
     if ('serviceWorker' in navigator) {

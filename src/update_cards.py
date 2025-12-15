@@ -383,7 +383,7 @@ def main():
                 target_list = limited_pools
 
             if target_list is not None and pool_name not in target_list:
-                target_list.append(pool_name)
+                target_list.insert(0, pool_name)
                 newly_added_pools.append(pool_name)
                 existing_pools.add(pool_name)
 
