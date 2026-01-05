@@ -1,5 +1,5 @@
 // HistoryModal.jsx
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {playClickSound} from "../utils/playClickSound.js";
 import FilterIcon from "../icons/FilterIcon.jsx";
 
@@ -46,6 +46,7 @@ const FILTER_MODES = [
 const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
     // console.log(history)
   const [filterMode, setFilterMode] = useState(0);
+  const listRef = useRef(null);
 
   const baseHistory = useMemo(() => {
     const mode = FILTER_MODES[filterMode];
@@ -57,6 +58,13 @@ const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
     [baseHistory, filterMode]
   );
   const totalCount = filteredHistory.length;
+
+  const handleToggleFilter = () => {
+    setFilterMode((prev) => (prev + 1) % FILTER_MODES.length);
+    if (listRef.current) {
+      listRef.current.scrollTop = 0;
+    }
+  };
 
   const style_long = {
     color: 'lightgray',
@@ -123,14 +131,14 @@ const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
                       className="flex items-center justify-center"
                       style={{gap: `${fontsize * 0.3}px`}}
                   >
-                      <span>{FILTER_MODES[filterMode].description}</span>
+                      <span>{FILTER_MODES[filterMode].description}（{FILTER_MODES[filterMode].limitNote}）</span>
                       <button
                           type="button"
                           className="flex items-center justify-center"
                           onClick={() => {
                               playClickSound();
-                              setFilterMode((prev) => (prev + 1) % FILTER_MODES.length);
-                          }}
+                          handleToggleFilter();
+                      }}
                           style={{
                               color: FILTER_MODES[filterMode].iconColor,
                               backgroundColor: 'transparent',
@@ -141,7 +149,7 @@ const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
                           <FilterIcon size={fontsize * 1.1} color={FILTER_MODES[filterMode].iconColor} />
                       </button>
                   </div>
-                  <div className="text-center">{FILTER_MODES[filterMode].limitNote}</div>
+                  {/* <div className="text-center">{FILTER_MODES[filterMode].limitNote}</div> */}
               </label>
 
               {/*表头*/}
@@ -163,6 +171,7 @@ const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
 
               <div
                   className="flex-1 overflow-y-auto"
+                  ref={listRef}
                   style={{
                       fontSize: `${fontsize}px`,
                       width: `${fontsize * 36}px`,

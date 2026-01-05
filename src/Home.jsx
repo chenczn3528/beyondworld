@@ -92,6 +92,13 @@ const Home = ({isPortrait, openAssetTest}) => {
 
     // 加载serviceWorker
     if ('serviceWorker' in navigator) {
+        let swRefreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (swRefreshing) return;
+            swRefreshing = true;
+            window.location.reload();
+        });
+
         window.addEventListener('load', () => {
             // 注册 Service Worker，添加时间戳确保获取最新版本
             const swUrl = `service_worker.js?t=${Date.now()}`;
@@ -99,6 +106,9 @@ const Home = ({isPortrait, openAssetTest}) => {
                 .register(swUrl)
                 .then((reg) => {
                     console.log('✅ SW registered:', reg);
+
+                    // 启动时主动检查更新
+                    reg.update();
 
                     // 检查 Service Worker 更新
                     reg.addEventListener('updatefound', () => {
@@ -108,6 +118,11 @@ const Home = ({isPortrait, openAssetTest}) => {
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                                     // 有新版本可用，提示用户刷新
                                     console.log('🔄 发现新版本，建议刷新页面');
+                                    if (reg.waiting) {
+                                        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                                    } else {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                    }
                                 }
                             });
                         }
