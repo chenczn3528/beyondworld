@@ -1,6 +1,6 @@
 import {playClickSound} from "../utils/playClickSound.js";
-import cardData from '../assets/cards.json';
 import React, {useEffect, useRef, useState} from "react";
+import { useData } from "../contexts/DataContext.jsx";
 import LeftIcon from "../icons/LeftIcon.jsx";
 import HomeIcon from "../icons/HomeIcon.jsx";
 import FilterRoleCard from "./FilterRoleCard.jsx";
@@ -33,6 +33,9 @@ const FilterPage = ({
     setShowGalleryFullImage,
     setGalleryCard,
 }) => {
+    // 使用动态加载的数据
+    const { cardData } = useData();
+
     // 页面渐入渐出特效
     const [state, setState] = useState(true);
 

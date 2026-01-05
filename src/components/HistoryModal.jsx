@@ -1,6 +1,7 @@
 // HistoryModal.jsx
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {playClickSound} from "../utils/playClickSound.js";
+import FilterIcon from "../icons/FilterIcon.jsx";
 
 // 用于格式化日期的函数
 // 记录时间的格式化
@@ -15,8 +16,47 @@ import {playClickSound} from "../utils/playClickSound.js";
   return `${year}/${month}/${day} ${hour}:${minute}`;
 };
 
+const FILTER_MODES = [
+  {
+    label: '全部',
+    description: '显示全部稀有度',
+    limitNote: '只显示最新的2000条记录',
+    iconColor: '#a855f7',
+    match: () => true,
+    limitToRecent: true,
+  },
+  {
+    label: '月卡+',
+    description: '仅显示月卡及以上',
+    limitNote: '只显示最新的2000条记录',
+    iconColor: '#f5c542',
+    match: (card) => ['月', '瞬', '世界', '刹那'].includes(card.稀有度),
+    limitToRecent: true,
+  },
+  {
+    label: '世界卡+',
+    description: '仅显示世界卡及以上',
+    limitNote: '不限制数量',
+    iconColor: '#9ca3af',
+    match: (card) => ['世界', '刹那'].includes(card.稀有度),
+    limitToRecent: false,
+  },
+];
+
 const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
     // console.log(history)
+  const [filterMode, setFilterMode] = useState(0);
+
+  const baseHistory = useMemo(() => {
+    const mode = FILTER_MODES[filterMode];
+    const source = mode.limitToRecent ? history.slice(-2000) : history;
+    return source.slice().reverse();
+  }, [history, filterMode]);
+  const filteredHistory = useMemo(
+    () => baseHistory.filter(FILTER_MODES[filterMode].match),
+    [baseHistory, filterMode]
+  );
+  const totalCount = filteredHistory.length;
 
   const style_long = {
     color: 'lightgray',
@@ -52,26 +92,56 @@ const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
               }}
           >
               {/*历史记录*/}
-              <label
+              <div
+                  className="flex items-center justify-center"
                   style={{
-                      color: 'white',
-                      fontSize: `${fontsize * 1.5}px`,
-                      fontWeight: 800,
+                      width: `${fontsize * 36}px`,
                       marginTop: `${fontsize * 1.5}px`,
                       marginBottom: `${fontsize * 0.2}px`,
                   }}
               >
-                  历史记录
-              </label>
+                  <label
+                      style={{
+                          color: 'white',
+                          fontSize: `${fontsize * 1.5}px`,
+                          fontWeight: 800,
+                      }}
+                  >
+                      历史记录
+                  </label>
+              </div>
 
               <label
                   style={{
                       color: '#ffffff80',
                       fontSize: `${fontsize * 0.7}px`,
+                      lineHeight: `${fontsize * 1.1}px`,
                       marginBottom: `${fontsize * 1}px`,
               }}
               >
-                  只显示最新的2000条记录，多了会卡
+                  <div
+                      className="flex items-center justify-center"
+                      style={{gap: `${fontsize * 0.3}px`}}
+                  >
+                      <span>{FILTER_MODES[filterMode].description}</span>
+                      <button
+                          type="button"
+                          className="flex items-center justify-center"
+                          onClick={() => {
+                              playClickSound();
+                              setFilterMode((prev) => (prev + 1) % FILTER_MODES.length);
+                          }}
+                          style={{
+                              color: FILTER_MODES[filterMode].iconColor,
+                              backgroundColor: 'transparent',
+                              borderRadius: `${fontsize * 0.4}px`,
+                              padding: `${fontsize * 0.2}px`,
+                          }}
+                      >
+                          <FilterIcon size={fontsize * 1.1} color={FILTER_MODES[filterMode].iconColor} />
+                      </button>
+                  </div>
+                  <div className="text-center">{FILTER_MODES[filterMode].limitNote}</div>
               </label>
 
               {/*表头*/}
@@ -99,7 +169,18 @@ const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
                       marginBottom: `${fontsize * 2.2}px`,
                   }}
               >
-                  {history.slice(-2000).reverse().map((card, idx) => {
+                  {filteredHistory.length === 0 ? (
+                      <div
+                          style={{
+                              color: '#2ecc71',
+                              textAlign: 'center',
+                              padding: `${fontsize * 0.6}px 0`,
+                          }}
+                      >
+                          —— 共 0 条记录 ——
+                      </div>
+                  ) : (
+                  filteredHistory.map((card, idx) => {
                       const cardHistoryColors = {
                           "刹那": {color: "#ffd700"},
                           "星": {color: "gray"},
@@ -124,21 +205,49 @@ const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
 
                       const backgroundColor = idx % 2 === 0 ? 'transparent' : '#13141b';
 
+                      const recordCount = idx + 1;
+                      const isLastRecord = recordCount === totalCount;
+                      const shouldShowSplit = recordCount % 10 === 0 && !isLastRecord;
+
                       return (
-                          <div
-                              key={idx}
-                              style={{backgroundColor, fontSize: `${fontsize}px`, height: `${fontsize * 1.5}px`,}}
-                              className="flex flex-row"
-                              // className={`absolute flex flex-row text-xs mb-2 flex justify-between ml-[3vmin] mr-[3vmin] h-[4vmin] items-center`}
-                          >
-                              <div style={style1}>{card.主角}·{card.卡名}</div>
-                              <div style={style2}>{card.稀有度}</div>
+                          <React.Fragment key={idx}>
                               <div
-                                  style={style1}>{card.获取途径.split("】").length === 1 ? card.获取途径 : card.获取途径.split("】")[0] + "】"}</div>
-                              <div style={style1}>{formatDate(card.timestamp)}</div>
-                          </div>
+                                  style={{backgroundColor, fontSize: `${fontsize}px`, height: `${fontsize * 1.5}px`,}}
+                                  className="flex flex-row"
+                                  // className={`absolute flex flex-row text-xs mb-2 flex justify-between ml-[3vmin] mr-[3vmin] h-[4vmin] items-center`}
+                              >
+                                  <div style={style1}>{card.主角}·{card.卡名}</div>
+                                  <div style={style2}>{card.稀有度}</div>
+                                  <div
+                                      style={style1}>{card.获取途径.split("】").length === 1 ? card.获取途径 : card.获取途径.split("】")[0] + "】"}</div>
+                                  <div style={style1}>{formatDate(card.timestamp)}</div>
+                              </div>
+                              {shouldShowSplit && (
+                                  <div
+                                      style={{
+                                          color: '#2ecc71',
+                                          textAlign: 'center',
+                                          padding: `${fontsize * 0.4}px 0`,
+                                      }}
+                                  >
+                                      —— {recordCount} 条记录 ——
+                                  </div>
+                              )}
+                              {isLastRecord && (
+                                  <div
+                                      style={{
+                                          color: '#2ecc71',
+                                          textAlign: 'center',
+                                          padding: `${fontsize * 0.4}px 0`,
+                                      }}
+                                  >
+                                      —— 共 {totalCount} 条记录 ——
+                                  </div>
+                              )}
+                          </React.Fragment>
                       );
-                  })}
+                  })
+                  )}
               </div>
           </div>
       </div>

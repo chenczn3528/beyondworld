@@ -1,9 +1,10 @@
 import {playClickSound} from "../utils/playClickSound.js";
-import cardData from '../assets/cards.json';
 import React, { useRef, useState} from "react";
+import { useData } from "../contexts/DataContext.jsx";
 
 const FilterRoleCard = ({ baseSize, onClose, selectedRole, setSelectedRole, position, showShadow, oritationLeft=false }) => {
-
+    // 使用动态加载的数据
+    const { cardData } = useData();
 
     const choices = cardData.filter(
         card => card.卡名 === "夜霜侵怀" || card.卡名 === "雨中暂别"

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import Carousel from "./Carousel";
-import cardData from "../assets/cards.json";
 import {playClickSound} from "../utils/playClickSound.js";
+import { useData } from "../contexts/DataContext.jsx";
 import MusicIcon from "../icons/MusicIcon.jsx";
 import { Asset } from './Asset.jsx';
 import { useAssetLoader } from '../hooks/useAssetLoader';
@@ -29,11 +29,14 @@ const SettingsLayer = ({
     galleryHistory,
     setShowMusicPageZIndex,
     selectedPools,
-    cardData,
+    cardData: cardDataProp,
     openAssetTest,
     simulateProbability,
     simulationResult,
 }) => {
+    // 使用动态加载的数据，优先使用 Context，如果没有则使用 props（向后兼容）
+    const { cardData: cardDataFromContext } = useData();
+    const cardData = cardDataFromContext || cardDataProp;
 
     const filtered_cardData = cardData.filter(card => card.稀有度 === '世界' || card.稀有度 === '刹那');
 

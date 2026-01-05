@@ -80,33 +80,93 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // 跳过来自 patchwiki 或其他外部源的请求
+  // 跳过来自外部源的请求（如 GitHub Raw API），直接返回，不缓存
   if (url.origin !== self.location.origin) {
-    return fetch(event.request); // 外部请求直接返回
+    return fetch(event.request);
   }
 
-  // 处理缓存和其他逻辑
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // 如果缓存中有，直接返回
-        return cachedResponse;
-      }
+  // 对于 HTML、JS、CSS 等核心文件，使用网络优先策略，确保获取最新版本
+  const isCoreFile = event.request.url.endsWith('.html') || 
+                     event.request.url.endsWith('.js') || 
+                     event.request.url.endsWith('.css') ||
+                     event.request.url.includes('/index.html') ||
+                     event.request.url.includes('/assets/') && (event.request.url.endsWith('.js') || event.request.url.endsWith('.css'));
 
-      // 否则从网络获取资源并缓存
-      return fetch(event.request).then((response) => {
-        // 确保只缓存完整的响应（状态码 200）
-        if (response.status === 200) {
-          // 只缓存静态资源
-          if (event.request.url.includes('/images/') || event.request.url.includes('/videos/') || event.request.url.includes('/audios/')) {
+  if (isCoreFile) {
+    // 网络优先策略：先尝试网络，失败则使用缓存
+    event.respondWith(
+      fetch(event.request, {
+        cache: 'no-store', // 完全绕过缓存
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
+      })
+        .then((response) => {
+          // 网络请求成功，返回最新版本
+          return response;
+        })
+        .catch(() => {
+          // 网络请求失败，尝试从缓存获取（离线支持）
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+
+  // 对于数据文件（JSON），也使用网络优先策略
+  if (event.request.url.endsWith('.json') || event.request.url.includes('/data/')) {
+    event.respondWith(
+      fetch(event.request, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
+      })
+        .then((response) => response)
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // 对于静态资源（图片、视频、音频），使用缓存优先策略（性能优化）
+  if (event.request.url.includes('/images/') || 
+      event.request.url.includes('/videos/') || 
+      event.request.url.includes('/audios/')) {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          // 缓存中有，先返回缓存，同时在后台更新
+          fetch(event.request).then((response) => {
+            if (response.status === 200) {
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(event.request, response.clone());
+              });
+            }
+          }).catch(() => {}); // 后台更新失败不影响用户体验
+          return cachedResponse;
+        }
+
+        // 缓存中没有，从网络获取并缓存
+        return fetch(event.request).then((response) => {
+          if (response.status === 200) {
             return caches.open(CACHE_NAME).then((cache) => {
               cache.put(event.request, response.clone());
               return response;
             });
           }
-        }
-        return response; // 如果是部分响应或其他响应，直接返回，不缓存
-      });
-    })
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // 其他请求：网络优先
+  event.respondWith(
+    fetch(event.request, { cache: 'no-store' })
+      .then((response) => response)
+      .catch(() => caches.match(event.request))
   );
 });

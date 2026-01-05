@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { playClickSound } from "../utils/playClickSound.js";
 import {getAvailablePools, getDynamicAttributeCounts} from "../utils/cardDataUtils.js";
-import cardData from "../assets/cards.json";
-import poolCategories from "../assets/poolCategories.json";
+import { useData } from "../contexts/DataContext.jsx";
 
 const CardPoolFilter = ({
     baseSize,
@@ -25,6 +24,8 @@ const CardPoolFilter = ({
     setSelectedPools,
     poolsLoaded,
 }) => {
+    // 使用动态加载的数据
+    const { cardData, poolCategories } = useData();
 
     const characters = valuesList["主角"] || [];
 

@@ -306,7 +306,12 @@ const AssetTest = ({ onClose }) => {
       )}
 
       <label style={{color: "gray", fontSize: `${baseSize * 18}px`}}>
-        解决各种视频音频播放很卡的问题，先点击“存储所有素材”按钮，存储完后点击“刷新网页”按钮，退出页面再开始抽卡
+        解决各种视频音频播放很卡的问题，先点击
+        <span style={{color: '#2563eb', fontWeight: '600'}}>"存储所有素材"</span>
+        按钮，存储完后点击
+        <span style={{color: '#059669', fontWeight: '600'}}>"刷新网页"</span>
+        按钮，退出页面再点击
+        <span style={{color: '#059669', fontWeight: '600'}}>"开始抽卡"</span>按钮
       </label>
       
       {/* 控制面板 */}

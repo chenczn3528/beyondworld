@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import './App.css';
 import Home from './Home.jsx';
 import AssetTest from './components/AssetTest.jsx';
+import { DataProvider } from './contexts/DataContext.jsx';
 
 function App() {
     const wrapperRef = useRef();
@@ -107,19 +108,21 @@ function App() {
 
 
     return (
-        <div className="viewport">
-            <div className="wrapper" ref={wrapperRef}>
-                <div className="game relative" ref={gameRef}>
-                    <div className="scrollable-content">
-                    {showAssetTest ? (
-                        <AssetTest onClose={() => setShowAssetTest(false)} />
-                    ) : (
-                        <Home isPortrait={isPortrait} openAssetTest={() => setShowAssetTest(true)} />
-                    )}
+        <DataProvider>
+            <div className="viewport">
+                <div className="wrapper" ref={wrapperRef}>
+                    <div className="game relative" ref={gameRef}>
+                        <div className="scrollable-content">
+                        {showAssetTest ? (
+                            <AssetTest onClose={() => setShowAssetTest(false)} />
+                        ) : (
+                            <Home isPortrait={isPortrait} openAssetTest={() => setShowAssetTest(true)} />
+                        )}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </DataProvider>
     );
 }
 
