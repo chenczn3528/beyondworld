@@ -106,7 +106,9 @@ const FilterAttrCard = ({
             style={{
                 ...settings,
                 color: 'white',
-                fontSize: `${baseSize * 7}px`
+                fontSize: `${baseSize * 7}px`,
+                overflowX: "hidden",
+                overflowY: "auto",
             }}
         >
 
