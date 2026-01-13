@@ -1,5 +1,5 @@
 import {playClickSound} from "../utils/playClickSound.js";
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import { useData } from "../contexts/DataContext.jsx";
 import LeftIcon from "../icons/LeftIcon.jsx";
 import HomeIcon from "../icons/HomeIcon.jsx";
@@ -34,7 +34,7 @@ const FilterPage = ({
     setGalleryCard,
 }) => {
     // 使用动态加载的数据
-    const { cardData } = useData();
+    const { cardData, poolCategories } = useData();
 
     // 页面渐入渐出特效
     const [state, setState] = useState(true);
@@ -60,9 +60,116 @@ const FilterPage = ({
     const [ownChoice, setOwnChoice] = useState("已拥有");
     const [lockInfoCard, setLockInfoCard] = useState(null);
     const [allowLockedPreview, setAllowLockedPreview] = useState(false);
+    const [poolChoice, setPoolChoice] = useState(["全部"]);
+    const [poolSearch, setPoolSearch] = useState("");
 
     const roleMap = {0: '顾时夜', 1: '易遇', 3: '夏萧因', 2: '柏源', 4: '全部'};
     const rarityOrderMap = ['稀有度', '主属性数值', '全部', '思维', '魅力', '体魄', '感知', '灵巧'];
+    const rechargePoolSet = useMemo(() => {
+        const entries = poolCategories?.recharge?.cards || [];
+        const pools = new Set();
+        entries.forEach(entry => {
+            const card = cardData.find(item => item.卡名 === entry.name);
+            const pool = card?.获取途径 || entry.pool;
+            if (pool) pools.add(pool);
+        });
+        return pools;
+    }, [cardData, poolCategories]);
+
+    const poolSections = useMemo(() => {
+        const poolSetAll = new Set(
+            (cardData || [])
+                .map(card => card.获取途径)
+                .filter(Boolean)
+        );
+        const fiveStarPools = new Set(
+            (cardData || [])
+                .filter(card => card.稀有度 === '世界' || card.稀有度 === '刹那')
+                .map(card => card.获取途径)
+                .filter(Boolean)
+        );
+
+        const commonPools = ["全部"];
+        if (rechargePoolSet.size > 0) commonPools.push("累充");
+        const storePool = "崩坍之界商店";
+        if (poolSetAll.has(storePool)) commonPools.push(storePool);
+        if (poolSetAll.has("世界之间")) commonPools.push("世界之间");
+
+        const collapsedRaw = poolCategories?.worldBetween?.subcategories?.collapsed?.pools ?? [];
+        const limitedRaw = poolCategories?.worldBetween?.subcategories?.limited?.pools ?? [];
+        const birthdayRaw = poolCategories?.worldBetween?.subcategories?.birthday?.pools ?? [];
+
+        const activityPoolBase = Array.from(poolSetAll)
+            .filter(pool => !rechargePoolSet.has(pool));
+        const activityPools = [
+            ...activityPoolBase
+                .filter(pool => pool.includes("活动") && !pool.includes("奇遇"))
+                .sort((a, b) => a.localeCompare(b, 'zh-Hans-CN')),
+            ...activityPoolBase
+                .filter(pool => pool.includes("奇遇"))
+                .sort((a, b) => a.localeCompare(b, 'zh-Hans-CN')),
+        ];
+        const collapsedPools = collapsedRaw
+            .filter(pool => poolSetAll.has(pool))
+            .filter(pool => !rechargePoolSet.has(pool));
+        const limitedPools = limitedRaw
+            .filter(pool => pool !== "世界之间")
+            .filter(pool => pool !== storePool)
+            .filter(pool => poolSetAll.has(pool))
+            .filter(pool => !rechargePoolSet.has(pool));
+        const birthdayPools = birthdayRaw
+            .filter(pool => poolSetAll.has(pool))
+            .filter(pool => !rechargePoolSet.has(pool));
+        const nonActivityBirthdayPools = birthdayPools.filter(pool => !pool.includes("活动"));
+
+        const latestLimited = "【栖云志异】世界之间";
+        const orderedLimited = [
+            ...(limitedPools.includes(latestLimited) ? [latestLimited] : []),
+            ...limitedPools.filter(pool => pool !== latestLimited),
+        ];
+
+        const excluded = new Set([
+            ...commonPools,
+            ...orderedLimited,
+            ...nonActivityBirthdayPools,
+            ...collapsedPools,
+            ...activityPools,
+        ]);
+
+        const otherPools = Array.from(fiveStarPools)
+            .filter(pool => !excluded.has(pool))
+            .filter(pool => !rechargePoolSet.has(pool))
+            .sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'));
+
+        return [
+            { key: 'common', label: null, pools: commonPools },
+            { key: 'limited', label: '限定卡池', pools: orderedLimited },
+            { key: 'birthday', label: '生日卡池', pools: nonActivityBirthdayPools },
+            { key: 'collapsed', label: '崩坍卡池', pools: collapsedPools },
+            { key: 'activity', label: '活动', pools: activityPools },
+            { key: 'other', label: '其他', pools: otherPools },
+        ];
+    }, [cardData, rechargePoolSet, poolCategories]);
+
+    const poolOptions = useMemo(() => {
+        const pools = poolSections.flatMap(section => section.pools);
+        return Array.from(new Set(pools));
+    }, [poolSections]);
+
+    const poolCardMap = useMemo(() => {
+        const map = new Map();
+        (cardData || []).forEach(card => {
+            const pool = card.获取途径;
+            if (!pool) return;
+            if (!map.has(pool)) map.set(pool, new Set());
+            map.get(pool).add(card.卡名);
+        });
+        if (poolOptions.includes("累充")) {
+            const rechargeNames = (poolCategories?.recharge?.cards || []).map(entry => entry.name).filter(Boolean);
+            map.set("累充", new Set(rechargeNames));
+        }
+        return map;
+    }, [cardData, poolCategories, poolOptions]);
 
     const { loadAsset } = useAssetLoader();
     const [backgroundImage, setBackgroundImage] = useState('images/bg_main1.jpg');
@@ -122,16 +229,21 @@ const FilterPage = ({
                 .map(card => ({ ...card, owned: false }));
         }
 
-        // 其他筛选（稀有度、世界、属性）
+        // 其他筛选（稀有度、世界、属性、卡池）
         tmpCards = tmpCards.filter(card =>
             (rarityChoice[0] === "全部" || rarityChoice.includes(card.稀有度)) &&
             (worldChoice[0] === "全部" || worldChoice.includes(card.世界)) &&
-            (typeChoice[0] === "全部" || typeChoice.includes(card.属性))
+            (typeChoice[0] === "全部" || typeChoice.includes(card.属性)) &&
+            (
+                poolChoice[0] === "全部"
+                || poolChoice.includes(card.获取途径)
+                || (poolChoice.includes("累充") && rechargePoolSet.has(card.获取途径))
+            )
         );
 
         const sorted = sortCards(tmpCards || [], orderChoice);
         setSortedCards(sorted);
-    }, [cards, selectedRole, orderChoice, ownChoice, rarityChoice, worldChoice, typeChoice]);
+    }, [cards, selectedRole, orderChoice, ownChoice, rarityChoice, worldChoice, typeChoice, poolChoice, cardData, rechargePoolSet]);
 
     const finalSortedCards = [
         ...sortedCards.filter(card => roleMap[selectedRole] === "全部" || card.主角 === roleMap[selectedRole]),
@@ -221,13 +333,16 @@ const FilterPage = ({
                 style={{left: "27%", top: "15%", gap: `${baseSize * 2}px`}}
             >
                 {finalSortedCards.map((card, index) => {
+                    const hasCard = Object.keys(card).length > 0;
                     return (
                         <div
                             key={index}
                             className="relative edge-blur-mask"
-                            style={{height: `${baseSize * 32}px`}}
+                            style={{
+                                height: `${baseSize * 32}px`,
+                            }}
                         >
-                            {Object.keys(card).length > 0 ? (
+                            {hasCard ? (
                                 <>
                                     <img
                                         src={card.图片信息[0].src}
@@ -398,6 +513,13 @@ const FilterPage = ({
                 setWorldChoice={setWorldChoice}
                 typeChoice={typeChoice}
                 setTypeChoice={setTypeChoice}
+                poolMap={poolOptions}
+                poolSections={poolSections}
+                poolCardMap={poolCardMap}
+                poolSearch={poolSearch}
+                setPoolSearch={setPoolSearch}
+                poolChoice={poolChoice}
+                setPoolChoice={setPoolChoice}
                 ownChoice={ownChoice}
                 setOwnChoice={setOwnChoice}
             />

@@ -311,10 +311,14 @@ def main():
 
     world_between = pool_categories.get("worldBetween", {})
     subcategories = world_between.get("subcategories", {})
+    excluded_limited_pools = {"世界之间", "崩坍之界商店"}
     for key, category in subcategories.items():
         pools = category.get("pools", [])
         if key == "limited":
-            filtered_pools = [p for p in pools if "累充" not in p]
+            filtered_pools = [
+                p for p in pools
+                if "累充" not in p and p not in excluded_limited_pools
+            ]
             if len(filtered_pools) != len(pools):
                 category["pools"] = filtered_pools
                 pools = filtered_pools
@@ -338,6 +342,8 @@ def main():
         if not pool_name:
             continue
         if "累充" in pool_name:
+            continue
+        if pool_name in excluded_limited_pools:
             continue
         if pool_name in existing_pools:
             continue

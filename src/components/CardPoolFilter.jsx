@@ -27,7 +27,15 @@ const CardPoolFilter = ({
     // 使用动态加载的数据
     const { cardData, poolCategories } = useData();
 
-    const characters = valuesList["主角"] || [];
+    const roleOrder = ['顾时夜', '易遇', '柏源', '夏萧因'];
+    const characters = (valuesList["主角"] || []).slice().sort((a, b) => {
+      const indexA = roleOrder.indexOf(a);
+      const indexB = roleOrder.indexOf(b);
+      if (indexA === -1 && indexB === -1) return a.localeCompare(b, 'zh-Hans-CN');
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    });
 
     const { availablePools, permanentPools } = useMemo(() => getAvailablePools(cardData), [cardData]);
     const filteredLimitedPools = useMemo(
@@ -80,6 +88,7 @@ const CardPoolFilter = ({
     );
 
     const hasRechargeOption = filteredRechargePools.length > 0;
+    const chargePoolSet = useMemo(() => new Set(filteredRechargePools), [filteredRechargePools]);
 
     useEffect(() => {
       if (!hasRechargeOption && includeRechargePools) {
@@ -187,6 +196,98 @@ const CardPoolFilter = ({
         ...validPermanentPools,
       ]);
     }, [selectedLimitedPools, includeRechargePools, filteredRechargePools, selectedRole, permanentPools, cardData, poolsLoaded]);
+
+    const selectedFiveStarCards = useMemo(() => {
+      if (!cardData.length) return [];
+      const isAllRoles = selectedRole.includes('随机');
+      const isAllPools = selectedPools.includes('全部');
+      const limitedPools = selectedPools.filter(pool => pool !== "世界之间" && !chargePoolSet.has(pool));
+      const chargeSelectedPools = selectedPools.filter(pool => chargePoolSet.has(pool));
+      const effectivePools = isAllPools
+        ? [...currentAvailablePools, ...permanentPools, ...filteredRechargePools]
+        : (limitedPools.length > 0
+          ? limitedPools
+          : (chargeSelectedPools.length > 0 ? chargeSelectedPools : selectedPools));
+      const poolSet = new Set(effectivePools);
+      const excludedKeywords = ["崩坍", "累充", "活动", "奇遇瞬间"];
+      const allowPaidCards = includeMoneyCard || chargeSelectedPools.length > 0;
+
+      const candidates = cardData.filter(card =>
+        (card.稀有度 === '世界' || card.稀有度 === '刹那') &&
+        poolSet.has(card.获取途径) &&
+        (isAllRoles || selectedRole.includes(card.主角))
+      );
+      const filtered = allowPaidCards
+        ? candidates
+        : candidates.filter(card => !excludedKeywords.some(keyword => card.获取途径.includes(keyword)));
+
+      const seen = new Set();
+      const uniqueCards = [];
+      filtered.forEach(card => {
+        const key = `${card.卡名}-${card.主角}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          uniqueCards.push(card);
+        }
+      });
+      return uniqueCards;
+    }, [cardData, selectedPools, selectedRole, currentAvailablePools, permanentPools, filteredRechargePools, includeMoneyCard, chargePoolSet]);
+
+    const selectedWorldCards = useMemo(
+      () => selectedFiveStarCards.filter(card => card.稀有度 === '世界'),
+      [selectedFiveStarCards]
+    );
+    const selectedInstantCards = useMemo(
+      () => selectedFiveStarCards.filter(card => card.稀有度 === '刹那'),
+      [selectedFiveStarCards]
+    );
+    const groupCardsByRole = (cards) => {
+      const grouped = new Map();
+      cards.forEach(card => {
+        const role = card.主角 || '未知';
+        if (!grouped.has(role)) grouped.set(role, []);
+        grouped.get(role).push(card);
+      });
+      return Array.from(grouped.entries())
+        .map(([role, list]) => ({
+          role,
+          names: list.map(item => item.卡名),
+        }))
+        .sort((a, b) => {
+          const indexA = roleOrder.indexOf(a.role);
+          const indexB = roleOrder.indexOf(b.role);
+          if (indexA === -1 && indexB === -1) return a.role.localeCompare(b.role, 'zh-Hans-CN');
+          if (indexA === -1) return 1;
+          if (indexB === -1) return -1;
+          return indexA - indexB;
+        });
+    };
+    const groupedWorldCards = useMemo(
+      () => groupCardsByRole(selectedWorldCards),
+      [selectedWorldCards]
+    );
+    const groupedInstantCards = useMemo(
+      () => groupCardsByRole(selectedInstantCards),
+      [selectedInstantCards]
+    );
+    const roleColorMap = {
+      '顾时夜': '#6fa2e6',
+      '易遇': '#7fd3a4',
+      '夏萧因': '#b28fe6',
+      '柏源': '#f2ad6b',
+    };
+    const renderGroupedCards = (groups) => {
+      if (groups.length === 0) return <span>无</span>;
+      return groups.map((group) => (
+        <div key={group.role} style={{ marginTop: '0.5vmin' }}>
+          <span style={{ color: roleColorMap[group.role] || '#cbd5f5', fontWeight: 700 }}>
+            {group.role}
+          </span>
+          <span>：</span>
+          <span style={{ color: '#d9d9d9' }}>{group.names.join('、')}</span>
+        </div>
+      ));
+    };
 
 
 
@@ -459,6 +560,19 @@ const CardPoolFilter = ({
                                         </div>
                                     </div>
                                 )}
+                            </div>
+
+                            <div className="flex flex-col ml-[3vw] mr-[3vw] mb-[3vmin]">
+                                <div style={{fontSize: `${baseSize * 5}px`, color: "#ffffff", marginTop: "0.5vmin"}}>
+                                    <span style={{ color: "#ffffff", fontWeight: 700, textShadow: "0 0 6px #7ad3ff" }}>刹那卡</span>
+                                    <span style={{ color: "#aaa" }}>：</span>
+                                    {renderGroupedCards(groupedInstantCards)}
+                                </div>
+                                <div style={{fontSize: `${baseSize * 5}px`, color: "#ffffff", marginTop: "1.5vmin"}}>
+                                    <span style={{ color: "#ffffff", fontWeight: 700, textShadow: "0 0 6px #ffd39a" }}>世界卡</span>
+                                    <span style={{ color: "#aaa" }}>：</span>
+                                    {renderGroupedCards(groupedWorldCards)}
+                                </div>
                             </div>
                         </div>
                     </div>
