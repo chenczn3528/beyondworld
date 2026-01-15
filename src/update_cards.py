@@ -18,6 +18,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+from pypinyin import Style, pinyin
 
 # -----------------------------
 # 基本配置
@@ -32,6 +33,7 @@ HEADERS = {"User-Agent": UA}
 # 输出
 CARDS_JSON_PATH = "src/assets/cards.json"
 POOL_CATEGORIES_PATH = "src/assets/poolCategories.json"
+PINYIN_MAP_PATH = "src/assets/pinyin_map.json"
 
 # -----------------------------
 # 会话 & 礼貌访问
@@ -231,6 +233,45 @@ def extract_recharge_cards(cards: List[Dict[str, any]]) -> List[Dict[str, str]]:
     recharge_cards.sort(key=sort_key)
     return recharge_cards
 
+def build_pinyin_entry(text: str) -> Dict[str, any]:
+    """为给定文本生成拼音信息，非中文字符对应空串。"""
+    syllables: List[str] = []
+    for char in text:
+        if re.match(r"[\u4e00-\u9fff]", char):
+            result = pinyin(char, style=Style.NORMAL, heteronym=False, errors="ignore")
+            syllable = result[0][0] if result and result[0] else ""
+            syllables.append(syllable.lower())
+        else:
+            syllables.append("")
+    full = "".join([s for s in syllables if s])
+    initials = "".join([s[0] for s in syllables if s])
+    return {"full": full, "initials": initials, "syllables": syllables}
+
+def sync_pinyin_map(cards: List[Dict[str, any]]) -> bool:
+    """补齐 pinyin_map.json 中缺失的卡名拼音，返回是否发生变更。"""
+    try:
+        with open(PINYIN_MAP_PATH, "r", encoding="utf-8") as f:
+            pinyin_map = json.load(f)
+    except FileNotFoundError:
+        pinyin_map = {}
+
+    added = []
+    for card in cards:
+        name = card.get("卡名")
+        if not name or name in pinyin_map:
+            continue
+        pinyin_map[name] = build_pinyin_entry(name)
+        added.append(name)
+
+    if added:
+        with open(PINYIN_MAP_PATH, "w", encoding="utf-8") as f:
+            json.dump(pinyin_map, f, ensure_ascii=False, indent=2)
+        print(f"已补充拼音映射 {len(added)} 条：{', '.join(added)}", flush=True)
+        return True
+
+    print("拼音映射无需更新。", flush=True)
+    return False
+
 def sync_recharge_section(pool_categories: Dict[str, any], recharge_cards: List[Dict[str, str]]) -> bool:
     """将累充卡池写入 poolCategories.json，返回是否发生变更"""
     if "recharge" not in pool_categories:
@@ -414,6 +455,9 @@ def main():
     with open(CARDS_JSON_PATH, "w", encoding="utf-8") as f:
         json.dump(cards, f, ensure_ascii=False, indent=2)
     print(f"✅ 共抓取 {len(cards)} 张卡片信息并保存完成。", flush=True)
+
+    # ------------ 补齐拼音映射 ------------
+    sync_pinyin_map(cards)
 
 if __name__ == "__main__":
     main()

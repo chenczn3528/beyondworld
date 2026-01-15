@@ -30,24 +30,36 @@ jobs:
       - name: Check for changes
         id: check
         run: |
+          CARDS_CHANGED=false
+          PINYIN_CHANGED=false
+
           if git diff --quiet src/assets/cards.json; then
-            echo "changes_detected=false" >> "$GITHUB_OUTPUT"
+            CARDS_CHANGED=false
           else
             ADDED=$(git diff --numstat src/assets/cards.json | awk '{print $1}')
             REMOVED=$(git diff --numstat src/assets/cards.json | awk '{print $2}')
-            echo "ADDED=$ADDED, REMOVED=$REMOVED"  # 调试用，可删
+            echo "cards.json ADDED=$ADDED, REMOVED=$REMOVED"  # 调试用，可删
 
             if [ "$ADDED" -gt "$REMOVED" ]; then
-              echo "Meaningful change detected: +$ADDED > -$REMOVED"
-              echo "changes_detected=true" >> "$GITHUB_OUTPUT"
+              echo "cards.json meaningful change detected: +$ADDED > -$REMOVED"
+              CARDS_CHANGED=true
             else
-              echo "Change rejected: +$ADDED <= -$REMOVED"
-              echo "changes_detected=false" >> "$GITHUB_OUTPUT"
+              echo "cards.json change rejected: +$ADDED <= -$REMOVED"
+              CARDS_CHANGED=false
             fi
           fi
 
+          if git diff --quiet src/assets/pinyin_map.json; then
+            PINYIN_CHANGED=false
+          else
+            PINYIN_CHANGED=true
+          fi
+
+          echo "cards_changed=$CARDS_CHANGED" >> "$GITHUB_OUTPUT"
+          echo "pinyin_changed=$PINYIN_CHANGED" >> "$GITHUB_OUTPUT"
+
       - name: Extract and highlight diff of cards.json
-        if: steps.check.outputs.changes_detected == 'true'
+        if: steps.check.outputs.cards_changed == 'true'
         id: diff
         run: |
           DIFF_HTML=$(mktemp)
@@ -67,19 +79,25 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Show diff of pinyin_map.json
+        if: steps.check.outputs.pinyin_changed == 'true'
+        run: |
+          echo "pinyin_map.json diff:"
+          git diff --color=always src/assets/pinyin_map.json
+
       - name: Commit updated cards.json
-        if: steps.check.outputs.changes_detected == 'true'
+        if: steps.check.outputs.cards_changed == 'true' || steps.check.outputs.pinyin_changed == 'true'
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git add src/assets/cards.json src/assets/poolCategories.json
+          git add src/assets/cards.json src/assets/poolCategories.json src/assets/pinyin_map.json
           DATE=$(date +'%Y-%m-%d')
           git commit -m "chore: update cards data on $DATE"
           git pull --rebase
           git push
 
       - name: Send email if cards.json changed
-        if: steps.check.outputs.changes_detected == 'true'
+        if: steps.check.outputs.cards_changed == 'true'
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.qq.com

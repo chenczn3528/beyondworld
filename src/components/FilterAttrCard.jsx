@@ -27,10 +27,17 @@ const FilterAttrCard = ({
     const [poolExpanded, setPoolExpanded] = useState(true);
     const [worldExpanded, setWorldExpanded] = useState(false);
     const [attrExpanded, setAttrExpanded] = useState(false);
+    const [poolSectionExpanded, setPoolSectionExpanded] = useState({
+        limited: true,
+        birthday: true,
+        collapsed: true,
+        activity: true,
+    });
     const [localPoolSearch, setLocalPoolSearch] = useState("");
     const effectivePoolSearch = poolSearch ?? localPoolSearch;
     const updatePoolSearch = setPoolSearch ?? setLocalPoolSearch;
     const trimmedPoolSearch = effectivePoolSearch.trim();
+    const forcePoolSectionExpanded = trimmedPoolSearch !== "";
     const filteredPoolSections = poolSections
         .map(section => {
             const filteredPools = section.pools.filter((item) => {
@@ -71,6 +78,13 @@ const FilterAttrCard = ({
     const worldMap = ["全部", "现实世界", "时代旧影", "仙途缥缈", "星际纵横", "特殊副本"];
     const attrMap = ['全部', '思维', '魅力', '体魄', '感知', '灵巧'];
     const ownMap = ["全部", "已拥有", "未拥有"];
+
+    const togglePoolSection = (key) => {
+        setPoolSectionExpanded(prev => ({
+            ...prev,
+            [key]: !prev[key],
+        }));
+    };
 
 
     const toggleRarity = (char, map, choice, setChoice) => {
@@ -256,77 +270,126 @@ const FilterAttrCard = ({
                 <div className="w-full" style={{border: "0.5px solid #4C4D55", marginTop: `${baseSize * 2}px`}}/>
                 {poolExpanded && (
                     <>
-                        <input
-                            value={effectivePoolSearch}
-                            onChange={(e) => updatePoolSearch(e.target.value)}
-                            placeholder="搜索卡池或卡名"
+                        <div
+                            className="flex items-center"
                             style={{
                                 marginTop: `${baseSize * 4}px`,
                                 marginLeft: `${baseSize * 2}px`,
                                 marginRight: `${baseSize * 2}px`,
-                                padding: `${baseSize * 2}px ${baseSize * 3}px`,
-                                backgroundColor: 'rgba(255,255,255,0.08)',
-                                border: '1px solid rgba(255,255,255,0.2)',
-                                borderRadius: `${baseSize * 2}px`,
-                                color: 'white',
-                                fontSize: `${baseSize * 5}px`,
-                                outline: 'none',
+                                gap: `${baseSize * 2}px`,
                             }}
-                        />
-                        <div className="flex flex-col gap-[1vmin]"
-                             style={{marginTop: `${baseSize * 4}px`, marginLeft: `${baseSize * 2}px`, marginRight: `${baseSize * 2}px`}}>
-                            {filteredPoolSections.map((section) => (
-                                <div key={section.key} style={{marginBottom: `${baseSize * 4}px`}}>
-                            {section.label && (
-                                <div
+                        >
+                            <input
+                                value={effectivePoolSearch}
+                                onChange={(e) => updatePoolSearch(e.target.value)}
+                                placeholder="搜索卡池或卡名"
+                                style={{
+                                    flex: 1,
+                                    padding: `${baseSize * 2}px ${baseSize * 3}px`,
+                                    backgroundColor: 'rgba(255,255,255,0.08)',
+                                    border: '1px solid rgba(255,255,255,0.2)',
+                                    borderRadius: `${baseSize * 2}px`,
+                                    color: 'white',
+                                    fontSize: `${baseSize * 5}px`,
+                                    outline: 'none',
+                                }}
+                            />
+                            {effectivePoolSearch && (
+                                <button
+                                    onClick={() => updatePoolSearch("")}
                                     style={{
-                                        fontSize: `${baseSize * 5.5}px`,
-                                        color: section.key === 'limited'
-                                            ? "#ffd166"
-                                            : section.key === 'birthday'
-                                                ? "#a8d7ff"
-                                                : section.key === 'collapsed'
-                                                    ? "#ff9fb5"
-                                                    : section.key === 'activity'
-                                                        ? "#9fe3b6"
-                                                    : "#c7c9d6",
-                                        textShadow: section.key === 'limited'
-                                            ? `0 0 ${baseSize * 2}px rgba(255,209,102,0.7)`
-                                            : section.key === 'birthday'
-                                                ? `0 0 ${baseSize * 2}px rgba(168,215,255,0.7)`
-                                                : section.key === 'collapsed'
-                                                    ? `0 0 ${baseSize * 2}px rgba(255,159,181,0.7)`
-                                                    : section.key === 'activity'
-                                                        ? `0 0 ${baseSize * 2}px rgba(159,227,182,0.7)`
-                                                    : "none",
-                                        marginBottom: `${baseSize * 2}px`,
+                                        fontSize: `${baseSize * 4.5}px`,
+                                        padding: `${baseSize * 1.5}px ${baseSize * 2.5}px`,
+                                        backgroundColor: 'rgba(255,255,255,0.15)',
+                                        color: 'white',
+                                        borderRadius: `${baseSize * 2}px`,
+                                        border: '1px solid rgba(255,255,255,0.25)',
                                     }}
                                 >
-                                    {section.label}
-                                </div>
+                                    清空
+                                </button>
                             )}
-                                    <div className="flex flex-col gap-[1vmin]">
-                                        {section.pools.map((char) => (
-                                            <button
-                                                key={char}
-                                                onClick={() => {toggleRarity(char, poolMap, poolChoice, setPoolChoice)}}
-                                                style={{
-                                                    fontSize: `${baseSize * 6}px`,
-                                                    backgroundColor: "transparent",
-                                                    padding: 0,
-                                                    textAlign: 'left',
-                                                    color: poolChoice.includes(char) ? "white" : "#b5b5b5",
-                                                    textShadow: poolChoice.includes(char)
-                                                        ? `0 0 ${baseSize * 4}px white, 0 0 ${baseSize * 8}px white`
-                                                        : `0 0 ${baseSize * 2.2}px rgba(0,0,0,0.95)`
-                                                }}
+                        </div>
+                        <div className="flex flex-col gap-[1vmin]"
+                             style={{marginTop: `${baseSize * 4}px`, marginLeft: `${baseSize * 2}px`, marginRight: `${baseSize * 2}px`}}>
+                            {filteredPoolSections.map((section) => {
+                                const isToggleable = ["limited", "birthday", "collapsed", "activity"].includes(section.key);
+                                const isExpanded = forcePoolSectionExpanded || !isToggleable || poolSectionExpanded[section.key];
+                                return (
+                                    <div key={section.key} style={{marginBottom: `${baseSize * 4}px`}}>
+                                        {section.label && (
+                                            <div className="flex items-center justify-between">
+                                                <div
+                                                    style={{
+                                                        fontSize: `${baseSize * 5.5}px`,
+                                                        color: section.key === 'limited'
+                                                            ? "#ffd166"
+                                                            : section.key === 'birthday'
+                                                                ? "#a8d7ff"
+                                                                : section.key === 'collapsed'
+                                                                    ? "#ff9fb5"
+                                                                    : section.key === 'activity'
+                                                                        ? "#9fe3b6"
+                                                                        : "#c7c9d6",
+                                                        textShadow: section.key === 'limited'
+                                                            ? `0 0 ${baseSize * 2}px rgba(255,209,102,0.7)`
+                                                            : section.key === 'birthday'
+                                                                ? `0 0 ${baseSize * 2}px rgba(168,215,255,0.7)`
+                                                                : section.key === 'collapsed'
+                                                                    ? `0 0 ${baseSize * 2}px rgba(255,159,181,0.7)`
+                                                                    : section.key === 'activity'
+                                                                        ? `0 0 ${baseSize * 2}px rgba(159,227,182,0.7)`
+                                                                        : "none",
+                                                    }}
+                                                >
+                                                    {section.label}
+                                                </div>
+                                                {isToggleable && (
+                                                    <button
+                                                        onClick={() => togglePoolSection(section.key)}
+                                                        style={{
+                                                            fontSize: `${baseSize * 4.5}px`,
+                                                            backgroundColor: "transparent",
+                                                            padding: 0,
+                                                            color: poolSectionExpanded[section.key] ? "white" : "#cfe3ff",
+                                                            textShadow: poolSectionExpanded[section.key]
+                                                                ? `0 0 ${baseSize * 2}px white, 0 0 ${baseSize * 2.2}px rgba(0,0,0,0.95)`
+                                                                : `0 0 ${baseSize * 2.2}px rgba(0,0,0,0.95), 0 0 ${baseSize * 1.8}px rgba(207,227,255,0.6)`,
+                                                        }}
+                                                    >
+                                                        {poolSectionExpanded[section.key] ? "收起" : "展开"}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                        {isExpanded && (
+                                            <div
+                                                className="flex flex-col gap-[1vmin]"
+                                                style={section.label ? { marginTop: `${baseSize * 2}px` } : undefined}
                                             >
-                                                {renderHighlightedText(char, trimmedPoolSearch)}
-                                            </button>
-                                        ))}
+                                                {section.pools.map((char) => (
+                                                    <button
+                                                        key={char}
+                                                        onClick={() => {toggleRarity(char, poolMap, poolChoice, setPoolChoice)}}
+                                                        style={{
+                                                            fontSize: `${baseSize * 6}px`,
+                                                            backgroundColor: "transparent",
+                                                            padding: 0,
+                                                            textAlign: 'left',
+                                                            color: poolChoice.includes(char) ? "white" : "#b5b5b5",
+                                                            textShadow: poolChoice.includes(char)
+                                                                ? `0 0 ${baseSize * 4}px white, 0 0 ${baseSize * 8}px white`
+                                                                : `0 0 ${baseSize * 2.2}px rgba(0,0,0,0.95)`
+                                                        }}
+                                                    >
+                                                        {renderHighlightedText(char, trimmedPoolSearch)}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </>
                 )}
