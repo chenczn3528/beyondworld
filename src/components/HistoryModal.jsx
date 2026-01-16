@@ -198,6 +198,13 @@ const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
                           "瞬": {color: "#c4a1ff"},
                           "世界": {color: "#dda516"}
                       };
+                      const roleColorMap = {
+                          "顾时夜": "#6fa2e6",
+                          "易遇": "#7fd3a4",
+                          "柏源": "#f2ad6b",
+                          "夏萧因": "#b28fe6",
+                          "夏萧音": "#b28fe6",
+                      };
                       const historyColor = cardHistoryColors[card.稀有度] || {color: "black"};
 
                       const style1 = {
@@ -225,7 +232,18 @@ const HistoryModal = ({ showHistory, setShowHistory, history, fontsize }) => {
                                   className="flex flex-row"
                                   // className={`absolute flex flex-row text-xs mb-2 flex justify-between ml-[3vmin] mr-[3vmin] h-[4vmin] items-center`}
                               >
-                                  <div style={style1}>{card.主角}·{card.卡名}</div>
+                                  <div style={style1}>
+                                      <span
+                                          style={{
+                                              color: ['世界', '刹那'].includes(card.稀有度)
+                                                  ? (roleColorMap[card.主角] || historyColor.color)
+                                                  : historyColor.color
+                                          }}
+                                      >
+                                          {card.主角}
+                                      </span>
+                                      ·{card.卡名}
+                                  </div>
                                   <div style={style2}>{card.稀有度}</div>
                                   <div
                                       style={style1}>{card.获取途径.split("】").length === 1 ? card.获取途径 : card.获取途径.split("】")[0] + "】"}</div>

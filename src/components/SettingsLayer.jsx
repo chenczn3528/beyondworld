@@ -6,6 +6,7 @@ import MusicIcon from "../icons/MusicIcon.jsx";
 import { Asset } from './Asset.jsx';
 import { useAssetLoader } from '../hooks/useAssetLoader';
 import MusicVolumeIcon from '../icons/MusicVolumeIcon.jsx';
+import InfoIcon from "../icons/InfoIcon.jsx";
 
 const SettingsLayer = ({
     baseSize,
@@ -33,12 +34,24 @@ const SettingsLayer = ({
     openAssetTest,
     simulateProbability,
     simulationResult,
+    showSimulationModal,
+    setShowSimulationModal,
+    simulationStatus,
 }) => {
     // 使用动态加载的数据，优先使用 Context，如果没有则使用 props（向后兼容）
     const { cardData: cardDataFromContext } = useData();
     const cardData = cardDataFromContext || cardDataProp;
 
     const filtered_cardData = cardData.filter(card => card.稀有度 === '世界' || card.稀有度 === '刹那');
+    const canShowSimulation = simulationStatus === 'done' && simulationResult;
+    const roleColorMap = {
+        '顾时夜': '#6fa2e6',
+        '易遇': '#7fd3a4',
+        '柏源': '#f2ad6b',
+        '夏萧因': '#b28fe6',
+        '夏萧音': '#b28fe6',
+    };
+    const numberColor = '#ffd39a';
 
     const [copyState, setCopyState] = useState(0);
     const { loadAsset } = useAssetLoader();
@@ -122,6 +135,191 @@ const SettingsLayer = ({
             className="absolute w-full h-full"
             style={{filter: showDetailedImage ? 'blur(10px)' : 'none', transition: 'filter 0.3s ease'}}
         >
+            {showSimulationModal && simulationResult && (
+                <div
+                    className="absolute w-full h-full flex justify-center items-center z-50"
+                    style={{backgroundColor: 'rgba(0,0,0,0.6)'}}
+                    onClick={() => {
+                        playClickSound();
+                        setShowSimulationModal(false);
+                    }}
+                >
+                    <div
+                        className="absolute flex flex-col items-start"
+                        style={{
+                            backgroundColor: 'rgba(0,0,0,0.9)',
+                            color: 'white',
+                            padding: `${baseSize * 6}px`,
+                            borderRadius: `${baseSize * 2}px`,
+                            width: `${baseSize * (simulationResult.hasGuaranteedMode ? 220 : 100)}px`,
+                            maxWidth: '85%',
+                            maxHeight: '70%',
+                            boxShadow: '0 0 20px rgba(255, 215, 0, 0.3)',
+                            overflowY: 'auto'
+                        }}
+                        onClick={(event) => {
+                            playClickSound();
+                            event.stopPropagation();
+                        }}
+                    >
+                        <div
+                            style={{
+                                fontSize: `${baseSize * 7}px`,
+                                fontWeight: 700,
+                                textShadow: '0 0 10px gold',
+                                marginBottom: `${baseSize * 3}px`,
+                                alignSelf: 'center',
+                                textAlign: 'center'
+                            }}
+                        >
+                            概率模拟结果
+                        </div>
+                        <div
+                            style={{
+                                fontSize: `${baseSize * 5.5}px`,
+                                textShadow: '0 0 6px rgba(255, 215, 0, 0.35)',
+                                lineHeight: 1.6,
+                                width: '100%'
+                            }}
+                        >
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    textAlign: 'center',
+                                    gap: `${baseSize * 0.6}px`
+                                }}
+                            >
+                                <div>
+                                    模拟
+                                    <span style={{ color: numberColor, fontWeight: 700 }}>
+                                        {simulationResult.drawCount}
+                                    </span>
+                                    抽，共出金
+                                    <span style={{ color: numberColor, fontWeight: 700 }}>
+                                        {simulationResult.totalFiveStar}
+                                    </span>
+                                    张
+                                </div>
+                                <div>
+                                    约每
+                                    <span style={{ color: numberColor, fontWeight: 700 }}>
+                                        {simulationResult.averageInterval}
+                                    </span>
+                                    抽出一次
+                                </div>
+                                <div>
+                                    世界卡
+                                    <span style={{ color: numberColor, fontWeight: 700 }}>
+                                        {simulationResult.totalWorld + simulationResult.totalInstant}
+                                    </span>
+                                    张
+                                    (<span style={{ color: numberColor, fontWeight: 700 }}>
+                                        {simulationResult.drawCount > 0
+                                            ? (((simulationResult.totalWorld + simulationResult.totalInstant) / simulationResult.drawCount) * 100).toFixed(2)
+                                            : '0.00'}
+                                    </span>%)
+                                </div>
+                                <div>
+                                    月卡
+                                    <span style={{ color: numberColor, fontWeight: 700 }}>
+                                        {simulationResult.totalMoon + simulationResult.totalInstantFourStar}
+                                    </span>
+                                    张 (
+                                    <span style={{ color: numberColor, fontWeight: 700 }}>
+                                        {simulationResult.drawCount > 0
+                                            ? (((simulationResult.totalMoon + simulationResult.totalInstantFourStar) / simulationResult.drawCount) * 100).toFixed(2)
+                                            : '0.00'}
+                                    </span>
+                                    %)
+                                </div>
+                                <div>
+                                    星卡
+                                    <span style={{ color: numberColor, fontWeight: 700 }}>
+                                        {simulationResult.totalStar}
+                                    </span>
+                                    张 (
+                                    <span style={{ color: numberColor, fontWeight: 700 }}>
+                                        {simulationResult.drawCount > 0
+                                            ? ((simulationResult.totalStar / simulationResult.drawCount) * 100).toFixed(2)
+                                            : '0.00'}
+                                    </span>
+                                    %)
+                                </div>
+                            </div>
+                            <div style={{ marginTop: `${baseSize * 3}px` }}>
+                                <div
+                                    style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: simulationResult.hasGuaranteedMode ? '1fr 0.7fr 1fr 0.7fr 1fr 0.7fr 0.7fr' : '1fr 0.7fr 1fr',
+                                        alignItems: 'baseline',
+                                        columnGap: `${baseSize * 3}px`,
+                                        padding: `0 ${baseSize * 10}px`,
+                                        fontWeight: 700,
+                                        textAlign: 'center'
+                                    }}
+                                >
+                                    <span>角色</span>
+                                    <span>卡数</span>
+                                    <span>占比</span>
+                                    {simulationResult.hasGuaranteedMode && (
+                                        <>
+                                            <span>歪卡</span>
+                                            <span>歪卡占比</span>
+                                            <span>歪常驻</span>
+                                            <span>歪限定</span>
+                                        </>
+                                    )}
+                                </div>
+                                {simulationResult.roleStats.map((entry) => {
+                                    const offEntry = simulationResult.offStats.find((item) => item.role === entry.role);
+                                    return (
+                                        <div
+                                            key={entry.role}
+                                            style={{
+                                                display: 'grid',
+                                                gridTemplateColumns: simulationResult.hasGuaranteedMode ? '1fr 0.7fr 1fr 0.7fr 1fr 0.7fr 0.7fr' : '1fr 0.7fr 1fr',
+                                                alignItems: 'baseline',
+                                                columnGap: `${baseSize * 3}px`,
+                                                padding: `0 ${baseSize * 10}px`,
+                                                textAlign: 'center'
+                                            }}
+                                        >
+                                            <span style={{ color: roleColorMap[entry.role] || 'white', fontWeight: 700 }}>
+                                                {entry.role}
+                                            </span>
+                                            <span style={{ color: roleColorMap[entry.role] || 'white', fontWeight: 700 }}>
+                                                {entry.count}
+                                            </span>
+                                            <span style={{ color: roleColorMap[entry.role] || 'white', fontWeight: 700 }}>
+                                                ({entry.percent}%)
+                                            </span>
+                                            {simulationResult.hasGuaranteedMode && (
+                                                <>
+                                                    <span style={{ color: roleColorMap[entry.role] || 'white', fontWeight: 700 }}>
+                                                        {offEntry ? offEntry.count : 0}
+                                                    </span>
+                                                    <span style={{ color: roleColorMap[entry.role] || 'white', fontWeight: 700 }}>
+                                                        ({offEntry ? offEntry.percent : '0.00'}%)
+                                                    </span>
+                                                    <span style={{ color: roleColorMap[entry.role] || 'white', fontWeight: 700 }}>
+                                                        {offEntry ? offEntry.offPermanent : 0}
+                                                    </span>
+                                                    <span style={{ color: roleColorMap[entry.role] || 'white', fontWeight: 700 }}>
+                                                        {offEntry ? offEntry.offLimited : 0}
+                                                    </span>
+                                                </>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/*主页显示卡片轮播图*/}
             <div
                 className="absolute flex justify-center"
@@ -273,6 +471,22 @@ const SettingsLayer = ({
                     >
                         概率模拟
                     </button>
+                    {canShowSimulation && (
+                        <button
+                            title="查看概率模拟结果"
+                            style={{
+                                backgroundColor: 'transparent',
+                                color: 'white',
+                                padding: 0
+                            }}
+                            onClick={() => {
+                                playClickSound();
+                                setShowSimulationModal(true);
+                            }}
+                        >
+                            <InfoIcon size={baseSize * 6.5} color="white"/>
+                        </button>
+                    )}
                 </div>
 
                 {/* 保底显示 */}
@@ -328,24 +542,6 @@ const SettingsLayer = ({
                             '0' : (totalDrawCount / totalFiveStarCount).toFixed(2)}
                         </label>
                     </div>
-
-                    {simulationResult && (
-                        <div
-                            className="flex items-center justify-end"
-                            style={{
-                                fontSize: `${baseSize * 5.5}px`,
-                                color: 'white',
-                                textShadow: '0 0 10px gold',
-                                marginTop: `${baseSize * 0.5}px`,
-                                whiteSpace: 'nowrap'
-                            }}
-                        >
-                            <label className="text-shadow" style={{whiteSpace: 'nowrap'}}>
-                                {simulationResult}
-                            </label>
-                        </div>
-                    )}
-
 
                     {/*保底显示*/}
                     <div

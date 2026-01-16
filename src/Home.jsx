@@ -216,7 +216,9 @@ const Home = ({isPortrait, openAssetTest}) => {
 
     const [musicID, setMusicID] = useLocalStorageState("bw_musicID", songsList && songsList.length > 0 ? songsList[0]["id"].slice(0,10) : "")
     const showVideoButtons = true;
-    const [simulationResult, setSimulationResult] = useState("");
+    const [simulationResult, setSimulationResult] = useState(null);
+    const [simulationStatus, setSimulationStatus] = useState('idle');
+    const [showSimulationModal, setShowSimulationModal] = useState(false);
 
 
     // 清除缓存数据
@@ -693,7 +695,6 @@ const Home = ({isPortrait, openAssetTest}) => {
       const isAllRoles = selectedRole.includes('随机');
       const limitedPools = selectedPools.filter(pool => pool !== "世界之间" && !chargePoolSet.has(pool));
       const chargeSelectedPools = selectedPools.filter(pool => chargePoolSet.has(pool));
-      const selectedPermanentPools = selectedPools.filter(pool => pool === "世界之间");
       const excludedKeywords = ["崩坍", "累充", "活动", "奇遇瞬间"];
       const allowPaidCards = includeMoneyCard || chargeSelectedPools.length > 0;
 
@@ -712,40 +713,35 @@ const Home = ({isPortrait, openAssetTest}) => {
           );
 
         let result;
+        const isAllRolesSelected = selectedRole.includes('随机');
+        const isRoleSelected = (card) => isAllRolesSelected || selectedRole.includes(card.主角);
+        const isRoleUnselected = (card) => !isAllRolesSelected && !selectedRole.includes(card.主角);
+        const preferredLimitedPools = limitedPools.length > 0
+          ? limitedPools
+          : (chargeSelectedPools.length > 0 ? chargeSelectedPools : selectedPools);
+
         if (forceGuaranteeMode === 'hard') {
           if (limitedPools.length > 0) {
             result = selectWithRoleAndPool(card =>
               limitedPools.includes(card.获取途径) &&
-              selectedRole.includes(card.主角)
+              isRoleSelected(card)
             );
           } else if (chargeSelectedPools.length > 0) {
             result = selectWithRoleAndPool(card =>
               chargeSelectedPools.includes(card.获取途径) &&
-              selectedRole.includes(card.主角)
+              isRoleSelected(card)
             );
           } else {
             result = selectWithRoleAndPool(card =>
               selectedPools.includes(card.获取途径) &&
-              selectedRole.includes(card.主角)
+              isRoleSelected(card)
             );
           }
         } else if (forceGuaranteeMode === 'soft') {
-          if (limitedPools.length > 0) {
-            result = selectWithRoleAndPool(card =>
-              selectedPermanentPools.includes(card.获取途径) ||
-              (limitedPools.includes(card.获取途径) && !selectedRole.includes(card.主角))
-            );
-          } else if (chargeSelectedPools.length > 0) {
-            result = selectWithRoleAndPool(card =>
-              selectedPermanentPools.includes(card.获取途径) ||
-              (chargeSelectedPools.includes(card.获取途径) && !selectedRole.includes(card.主角))
-            );
-          } else {
-            result = selectWithRoleAndPool(card =>
-              selectedPermanentPools.includes(card.获取途径) &&
-              !selectedRole.includes(card.主角)
-            );
-          }
+          result = selectWithRoleAndPool(card =>
+            permanentPools.includes(card.获取途径) ||
+            (preferredLimitedPools.includes(card.获取途径) && isRoleUnselected(card))
+          );
         } else if (!isAllRoles) {
           if (onlySelectedRoleCard) {
             result = selectWithRoleAndPool(card =>
@@ -813,7 +809,11 @@ const Home = ({isPortrait, openAssetTest}) => {
           );
         }
 
-        return applyPaidFilter(result.filter(card => card.稀有度 === targetRarity));
+        const filtered = result.filter(card => card.稀有度 === targetRarity);
+        if (targetRarity === '辰星' && includeThreeStarM) {
+          return filtered;
+        }
+        return applyPaidFilter(filtered);
       };
 
       // 五星概率（动态）
@@ -822,33 +822,26 @@ const Home = ({isPortrait, openAssetTest}) => {
         dynamicFiveStarRate = 2 + (pity - 59) * 10;
       }
 
-      const fourStarRate = 7;
+      const fourStarRate = 10;
 
       // 判断稀有度
       if (isTenDrawGuarantee) {
-        // 十抽保底：必出四星（瞬/月）及以上
-        const guaranteeRoll = Math.random();
-        if (guaranteeRoll < 0.5) {
-          // 四星：若未包含“崩坍累充”，则不出“瞬”，只出“月”
-          rarity = includeMoneyCard ? (Math.random() < 0.5 ? '瞬' : '月') : '月';
-        } else {
-          // 50% 概率出五星：世界/刹那
-          rarity = Math.random() < 0.5 ? '世界' : '刹那';
-        }
+        // 十抽保底：必出四星（瞬/月）
+        rarity = includeMoneyCard ? (Math.random() < 0.2 ? '瞬' : '月') : '月';
       } else if (fourStarCounter >= 9) {
         // 四星保底时，在"世界"和"刹那"之间随机选择
         if (roll < dynamicFiveStarRate) {
-          rarity = Math.random() < 0.5 ? '世界' : '刹那';
+          rarity = Math.random() < 0.2 ? '刹那' : '世界';
         } else {
           // 四星：若未包含“崩坍累充”，则不出“瞬”，只出“月”；否则 瞬/月 等概率
-          rarity = includeMoneyCard ? (Math.random() < 0.5 ? '瞬' : '月') : '月';
+          rarity = includeMoneyCard ? (Math.random() < 0.2 ? '瞬' : '月') : '月';
         }
       } else if (roll < dynamicFiveStarRate) {
         // 非保底时，在"世界"和"刹那"之间随机选择
-        rarity = Math.random() < 0.5 ? '世界' : '刹那';
+        rarity = Math.random() < 0.2 ? '刹那' : '世界';
       } else if (roll < dynamicFiveStarRate + fourStarRate) {
         // 四星：若未包含“崩坍累充”，则不出“瞬”，只出“月”；否则 瞬/月 等概率
-        rarity = includeMoneyCard ? (Math.random() < 0.5 ? '瞬' : '月') : '月';
+        rarity = includeMoneyCard ? (Math.random() < 0.2 ? '瞬' : '月') : '月';
       } else {
         // rarity = '星'; // 星或辰星统一为稀有度"星"
         // 单独判断辰星/星星
@@ -923,19 +916,41 @@ const Home = ({isPortrait, openAssetTest}) => {
 
     const simulateProbability = (defaultDraws = 10000) => {
       const drawInput = window.prompt('模拟抽卡次数（默认140）', String(defaultDraws));
+      if (drawInput === null) return;
       const drawCount = Math.max(1, parseInt(drawInput || String(defaultDraws), 10));
-      setSimulationResult('模拟中...');
+      setShowSimulationModal(false);
+      setSimulationResult(null);
+      setSimulationStatus('running');
 
       setTimeout(() => {
         let pity = 0;
         let fourCounter = 0;
         let localSoft = softPityFailed;
         let totalFiveStar = 0;
+        let totalWorld = 0;
+        let totalInstant = 0;
+        let totalMoon = 0;
+        let totalInstantFourStar = 0;
+        let totalStar = 0;
+        const worldCounts = {};
+        const instantCounts = {};
+        let totalOff = 0;
+        const offCounts = {};
+        const offPermanentCounts = {};
+        const roleOrder = ['顾时夜', '易遇', '柏源', '夏萧因'];
+        const limitedPools = selectedPools.filter((pool) => pool !== '世界之间' && !chargePoolSet.has(pool));
+        const chargeSelectedPools = selectedPools.filter((pool) => chargePoolSet.has(pool));
+        const hasPoolTarget = limitedPools.length > 0 || chargeSelectedPools.length > 0;
+        const targetPools = hasPoolTarget ? (limitedPools.length > 0 ? limitedPools : chargeSelectedPools) : [];
+        const hasRoleTarget = !selectedRole.includes('随机') && selectedRole.length < roleOrder.length;
+        const shouldTrackOff = useSoftGuarantee && (hasPoolTarget || hasRoleTarget);
+        const hasGuaranteedMode = shouldTrackOff;
         const runResults = [];
 
         for (let i = 0; i < drawCount; i += 1) {
           const isAllRoles = selectedRole.includes('随机');
-          const isGuaranteedMode = useSoftGuarantee && !onlySelectedRoleCard && !isAllRoles;
+          const isGuaranteedMode = useSoftGuarantee && !onlySelectedRoleCard && (hasPoolTarget || !isAllRoles);
+          const isRoleSelected = (card) => isAllRoles || selectedRole.includes(card.主角);
           let forceMode = null;
           if (isGuaranteedMode) {
             forceMode = localSoft ? 'hard' : 'soft';
@@ -967,25 +982,56 @@ const Home = ({isPortrait, openAssetTest}) => {
             pity = 0;
             fourCounter = 0;
 
+            if (rarity === '世界') {
+              totalWorld += 1;
+              const roleName = result.card && result.card.主角;
+              if (roleName) {
+                worldCounts[roleName] = (worldCounts[roleName] || 0) + 1;
+              }
+            } else if (rarity === '刹那') {
+              totalInstant += 1;
+              const roleName = result.card && result.card.主角;
+              if (roleName) {
+                instantCounts[roleName] = (instantCounts[roleName] || 0) + 1;
+              }
+            }
+
             if (isGuaranteedMode) {
-              const limitedPools = selectedPools.filter((pool) => pool !== '世界之间' && !chargePoolSet.has(pool));
-              const chargeSelectedPools = selectedPools.filter((pool) => chargePoolSet.has(pool));
-              let targetPools = [];
-              if (limitedPools.length > 0 || chargeSelectedPools.length > 0) {
-                targetPools = limitedPools.length > 0 ? limitedPools : chargeSelectedPools;
-                const gotTarget = result.card
-                  && selectedRole.includes(result.card.主角)
+              let gotTarget = false;
+              if (hasPoolTarget) {
+                gotTarget = result.card
+                  && isRoleSelected(result.card)
                   && targetPools.includes(result.card.获取途径);
                 localSoft = !gotTarget;
               } else {
-                const gotTarget = result.card
-                  && selectedRole.includes(result.card.主角)
+                gotTarget = result.card
+                  && isRoleSelected(result.card)
                   && permanentPools.includes(result.card.获取途径);
                 localSoft = !gotTarget;
               }
             }
+
+            if (shouldTrackOff && result.card && result.card.主角) {
+              const roleHit = !hasRoleTarget || selectedRole.includes(result.card.主角);
+              const poolHit = !hasPoolTarget || targetPools.includes(result.card.获取途径);
+              if (!roleHit || !poolHit) {
+                totalOff += 1;
+                const offRole = result.card.主角;
+                offCounts[offRole] = (offCounts[offRole] || 0) + 1;
+                if (permanentPools.includes(result.card.获取途径)) {
+                  offPermanentCounts[offRole] = (offPermanentCounts[offRole] || 0) + 1;
+                }
+              }
+            }
           } else {
             pity += 1;
+            if (rarity === '月') {
+              totalMoon += 1;
+            } else if (rarity === '瞬') {
+              totalInstantFourStar += 1;
+            } else if (rarity === '星' || rarity === '辰星') {
+              totalStar += 1;
+            }
             if (rarity === '月' || rarity === '瞬') {
               fourCounter = 0;
             } else {
@@ -995,9 +1041,38 @@ const Home = ({isPortrait, openAssetTest}) => {
         }
 
         const averageInterval = totalFiveStar > 0 ? (drawCount / totalFiveStar).toFixed(2) : '∞';
-        setSimulationResult(
-          `模拟${drawCount} 抽：共出金 ${totalFiveStar.toFixed(2)} 张，约每 ${averageInterval} 抽出一次`
-        );
+        const totalFiveStarCards = totalWorld + totalInstant;
+        const roleStats = roleOrder.map((role) => {
+          const count = (worldCounts[role] || 0) + (instantCounts[role] || 0);
+          const percent = totalFiveStarCards > 0 ? ((count / totalFiveStarCards) * 100).toFixed(2) : '0.00';
+          return { role, count, percent };
+        });
+        const offStats = roleOrder.map((role) => {
+          const count = offCounts[role] || 0;
+          const roleTotal = (worldCounts[role] || 0) + (instantCounts[role] || 0);
+          const percent = roleTotal > 0 ? ((count / roleTotal) * 100).toFixed(2) : '0.00';
+          const offPermanent = offPermanentCounts[role] || 0;
+          const offLimited = Math.max(0, count - offPermanent);
+          return { role, count, percent, offPermanent, offLimited };
+        });
+        const offRate = totalFiveStarCards > 0 ? ((totalOff / totalFiveStarCards) * 100).toFixed(2) : '0.00';
+        setSimulationResult({
+          drawCount,
+          totalFiveStar,
+          averageInterval,
+          totalWorld,
+          totalInstant,
+          totalMoon,
+          totalInstantFourStar,
+          totalStar,
+          roleStats,
+          hasGuaranteedMode,
+          totalOff,
+          offRate,
+          offStats
+        });
+        setSimulationStatus('done');
+        setShowSimulationModal(true);
       }, 50);
     };
 
@@ -1221,6 +1296,9 @@ const Home = ({isPortrait, openAssetTest}) => {
                 openAssetTest={openAssetTest}
                 simulateProbability={simulateProbability}
                 simulationResult={simulationResult}
+                showSimulationModal={showSimulationModal}
+                setShowSimulationModal={setShowSimulationModal}
+                simulationStatus={simulationStatus}
             />
 
         </div>
