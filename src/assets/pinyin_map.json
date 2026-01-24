@@ -2766,5 +2766,45 @@
       "shen",
       "chu"
     ]
+  },
+  "镜中舞曲": {
+    "full": "jingzhongwuqu",
+    "initials": "jzwq",
+    "syllables": [
+      "jing",
+      "zhong",
+      "wu",
+      "qu"
+    ]
+  },
+  "时间起点": {
+    "full": "shijianqidian",
+    "initials": "sjqd",
+    "syllables": [
+      "shi",
+      "jian",
+      "qi",
+      "dian"
+    ]
+  },
+  "永生乐园": {
+    "full": "yongshengleyuan",
+    "initials": "ysly",
+    "syllables": [
+      "yong",
+      "sheng",
+      "le",
+      "yuan"
+    ]
+  },
+  "常夜降临": {
+    "full": "changyejianglin",
+    "initials": "cyjl",
+    "syllables": [
+      "chang",
+      "ye",
+      "jiang",
+      "lin"
+    ]
   }
 }
