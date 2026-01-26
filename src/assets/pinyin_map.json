@@ -2806,5 +2806,113 @@
       "jiang",
       "lin"
     ]
+  },
+  "火光延续": {
+    "full": "huoguangyanxu",
+    "initials": "hgyx",
+    "syllables": [
+      "huo",
+      "guang",
+      "yan",
+      "xu"
+    ]
+  },
+  "颠覆真理": {
+    "full": "dianfuzhenli",
+    "initials": "dfzl",
+    "syllables": [
+      "dian",
+      "fu",
+      "zhen",
+      "li"
+    ]
+  },
+  "传说": {
+    "full": "chuanshuo",
+    "initials": "cs",
+    "syllables": [
+      "chuan",
+      "shuo"
+    ]
+  },
+  "群星海": {
+    "full": "qunxinghai",
+    "initials": "qxh",
+    "syllables": [
+      "qun",
+      "xing",
+      "hai"
+    ]
+  },
+  "午后": {
+    "full": "wuhou",
+    "initials": "wh",
+    "syllables": [
+      "wu",
+      "hou"
+    ]
+  },
+  "林间语": {
+    "full": "linjianyu",
+    "initials": "ljy",
+    "syllables": [
+      "lin",
+      "jian",
+      "yu"
+    ]
+  },
+  "虚假愿望": {
+    "full": "xujiayuanwang",
+    "initials": "xjyw",
+    "syllables": [
+      "xu",
+      "jia",
+      "yuan",
+      "wang"
+    ]
+  },
+  "归去来": {
+    "full": "guiqulai",
+    "initials": "gql",
+    "syllables": [
+      "gui",
+      "qu",
+      "lai"
+    ]
+  },
+  "落幕": {
+    "full": "luomu",
+    "initials": "lm",
+    "syllables": [
+      "luo",
+      "mu"
+    ]
+  },
+  "迷境": {
+    "full": "mijing",
+    "initials": "mj",
+    "syllables": [
+      "mi",
+      "jing"
+    ]
+  },
+  "写过往": {
+    "full": "xieguowang",
+    "initials": "xgw",
+    "syllables": [
+      "xie",
+      "guo",
+      "wang"
+    ]
+  },
+  "故事前夜": {
+    "full": "gushiqianye",
+    "initials": "gsqy",
+    "syllables": [
+      "gu",
+      "shi",
+      "qian",
+      "ye"
+    ]
   }
 }
