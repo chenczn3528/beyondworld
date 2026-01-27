@@ -122,11 +122,7 @@ const FilterPage = ({
             .filter(pool => !rechargePoolSet.has(pool));
         const nonActivityBirthdayPools = birthdayPools.filter(pool => !pool.includes("活动"));
 
-        const latestLimited = "【栖云志异】世界之间";
-        const orderedLimited = [
-            ...(limitedPools.includes(latestLimited) ? [latestLimited] : []),
-            ...limitedPools.filter(pool => pool !== latestLimited),
-        ];
+        const orderedLimited = limitedPools;
 
         const excluded = new Set([
             ...commonPools,
