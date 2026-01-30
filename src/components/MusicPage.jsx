@@ -58,7 +58,7 @@ const MusicPage = ({
                         height="86" 
                         sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
                         // 必须是https
-                        src={`https://music.163.com/outchain/player?type=2&id=${musicID}&auto=1&height=66`}>
+                        src={`https://music.163.com/m/outchain/player?type=2&id=${musicID}&auto=1&height=66`}>
                     </iframe>
 
                 </div>
