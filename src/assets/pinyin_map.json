@@ -2914,5 +2914,45 @@
       "qian",
       "ye"
     ]
+  },
+  "余烬回响": {
+    "full": "yujinhuixiang",
+    "initials": "yjhx",
+    "syllables": [
+      "yu",
+      "jin",
+      "hui",
+      "xiang"
+    ]
+  },
+  "薪火昼夜": {
+    "full": "xinhuozhouye",
+    "initials": "xhzy",
+    "syllables": [
+      "xin",
+      "huo",
+      "zhou",
+      "ye"
+    ]
+  },
+  "群鸟不渡": {
+    "full": "qunniaobudu",
+    "initials": "qnbd",
+    "syllables": [
+      "qun",
+      "niao",
+      "bu",
+      "du"
+    ]
+  },
+  "梦海倾覆": {
+    "full": "menghaiqingfu",
+    "initials": "mhqf",
+    "syllables": [
+      "meng",
+      "hai",
+      "qing",
+      "fu"
+    ]
   }
 }
