@@ -22,10 +22,16 @@ const CardMeet = ({ card, showMeet, setShowMeet, fontsize })=>{
 
     const scrollRef = useRef(null);
 
-    const filteredMeets = card["相会事件"].filter(item =>
-        item.content_html !== `{{{${item.title_img}}}}` && item.content_html !== "");
+    const rawMeets = Array.isArray(card?.["相会事件"]) ? card["相会事件"] : [];
+    const filteredMeets = rawMeets.filter(
+        (item) => item?.content_html !== `{{{${item?.title_img}}}}` && item?.content_html !== ""
+    );
 
-    const parsed = filteredMeets[showMeetNumber].content_html
+    if (!showMeet || filteredMeets.length === 0) {
+        return null;
+    }
+
+    const parsed = filteredMeets[Math.min(showMeetNumber, filteredMeets.length - 1)].content_html
         .split(/<br\s*\/?><br\s*\/?>/i).flatMap((part, index, arr) =>
             index < arr.length - 1
                 ? [
@@ -63,11 +69,10 @@ const CardMeet = ({ card, showMeet, setShowMeet, fontsize })=>{
     }, [showMeetNumber]);
 
     return (
-        showMeet && (
-            <div
-                className="absolute w-full h-full z-[60] flex flex-row items-center"
-                style={{backgroundColor: 'rgba(0, 0, 0, 0.8)', gap: `${fontsize}px`}}
-            >
+        <div
+            className="absolute w-full h-full z-[60] flex flex-row items-center"
+            style={{backgroundColor: 'rgba(0, 0, 0, 0.8)', gap: `${fontsize}px`}}
+        >
                 {/*返回按钮*/}
                 <button className="absolute z-[70] w-auto flex items-center justify-center"
                     onClick={()=>setShowMeet(false)}
@@ -133,8 +138,7 @@ const CardMeet = ({ card, showMeet, setShowMeet, fontsize })=>{
                 </div>
 
 
-            </div>
-        )
+        </div>
     );
 }
 

@@ -148,6 +148,13 @@ const GalleryFullImage = (
         );
     }, [card]);
 
+    const hasMeetEvents = useMemo(() => {
+        const rawMeets = Array.isArray(card?.["相会事件"]) ? card["相会事件"] : [];
+        return rawMeets.some(
+            (item) => item?.content_html && item.content_html !== `{{{${item?.title_img}}}}`
+        );
+    }, [card]);
+
     const openVideoPage = (index = 0) => {
         if (!availableVideos.length) return;
         const clamped = Math.max(0, Math.min(index, availableVideos.length - 1));
@@ -169,6 +176,7 @@ const GalleryFullImage = (
 
     useEffect(() => {
         setShowCardDetails(false);
+        setShowMeet(false);
     }, [card]);
 
     const handleVideoPageState = (nextZ) => {
@@ -487,16 +495,18 @@ const GalleryFullImage = (
                                             视频
                                         </button>
                                     )}
-                                    <button
-                                        className="w-auto flex items-center justify-center"
-                                        style={{...button_style}}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setShowMeet(true);
-                                        }}
-                                    >
-                                        相会
-                                    </button>
+                                    {hasMeetEvents && (
+                                        <button
+                                            className="w-auto flex items-center justify-center"
+                                            style={{...button_style}}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setShowMeet(true);
+                                            }}
+                                        >
+                                            相会
+                                        </button>
+                                    )}
                                 </div>
 
                                 {/*右下角按钮*/}
