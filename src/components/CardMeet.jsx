@@ -27,6 +27,15 @@ const CardMeet = ({ card, showMeet, setShowMeet, fontsize })=>{
         (item) => item?.content_html !== `{{{${item?.title_img}}}}` && item?.content_html !== ""
     );
 
+    useEffect(() => {
+        if (!showMeet || filteredMeets.length === 0) {
+            return;
+        }
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = 0;
+        }
+    }, [showMeetNumber, showMeet, filteredMeets.length]);
+
     if (!showMeet || filteredMeets.length === 0) {
         return null;
     }
@@ -58,15 +67,6 @@ const CardMeet = ({ card, showMeet, setShowMeet, fontsize })=>{
                     </div>
                 ] : [<span key={`text-${index}`} dangerouslySetInnerHTML={{ __html: part }}/>]
         );
-
-
-
-
-    useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = 0;
-        }
-    }, [showMeetNumber]);
 
     return (
         <div

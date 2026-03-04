@@ -50,10 +50,10 @@ const MusicPage = ({
                     
                     <iframe 
                         key={musicID}
-                        frameborder="no" 
+                        frameBorder="no" 
                         border="0" 
-                        marginwidth="0" 
-                        marginheight="0" 
+                        marginWidth="0" 
+                        marginHeight="0" 
                         width="330" 
                         height="86" 
                         sandbox="allow-scripts allow-same-origin allow-popups allow-forms"

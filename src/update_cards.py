@@ -83,6 +83,18 @@ def clean_kv(line: str):
         return None, None
     return k, v
 
+def sanitize_event_html(html: str) -> str:
+    """移除除 <br> 以外的标签，仅保留文本与 <br>。"""
+    if not html:
+        return ""
+    soup = BeautifulSoup(html, "html.parser")
+    for tag in soup.find_all(True):
+        if tag.name == "br":
+            tag.attrs = {}
+            continue
+        tag.unwrap()
+    return soup.decode_contents().strip()
+
 # -----------------------------
 # mwclient 初始化
 # -----------------------------
@@ -136,6 +148,34 @@ def extract_image_info_from_detail(detail_url: str) -> List[Dict[str, str]]:
     return image_info
 
 # -----------------------------
+# 图片数量校验
+# -----------------------------
+def is_valid_image_list(rarity: str, image_info: List[Dict[str, str]]) -> bool:
+    if not image_info:
+        return False
+    # 过滤无效项（空 dict 或无 src）
+    cleaned = [img for img in image_info if isinstance(img, dict) and img.get("src")]
+    if not cleaned:
+        return False
+    count = len(cleaned)
+
+    # 星/辰星：1张
+    if rarity in ("星", "辰星"):
+        return count == 1
+    # 月：至少2张
+    if rarity == "月":
+        return count >= 2
+    # 瞬：5张
+    if rarity == "瞬":
+        return count == 5
+    # 世界/刹那：至少2张
+    if rarity in ("世界", "刹那"):
+        return count >= 2
+
+    # 其他未知稀有度：只要有图即可
+    return count > 0
+
+# -----------------------------
 # 用 wiki API 获取其他详细信息
 # -----------------------------
 def wiki_detailed_info(card_name: str) -> Dict[str, str]:
@@ -182,6 +222,13 @@ def wiki_detailed_info(card_name: str) -> Dict[str, str]:
     meets: List[Dict[str, str]] = []
     # 可能 parts[2] 才是相会事件，也可能更多段，这里保险枚举后续段
     for blk in parts[2:]:
+        # 多行值处理：抓取 |相会事件...= 到下一条字段或段结束
+        for match in re.finditer(r"\|(?P<key>相会事件[^=]*)=(?P<val>.*?)(?=\n\||\n}}|$)", blk, re.S):
+            key = match.group("key").strip()
+            val = sanitize_event_html(match.group("val"))
+            if val:
+                meets.append({"title_img": key, "content_html": val})
+
         for line in blk.split("\n"):
             k, v = clean_kv(line)
             if not k:
@@ -190,8 +237,8 @@ def wiki_detailed_info(card_name: str) -> Dict[str, str]:
             if "稀有度" in k:
                 continue
             if "相会事件" in k:
-                if v:
-                    meets.append({"title_img": k, "content_html": v})
+                # 已由多行解析处理
+                continue
             else:
                 # 其他键值也记录
                 info[k] = v
@@ -332,9 +379,25 @@ def main():
             detail_url = urljoin(BASE_URL, link_tag["href"])
             print(f"[{index}] 抓取：{card_name} -> {detail_url}", flush=True)
 
-            image_info = extract_image_info_from_detail(detail_url)
-            if image_info:
+            rarity = info_dict.get("稀有度", "")
+            image_info = []
+            max_img_retries = 3
+            for attempt in range(1, max_img_retries + 1):
+                image_info = extract_image_info_from_detail(detail_url)
+                if is_valid_image_list(rarity, image_info):
+                    break
+                wait = 1.5 + attempt * 0.8
+                print(f"[重试] 图片数量不符合（{rarity}）：{card_name} -> 第{attempt}次，等待{wait:.1f}s", flush=True)
+                time.sleep(wait)
+
+            if image_info and is_valid_image_list(rarity, image_info):
                 info_dict["图片信息"] = image_info
+            else:
+                print(f"[跳过] 图片数量仍不符合（{rarity}）：{card_name}", flush=True)
+                continue
+        else:
+            print(f"[跳过] 缺少详情链接：{card_name}", flush=True)
+            continue
 
         info_dict = check_cards(info_dict)
 
