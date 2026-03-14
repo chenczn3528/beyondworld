@@ -104,6 +104,11 @@ const CardSummary = ({
   });
 
   const grid = createEmptyGrid();
+  const slotStyle = {
+    width: `${fontsize * picWidthRatio}px`,
+    height: `${fontsize * picHeightRatio}px`,
+  };
+  const rowOffsets = [0, 3, 7];
 
   // console.log("sortedCards", sortedCards)
 
@@ -116,6 +121,12 @@ const CardSummary = ({
 
   return (
     <div className="absolute w-full h-full flex items-center justify-center">
+      <style>{`
+        @keyframes cardFloatIn {
+          0% { transform: translateY(72px); opacity: 0; }
+          100% { transform: translateY(0); opacity: 1; }
+        }
+      `}</style>
       {/*底部图片（绝对定位） */}
       <Asset
         src="bg_main2.jpg"
@@ -138,6 +149,11 @@ const CardSummary = ({
           <div key={rowIndex} className="flex justify-center z-20" style={{marginTop: `${fontsize * 1}px`,marginBottom: `${fontsize * 0.5}px`, gap: `${fontsize}px`}}>
             {row.map((card, colIndex) => {
               let glowStyle = {};
+              const slotIndex = rowOffsets[rowIndex] + colIndex;
+              const cardAnimStyle = {
+                animation: 'cardFloatIn 420ms ease-out both',
+                animationDelay: `${slotIndex * 80}ms`,
+              };
 
               if (card && (card.card.稀有度 === "世界" || card.card.稀有度 === "刹那")) {
                 glowStyle = {
@@ -150,16 +166,20 @@ const CardSummary = ({
               }
 
               return (
-                  <div key={colIndex} className={clsx("relative flex items-center justify-center")}>
+                  <div
+                      key={colIndex}
+                      className={clsx("relative flex items-center justify-center")}
+                      style={slotStyle}
+                  >
                     {card && (
-                        <>
+                        <div className="w-full h-full" style={cardAnimStyle}>
                           <LazyLoadImage
                               src={card.card.图片信息[0].srcset}
                               placeholderSrc={card.card.图片信息[0].src}
                               effect="blur"
                               alt={card.card.卡名}
-                              className="object-contain flex justify-center"
-                              style={{...glowStyle, maxWidth: `${fontsize * picWidthRatio}px`, maxHeight: `${fontsize * picHeightRatio}px`}}
+                              className="object-contain flex justify-center w-full h-full relative z-10"
+                              style={{...glowStyle}}
                               onClick={()=>{
                                   playClickSound();
                                   setFullImage(card.card);
@@ -209,7 +229,7 @@ const CardSummary = ({
                           >
                             <label>{card.card.主角}·{card.card.卡名}</label>
                           </div>
-                        </>
+                        </div>
                     )}
                   </div>
 

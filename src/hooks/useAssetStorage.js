@@ -134,6 +134,24 @@ export function useAssetStorage() {
     }
   }, [initDB]);
 
+  // 获取存储进度
+  const getStoredProgress = useCallback(async (assetId) => {
+    try {
+      const db = await initDB();
+      const transaction = db.transaction(['progress'], 'readonly');
+      const progressStore = transaction.objectStore('progress');
+
+      return await new Promise((resolve, reject) => {
+        const request = progressStore.get(assetId);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+      });
+    } catch (err) {
+      console.error('Failed to get stored progress:', err);
+      return null;
+    }
+  }, [initDB]);
+
   // 通过 URL 获取已存储的资产
   const getAssetByUrl = useCallback(async (url) => {
     try {
@@ -238,6 +256,15 @@ export function useAssetStorage() {
       
       // 更新进度信息
       progress.totalChunks = totalChunks;
+
+      // 尝试从 IndexedDB 恢复进度
+      if (progress.storedChunks === 0) {
+        const storedProgress = await getStoredProgress(assetId);
+        if (storedProgress && storedProgress.storedChunks > 0) {
+          progress.storedChunks = Math.min(storedProgress.storedChunks, totalChunks);
+          console.log(`storeAsset: Resuming from chunk ${progress.storedChunks}/${totalChunks}`);
+        }
+      }
       progressRef.current.set(assetId, progress);
       
       // 存储资产元数据（使用单独的事务）
@@ -456,6 +483,16 @@ export function useAssetStorage() {
       for (const assetType of assets) {
         for (const filePath of assetType.files) {
           try {
+            const url = `/${filePath}`;
+            const existing = await getAssetByUrl(url);
+            if (existing && existing.status === 'completed') {
+              storedCount++;
+              setStoredAssets(storedCount);
+              const overallProgress = Math.round((storedCount / totalCount) * 100);
+              setProgress(overallProgress);
+              continue;
+            }
+
             console.log(`Fetching ${filePath}...`);
             
             // 测试文件是否可访问
@@ -516,7 +553,7 @@ export function useAssetStorage() {
       setError(error.message);
       throw error;
     }
-  }, [storeAsset]);
+  }, [storeAsset, getAssetByUrl]);
 
   // 恢复中断的存储
   const resumeStorage = useCallback(async () => {

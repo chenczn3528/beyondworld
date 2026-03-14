@@ -1122,13 +1122,13 @@ const Home = ({isPortrait, openAssetTest}) => {
     return (
         <div className="w-full h-full relative overflow-hidden" style={{backgroundColor: 'black'}} ref={divRef}>
 
-            {/* 视频层（最底层） */}
-            <Asset src="background1.mp4" type="video" controls={false} onEnded={() => {
-                const validDrawId = drawSessionIdRef.current;
-                if (!validDrawId) return;
-                setisAnimatingDrawCards(false);
-                drawSessionIdRef.current = 0; // 重置流程 ID，防止后续重复触发
-            }} className="absolute top-0 left-0 w-full h-full object-cover z-0"/>
+            {/* 背景层（最底层） */}
+            <Asset
+                src="background1.png"
+                type="image"
+                alt="background"
+                className="absolute top-0 left-0 w-full h-full object-cover z-0"
+            />
 
 
             {/* 抽卡动画层 */}

@@ -96,6 +96,10 @@ const AssetTest = ({ onClose }) => {
       await storeAllAssets();
       // 存储完成后自动刷新统计信息
       await loadStats();
+      // 存储完成后自动刷新页面
+      setTimeout(() => {
+        try { window.location.reload(); } catch {}
+      }, 300);
     } catch (error) {
       console.error('Failed to store assets:', error);
     }
@@ -423,6 +427,47 @@ const AssetTest = ({ onClose }) => {
 
         {/* 文件大小信息 - 移到统计信息下面 */}
         {renderFileSizeInfo()}
+      </div>
+
+      {/* 图片预览：先列小图 */}
+      <div style={{ marginBottom: '32px' }}>
+        <label style={{
+          display: 'block',
+          fontSize: `${baseSize * 18}px`,
+          fontWeight: '600',
+          marginBottom: `${baseSize * 12}px`,
+        }}>
+          图片
+        </label>
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: `${baseSize * 10}px`,
+          maxWidth: `${baseSize * 700}px`,
+          margin: '0 auto'
+        }}>
+          {(fileSizeInfo?.assets?.image || []).map(img => {
+            const name = img.path.replace(/^.*\//, '');
+            return (
+              <div
+                key={img.path}
+                title={name}
+                style={{
+                  backgroundColor: '#1f2937',
+                  padding: `${baseSize * 6}px`,
+                  borderRadius: 6,
+                  width: `${baseSize * 90}px`,
+                  height: `${baseSize * 70}px`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <Asset type="image" src={name} alt={name} style={{ maxWidth: '100%', maxHeight: '100%' }} />
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* 媒体测试：直接按顺序列出所有视频与音频 */}

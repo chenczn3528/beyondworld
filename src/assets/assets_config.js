@@ -5,9 +5,9 @@
 export const assetsConfig = {
   version: "1.0.0",
   lastUpdated: "2025-10-13T18:34:11.420927",
-  totalFiles: 26,
-  totalSize: 39475248,
-  totalSizeFormatted: "37.65 MB",
+  totalFiles: 25,
+  totalSize: 8946991,
+  totalSizeFormatted: "8.53 MB",
   assets: {
   "video": [
     {
@@ -19,16 +19,6 @@ export const assetsConfig = {
       "path": "videos/no_gold.mp4",
       "size": 2679808,
       "sizeFormatted": "2.56 MB"
-    },
-    {
-      "path": "videos/background.mp4",
-      "size": 1059510,
-      "sizeFormatted": "1.01 MB"
-    },
-    {
-      "path": "videos/background1.mp4",
-      "size": 30477864,
-      "sizeFormatted": "29.07 MB"
     }
   ],
   "audio": [
@@ -93,6 +83,11 @@ export const assetsConfig = {
       "path": "images/background.png",
       "size": 696704,
       "sizeFormatted": "680.38 KB"
+    },
+    {
+      "path": "images/background1.png",
+      "size": 1009117,
+      "sizeFormatted": "985.47 KB"
     },
     {
       "path": "images/moon.png",

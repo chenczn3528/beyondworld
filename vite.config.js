@@ -18,8 +18,18 @@ function getGitInfo() {
 
 const git = getGitInfo()
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
+    {
+      name: 'inject-csp-upgrade-insecure-requests',
+      transformIndexHtml(html) {
+        if (command !== 'build') return html
+        return html.replace(
+          /<head>/i,
+          `<head>\n    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">`
+        )
+      }
+    },
     react(),
     VitePWA({
       filename: 'sw-beyond.js', // ✅ 与模拟器 A 区分
@@ -58,4 +68,4 @@ export default defineConfig({
     host: '0.0.0.0', // 允许局域网访问
     port: 5174,
   }
-})
+}))
