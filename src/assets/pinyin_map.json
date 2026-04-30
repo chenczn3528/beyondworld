@@ -3034,5 +3034,37 @@
       "wu",
       "ya"
     ]
+  },
+  "不染": {
+    "full": "buran",
+    "initials": "br",
+    "syllables": [
+      "bu",
+      "ran"
+    ]
+  },
+  "濯净": {
+    "full": "zhuojing",
+    "initials": "zj",
+    "syllables": [
+      "zhuo",
+      "jing"
+    ]
+  },
+  "清心": {
+    "full": "qingxin",
+    "initials": "qx",
+    "syllables": [
+      "qing",
+      "xin"
+    ]
+  },
+  "拂尘": {
+    "full": "fuchen",
+    "initials": "fc",
+    "syllables": [
+      "fu",
+      "chen"
+    ]
   }
 }
