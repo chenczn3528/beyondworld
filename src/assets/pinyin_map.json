@@ -3066,5 +3066,45 @@
       "fu",
       "chen"
     ]
+  },
+  "与子同袍": {
+    "full": "yuzitongpao",
+    "initials": "yztp",
+    "syllables": [
+      "yu",
+      "zi",
+      "tong",
+      "pao"
+    ]
+  },
+  "月枕山河": {
+    "full": "yuezhenshanhe",
+    "initials": "yzsh",
+    "syllables": [
+      "yue",
+      "zhen",
+      "shan",
+      "he"
+    ]
+  },
+  "含章可贞": {
+    "full": "hanzhangkezhen",
+    "initials": "hzkz",
+    "syllables": [
+      "han",
+      "zhang",
+      "ke",
+      "zhen"
+    ]
+  },
+  "冠盖京华": {
+    "full": "guangaijinghua",
+    "initials": "ggjh",
+    "syllables": [
+      "guan",
+      "gai",
+      "jing",
+      "hua"
+    ]
   }
 }
