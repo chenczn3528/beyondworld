@@ -3113,5 +3113,26 @@
     "syllables": [
       "shuo"
     ]
+  },
+  "隐": {
+    "full": "yin",
+    "initials": "y",
+    "syllables": [
+      "yin"
+    ]
+  },
+  "望": {
+    "full": "wang",
+    "initials": "w",
+    "syllables": [
+      "wang"
+    ]
+  },
+  "弦": {
+    "full": "xian",
+    "initials": "x",
+    "syllables": [
+      "xian"
+    ]
   }
 }
