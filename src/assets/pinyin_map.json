@@ -3134,5 +3134,45 @@
     "syllables": [
       "xian"
     ]
+  },
+  "天定同途": {
+    "full": "tiandingtongtu",
+    "initials": "tdtt",
+    "syllables": [
+      "tian",
+      "ding",
+      "tong",
+      "tu"
+    ]
+  },
+  "予你繁华": {
+    "full": "yunifanhua",
+    "initials": "ynfh",
+    "syllables": [
+      "yu",
+      "ni",
+      "fan",
+      "hua"
+    ]
+  },
+  "祈世相依": {
+    "full": "qishixiangyi",
+    "initials": "qsxy",
+    "syllables": [
+      "qi",
+      "shi",
+      "xiang",
+      "yi"
+    ]
+  },
+  "浊念归心": {
+    "full": "zhuonianguixin",
+    "initials": "zngx",
+    "syllables": [
+      "zhuo",
+      "nian",
+      "gui",
+      "xin"
+    ]
   }
 }
