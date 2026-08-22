@@ -3194,5 +3194,45 @@
       "wan",
       "chuan"
     ]
+  },
+  "王座之上": {
+    "full": "wangzuozhishang",
+    "initials": "wzzs",
+    "syllables": [
+      "wang",
+      "zuo",
+      "zhi",
+      "shang"
+    ]
+  },
+  "永夜难渡": {
+    "full": "yongyenandu",
+    "initials": "yynd",
+    "syllables": [
+      "yong",
+      "ye",
+      "nan",
+      "du"
+    ]
+  },
+  "罪不及身": {
+    "full": "zuibujishen",
+    "initials": "zbjs",
+    "syllables": [
+      "zui",
+      "bu",
+      "ji",
+      "shen"
+    ]
+  },
+  "仰观万象": {
+    "full": "yangguanwanxiang",
+    "initials": "ygwx",
+    "syllables": [
+      "yang",
+      "guan",
+      "wan",
+      "xiang"
+    ]
   }
 }
