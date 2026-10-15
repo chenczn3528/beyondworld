@@ -3253,5 +3253,45 @@
       "shi",
       "zhen"
     ]
+  },
+  "煦色韶光": {
+    "full": "xuseshaoguang",
+    "initials": "xssg",
+    "syllables": [
+      "xu",
+      "se",
+      "shao",
+      "guang"
+    ]
+  },
+  "金相玉质": {
+    "full": "jinxiangyuzhi",
+    "initials": "jxyz",
+    "syllables": [
+      "jin",
+      "xiang",
+      "yu",
+      "zhi"
+    ]
+  },
+  "明心见性": {
+    "full": "mingxinjianxing",
+    "initials": "mxjx",
+    "syllables": [
+      "ming",
+      "xin",
+      "jian",
+      "xing"
+    ]
+  },
+  "瑰意琦行": {
+    "full": "guiyiqixing",
+    "initials": "gyqx",
+    "syllables": [
+      "gui",
+      "yi",
+      "qi",
+      "xing"
+    ]
   }
 }
