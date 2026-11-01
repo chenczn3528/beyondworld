@@ -175,6 +175,51 @@ def is_valid_image_list(rarity: str, image_info: List[Dict[str, str]]) -> bool:
     # 其他未知稀有度：只要有图即可
     return count > 0
 
+
+def is_complete_card(card: Dict[str, any]) -> bool:
+    """按稀有度检查卡片最低完整度，满足后才允许写入本地。"""
+    name = card.get("卡名")
+    rarity = card.get("稀有度")
+    if not name or not rarity:
+        return False
+
+    image_info = card.get("图片信息", [])
+    if not is_valid_image_list(rarity, image_info):
+        return False
+
+    # 相会事件是卡片详情的核心内容。不同稀有度设定不同的最低数量。
+    min_events = {
+        "星": 3,
+        "辰星": 3,
+        "月": 4,
+        "世界": 5,
+        "瞬": 4,
+        "刹那": 5,
+    }.get(rarity, 0)
+    if len(card.get("相会事件") or []) < min_events:
+        return False
+
+    # 月卡和世界卡必须同时有重逢、满花视频；星/辰星卡通常没有视频。
+    if rarity in ("月", "世界", "瞬", "刹那"):
+        if not card.get("重逢视频") or not card.get("满花视频"):
+            return False
+
+    return True
+
+
+def load_existing_cards() -> List[Dict[str, any]]:
+    """读取本地卡片；文件不存在或内容损坏时从空列表开始。"""
+    try:
+        with open(CARDS_JSON_PATH, "r", encoding="utf-8") as f:
+            cards = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"本地卡片数据不可用，将从空列表开始：{e}", flush=True)
+        return []
+    if not isinstance(cards, list):
+        print("本地卡片数据不是列表，将从空列表开始。", flush=True)
+        return []
+    return [card for card in cards if isinstance(card, dict) and card.get("卡名")]
+
 # -----------------------------
 # 用 wiki API 获取其他详细信息
 # -----------------------------
@@ -351,7 +396,8 @@ def sync_recharge_section(pool_categories: Dict[str, any], recharge_cards: List[
 # -----------------------------
 def main():
     print("🚀 开始抓取：", LIST_URL)
-    cards: List[Dict[str, any]] = []
+    existing_cards = load_existing_cards()
+    cards_by_name = {card["卡名"]: card for card in existing_cards}
 
     resp = polite_get(LIST_URL)
     soup = BeautifulSoup(resp.text, "html.parser")
@@ -368,9 +414,26 @@ def main():
         card_name = name_div.get_text(strip=True).split("·")[-1]
         valid_rows.append((row, card_name))
 
-    print(f"🃏 本次共需抓取 {len(valid_rows)} 张卡片。", flush=True)
+    listed_names = {card_name for _, card_name in valid_rows}
+    new_names = listed_names - cards_by_name.keys()
+    incomplete_names = {
+        name for name in listed_names & cards_by_name.keys()
+        if not is_complete_card(cards_by_name[name])
+    }
+    pending_names = new_names | incomplete_names
+
+    print(
+        f"🃏 列表共 {len(valid_rows)} 张卡片；新增 {len(new_names)} 张，"
+        f"本地不完整待重试 {len(incomplete_names)} 张。",
+        flush=True,
+    )
+
+    if not pending_names:
+        print("本地卡片数量和完整性均正常，跳过所有详情页抓取。", flush=True)
 
     for index, (row, card_name) in enumerate(valid_rows):
+        if card_name not in pending_names:
+            continue
 
         info_dict = wiki_detailed_info(card_name)
 
@@ -400,8 +463,23 @@ def main():
             continue
 
         info_dict = check_cards(info_dict)
+        if not is_complete_card(info_dict):
+            print(f"[跳过] 卡片核心信息不完整：{card_name}", flush=True)
+            continue
+        cards_by_name[card_name] = info_dict
 
-        cards.append(info_dict)
+    # 保留本地已有卡片，并按列表页顺序排列新增/更新卡片；详情抓取失败的
+    # 新卡不会写入本地，下一次运行时会再次进入 pending_names。
+    cards = [
+        cards_by_name[name]
+        for _, name in valid_rows
+        if name in cards_by_name and is_complete_card(cards_by_name[name])
+    ]
+    listed_name_set = {name for _, name in valid_rows}
+    cards.extend(
+        card for card in existing_cards
+        if card.get("卡名") not in listed_name_set and is_complete_card(card)
+    )
 
     # ------------ 卡池分类更新 ------------
     try:
